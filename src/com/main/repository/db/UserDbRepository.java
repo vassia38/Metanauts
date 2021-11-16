@@ -4,7 +4,6 @@ import  com.main.model.User;
 import  com.main.model.validators.Validator;
 
 import com.main.repository.Repository;
-import com.main.repository.RepositoryException;
 
 import java.sql.*;
 import java.util.HashSet;
@@ -22,8 +21,9 @@ public class UserDbRepository implements Repository<Long, User> {
         this.password = password;
         this.validator = validator;
     }
+
     @Override
-    public User findOne(Long id) {
+    public User findOneById(Long id) {
         if (id==null)
             throw new IllegalArgumentException("entity must be not null");
         String sqlSelect = "select * from users where id=?";
@@ -32,9 +32,33 @@ public class UserDbRepository implements Repository<Long, User> {
             psSelect.setLong(1,id);
             ResultSet resultSet = psSelect.executeQuery();
             if(resultSet.next()) {
+                String userName = resultSet.getString("username");
                 String firstName = resultSet.getString("first_name");
                 String lastName = resultSet.getString("last_name");
-                return new User(id,firstName, lastName);
+                return new User(id, userName,firstName, lastName);
+            }
+        }catch(SQLException e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public User findOneByUsername(String name) {
+        if(username == null)
+            throw new IllegalArgumentException("entity must not be null");
+        String sqlSelect = "select * from users where username=?";
+        try(Connection connection = DriverManager.getConnection(url,username,password);
+            PreparedStatement psSelect = connection.prepareStatement(sqlSelect)){
+            psSelect.setString(1,name);
+            ResultSet resultSet = psSelect.executeQuery();
+            if(resultSet.next()) {
+                Long id = resultSet.getLong("id");
+                String userName = resultSet.getString("username");
+                String firstName = resultSet.getString("first_name");
+                String lastName = resultSet.getString("last_name");
+                User user = new User(userName,firstName, lastName);
+                user.setId(id);
+                return user;
             }
         }catch(SQLException e){
             e.printStackTrace();
@@ -51,10 +75,11 @@ public class UserDbRepository implements Repository<Long, User> {
 
             while (resultSet.next()) {
                 Long id = resultSet.getLong("id");
+                String userName = resultSet.getString("username");
                 String firstName = resultSet.getString("first_name");
                 String lastName = resultSet.getString("last_name");
 
-                User utilizator = new User(id,firstName, lastName);
+                User utilizator = new User(id, userName, firstName, lastName);
                 users.add(utilizator);
             }
         } catch (SQLException e) {
@@ -66,11 +91,12 @@ public class UserDbRepository implements Repository<Long, User> {
     @Override
     public User save(User entity) {
         this.validator.validate(entity);
-        String sql = "insert into users (first_name, last_name ) values (?, ?)";
+        String sql = "insert into users (username, first_name, last_name ) values (?, ?, ?)";
         try (Connection connection = DriverManager.getConnection(url, username, password);
              PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setString(1, entity.getFirstName());
-            ps.setString(2, entity.getLastName());
+            ps.setString(1, entity.getUsername());
+            ps.setString(2, entity.getFirstName());
+            ps.setString(3, entity.getLastName());
             ps.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -80,7 +106,7 @@ public class UserDbRepository implements Repository<Long, User> {
 
     @Override
     public User delete(Long id) {
-        User found = this.findOne(id);
+        User found = this.findOneById(id);
         if(found == null)
             return null;
         String sqlDelete = "delete from users where (id=?)";
@@ -111,7 +137,7 @@ public class UserDbRepository implements Repository<Long, User> {
 
     @Override
     public User update(User entity) {
-        User oldState = this.findOne(entity.getId());
+        User oldState = this.findOneById(entity.getId());
         if(oldState == null)
             return null;
         String sqlUpdate = "update users set first_name=?, last_name=? where id=?";

@@ -18,7 +18,7 @@ public interface Repository<ID, E extends Entity<ID>> {
      * or null - if there is no entity with the given id
      * @throws IllegalArgumentException if id is null.
      */
-    E findOne(ID id);
+    E findOneById(ID id);
 
     /**
      * @return all entities

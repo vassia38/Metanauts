@@ -46,7 +46,9 @@ public class ControllerClass implements Controller{
     }
 
     @Override
-    public User updateUser(User entity){
+    public User updateUser(User entity, String firstName, String lastName){
+        entity.setFirstName(firstName);
+        entity.setLastName(lastName);
         User oldState = userService.update(entity);
         if(oldState == null)
             throw new RepositoryException("User doesn't exist!\n");
@@ -55,7 +57,15 @@ public class ControllerClass implements Controller{
 
     @Override
     public User findUserById(Long id) {
-        User user = userService.findOne(id);
+        User user = userService.findOneById(id);
+        if(user == null)
+            throw new RepositoryException("User doesn't exist!\n");
+        return user;
+    }
+
+    @Override
+    public User findUserByUsername(String username) {
+        User user = userService.findOneByUsername(username);
         if(user == null)
             throw new RepositoryException("User doesn't exist!\n");
         return user;
@@ -69,9 +79,9 @@ public class ControllerClass implements Controller{
     @Override
     public void addFriendship(Friendship entity) {
         Long id1 = entity.getId().getLeft();
-        User user1 = userService.findOne(id1);
+        User user1 = userService.findOneById(id1);
         Long id2 = entity.getId().getRight();
-        User user2 = userService.findOne(id2);
+        User user2 = userService.findOneById(id2);
         if(user1 == null || user2 == null)
             throw new RepositoryException("User(s) doesn't exist!\n");
         Friendship fr = friendshipService.add(entity);
@@ -82,9 +92,9 @@ public class ControllerClass implements Controller{
     @Override
     public Friendship deleteFriendship(Friendship entity) {
         Long id1 = entity.getId().getLeft();
-        User user1 = userService.findOne(id1);
+        User user1 = userService.findOneById(id1);
         Long id2 = entity.getId().getRight();
-        User user2 = userService.findOne(id2);
+        User user2 = userService.findOneById(id2);
         if(user1 == null || user2 == null)
             throw new RepositoryException("User(s) doesn't exist!\n");
         Friendship fr = friendshipService.delete(entity);
