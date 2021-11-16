@@ -2,10 +2,11 @@ package com.main.service;
 
 import com.main.model.User;
 import com.main.repository.Repository;
+import com.main.repository.db.UserDbRepository;
 
 public class UserService {
-    public final Repository<Long, User> userRepo;
-    public UserService(Repository<Long, User> userRepo){
+    public final UserDbRepository userRepo;
+    public UserService(UserDbRepository userRepo){
         this.userRepo = userRepo;
     }
 
@@ -21,8 +22,11 @@ public class UserService {
     public Iterable<User> getAllEntities(){
         return userRepo.findAll();
     }
-    public User findOne(Long id){
-        return userRepo.findOne(id);
+    public User findOneById(Long id){
+        return userRepo.findOneById(id);
+    }
+    public User findOneByUsername(String username){
+        return userRepo.findOneByUsername(username);
     }
     public Integer size(){
         return userRepo.size();

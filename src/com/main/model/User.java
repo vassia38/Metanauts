@@ -44,10 +44,9 @@ public class User extends Entity<Long> {
 
     @Override
     public String toString() {
-        return "User{ ID=" + this.getId() + " " +
-                "username='" + username + '\'' +
-                "firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
+        return "User{ username = '" + username + '\'' +
+                ", firstName = ' " + firstName + '\'' +
+                ", lastName = '" + lastName + '\'' +
                 " }";
     }
 

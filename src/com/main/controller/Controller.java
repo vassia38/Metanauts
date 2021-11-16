@@ -10,8 +10,9 @@ import java.util.ArrayList;
 public interface Controller {
     void addUser(User entity);
     User deleteUser(User entity);
-    User updateUser(User entity);
+    User updateUser(User entity, String firstName, String lastName);
     User findUserById(Long id);
+    User findUserByUsername(String username);
     Iterable<User> getAllUsers();
     void addFriendship(Friendship entity);
     Friendship deleteFriendship(Friendship entity);
@@ -19,4 +20,5 @@ public interface Controller {
     Iterable<Friendship> getAllFriendships();
     ArrayList<ArrayList<Long>> getAllCommunities();
     int getBiggestCommunitySize();
+
 }

@@ -6,12 +6,8 @@ import com.main.repository.db.FriendshipDbRepository;
 import com.main.repository.db.UserDbRepository;
 import com.main.service.FriendshipService;
 import com.main.service.UserService;
-import com.main.model.Friendship;
-import com.main.model.Tuple;
-import com.main.model.User;
 import com.main.model.validators.PrietenieValidator;
 import com.main.model.validators.UtilizatorValidator;
-import com.main.repository.Repository;
 import com.main.view.UI;
 
 public class Main {
@@ -23,9 +19,9 @@ public class Main {
         UtilizatorValidator userValidator = new UtilizatorValidator();
 
         PrietenieValidator friendshipValidator = new PrietenieValidator();
-        Repository<Long, User> userRepo = new UserDbRepository(
+        UserDbRepository userRepo = new UserDbRepository(
                 url, username,password, userValidator);
-        Repository<Tuple<Long,Long>, Friendship> friendshipRepo =
+        FriendshipDbRepository friendshipRepo =
                 new FriendshipDbRepository(url, username, password, friendshipValidator);
         UserService userService =
                 new UserService(userRepo);
