@@ -22,6 +22,25 @@ public class UserDbRepository implements Repository<Long, User> {
         this.password = password;
         this.validator = validator;
     }
+
+    public Long findByUsername(String userName) {
+        if (userName==null)
+            throw new IllegalArgumentException("entity must be not null");
+        String sqlSelect = "select * from users where username=?";
+        try(Connection connection = DriverManager.getConnection(url,username,password);
+            PreparedStatement psSelect = connection.prepareStatement(sqlSelect)){
+            psSelect.setString(1,userName);
+            ResultSet resultSet = psSelect.executeQuery();
+            if(resultSet.next()) {
+                Long id = resultSet.getLong("id");
+                return id;
+            }
+        }catch(SQLException e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     @Override
     public User findOne(Long id) {
         if (id==null)
@@ -32,9 +51,10 @@ public class UserDbRepository implements Repository<Long, User> {
             psSelect.setLong(1,id);
             ResultSet resultSet = psSelect.executeQuery();
             if(resultSet.next()) {
+                String userName = resultSet.getString("username");
                 String firstName = resultSet.getString("first_name");
                 String lastName = resultSet.getString("last_name");
-                return new User(id,firstName, lastName);
+                return new User(id, userName,firstName, lastName);
             }
         }catch(SQLException e){
             e.printStackTrace();
@@ -51,10 +71,11 @@ public class UserDbRepository implements Repository<Long, User> {
 
             while (resultSet.next()) {
                 Long id = resultSet.getLong("id");
+                String userName = resultSet.getString("username");
                 String firstName = resultSet.getString("first_name");
                 String lastName = resultSet.getString("last_name");
 
-                User utilizator = new User(id,firstName, lastName);
+                User utilizator = new User(id, userName, firstName, lastName);
                 users.add(utilizator);
             }
         } catch (SQLException e) {
@@ -66,11 +87,12 @@ public class UserDbRepository implements Repository<Long, User> {
     @Override
     public User save(User entity) {
         this.validator.validate(entity);
-        String sql = "insert into users (first_name, last_name ) values (?, ?)";
+        String sql = "insert into users (username, first_name, last_name ) values (?, ?)";
         try (Connection connection = DriverManager.getConnection(url, username, password);
              PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setString(1, entity.getFirstName());
-            ps.setString(2, entity.getLastName());
+            ps.setString(1, entity.getUsername());
+            ps.setString(2, entity.getFirstName());
+            ps.setString(3, entity.getLastName());
             ps.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();

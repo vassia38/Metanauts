@@ -3,16 +3,26 @@ package com.main.model;
 import java.util.Objects;
 
 public class User extends Entity<Long> {
+    private String username;
     private String firstName;
     private String lastName;
 
-    public User(String firstName, String lastName) {
+    public User(String username, String firstName, String lastName) {
+        this.username = username;
         this.firstName = firstName;
         this.lastName = lastName;
     }
-    public User(Long id, String firstName, String lastName){
-        this(firstName,lastName);
+    public User(Long id, String username, String firstName, String lastName){
+        this(username, firstName, lastName);
         super.setId(id);
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getFirstName() {
@@ -35,6 +45,7 @@ public class User extends Entity<Long> {
     @Override
     public String toString() {
         return "User{ ID=" + this.getId() + " " +
+                "username='" + username + '\'' +
                 "firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 " }";
@@ -44,12 +55,11 @@ public class User extends Entity<Long> {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof User that)) return false;
-        return getFirstName().equals(that.getFirstName()) &&
-                getLastName().equals(that.getLastName());
+        return getUsername().equals(that.getUsername());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(),getFirstName(), getLastName());
+        return Objects.hash(getId(), getUsername(), getFirstName(), getLastName());
     }
 }
