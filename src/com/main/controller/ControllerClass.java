@@ -8,6 +8,7 @@ import com.main.service.FriendshipService;
 import com.main.service.UserService;
 
 import java.util.ArrayList;
+import java.util.InputMismatchException;
 import java.util.Objects;
 
 public class ControllerClass implements Controller{

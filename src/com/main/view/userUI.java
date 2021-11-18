@@ -10,70 +10,39 @@ import com.main.repository.RepositoryException;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.*;
 
 /**
- * a basic command line adminUI
+ * a basic command line userUI
  */
-public class adminUI extends Thread{
+public class userUI extends Thread{
     private static final Map<String, Method> cmdList = new HashMap<>();
     private static Controller controller;
     private static final Scanner keyboard = new Scanner(System.in);
     private User currentUser;
     /**
-     * a basic command line adminUI
+     * a basic command line userUI
      * @param controller for friendships and users services
      */
-    public adminUI(Controller controller){
-        adminUI.controller = controller;
+    public userUI(Controller controller, String user){
+        userUI.controller = controller;
+        currentUser = controller.findUserByUsername(user);
         try {
-            cmdList.put("login", adminUI.class.getMethod("loginUser"));
-            cmdList.put("logout", adminUI.class.getMethod("logoutUser"));
-            cmdList.put("add user", adminUI.class.getMethod("addUser"));
-            cmdList.put("delete user", adminUI.class.getMethod("deleteUser"));
-            cmdList.put("update user", adminUI.class.getMethod("updateUser"));
-            cmdList.put("users", adminUI.class.getMethod("showUsers"));
-            cmdList.put("find user", adminUI.class.getMethod("findUserByUsername"));
-            cmdList.put("add friendship", adminUI.class.getMethod("addFriendship"));
-            cmdList.put("delete friendship", adminUI.class.getMethod("deleteFriendship"));
-            cmdList.put("update friendship", adminUI.class.getMethod("updateFriendship"));
-            cmdList.put("friendships", adminUI.class.getMethod("showAllFriendships"));
-            cmdList.put("communities", adminUI.class.getMethod("showCommunities"));
-            cmdList.put("communities max", adminUI.class.getMethod("biggestCommunity"));
-            cmdList.put("help", adminUI.class.getMethod("help"));
+            cmdList.put("delete user", userUI.class.getMethod("deleteUser"));
+            cmdList.put("update user", userUI.class.getMethod("updateUser"));
+            cmdList.put("users", userUI.class.getMethod("showUsers"));
+            cmdList.put("find user", userUI.class.getMethod("findUserByUsername"));
+            cmdList.put("add friendship", userUI.class.getMethod("addFriendship"));
+            cmdList.put("delete friendship", userUI.class.getMethod("deleteFriendship"));
+            cmdList.put("friendships", userUI.class.getMethod("showAllFriendships"));
+            cmdList.put("communities", userUI.class.getMethod("showCommunities"));
+            cmdList.put("communities max", userUI.class.getMethod("biggestCommunity"));
+            cmdList.put("help", userUI.class.getMethod("help"));
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
         }
     }
-    public void loginUser(){
-        System.out.println("username:");
-        String username = keyboard.nextLine();
-        User user = controller.findUserByUsername(username);
-        if(user != null){
-            this.currentUser = user;
-            System.out.println("Logged in as " + user.getUsername());
-        }
-    }
-    public void logoutUser(){
-        if(this.currentUser != null){
-            System.out.println("Logged out!");
-            this.currentUser = null;
-        }
-    }
 
-    public void addUser(){
-        System.out.println("username:");
-        String username = keyboard.nextLine();
-        System.out.println("First name:");
-        String firstName = keyboard.nextLine();
-        System.out.println("Last name:");
-        String lastName = keyboard.nextLine();
-        User user = new User(username, firstName, lastName);
-        controller.addUser(user);
-    }
     public void deleteUser(){
         if(this.currentUser == null){
             System.out.println("You are not logged in!\n");
@@ -129,19 +98,6 @@ public class adminUI extends Thread{
         Friendship friendship = new Friendship(id.getLeft(),id.getRight());
         controller.deleteFriendship(friendship);
     }
-    public void updateFriendship(){
-        Tuple<Long,Long> id = inputFriendship();
-        System.out.println("New date-time (yyyy-MM-dd HH:mm):");
-        String dateStr = keyboard.nextLine();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-        try {
-            LocalDateTime date = LocalDateTime.parse(dateStr, formatter);
-            Friendship friendship = new Friendship(id.getLeft(),id.getRight(),date);
-            controller.updateFriendship(friendship);
-        }catch(DateTimeParseException e){
-            throw new InputMismatchException("Invalid date format!");
-        }
-    }
     public void showAllFriendships(){
         for(Friendship fr : controller.getAllFriendships())
             System.out.println(fr);
@@ -166,21 +122,17 @@ public class adminUI extends Thread{
         if(this.currentUser != null)
             System.out.println("Current user is " + this.currentUser);
         System.out.println("Commands:");
-        System.out.println("login");
-        System.out.println("logout");
-        System.out.println("add user");
+        System.out.println("logout / exit");
         System.out.println("delete user");
         System.out.println("update user");
         System.out.println("users = show all users");
         System.out.println("find user = find user by username");
         System.out.println("add friendship = add friendship");
         System.out.println("delete friendship = delete friendship");
-        System.out.println("update friendship = update friendship");
         System.out.println("friendships = show all friendships");
         System.out.println("communities = show all communities");
         System.out.println("communities max = size of biggest community");
         System.out.println("help");
-        System.out.println("exit");
     }
     public void start(){
         help();
@@ -189,7 +141,8 @@ public class adminUI extends Thread{
             System.out.print(">>>");
             try{
                 cmd = keyboard.nextLine();
-                if(cmd.equals("exit")){
+                if(cmd.equals("exit") || cmd.equals("logout")){
+                    System.out.println("Logged out!");
                     return;
                 }
                 cmdList.get(cmd).invoke(this);

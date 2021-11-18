@@ -2,6 +2,7 @@ package com.main;
 
 import com.main.controller.Controller;
 import com.main.controller.ControllerClass;
+import com.main.repository.RepositoryException;
 import com.main.repository.db.FriendshipDbRepository;
 import com.main.repository.db.UserDbRepository;
 import com.main.service.FriendshipService;
@@ -9,6 +10,7 @@ import com.main.service.UserService;
 import com.main.model.validators.PrietenieValidator;
 import com.main.model.validators.UtilizatorValidator;
 import com.main.view.adminUI;
+import com.main.view.userUI;
 
 import java.util.Scanner;
 
@@ -31,7 +33,6 @@ public class Main {
                 new FriendshipService(friendshipRepo);
         Controller controller =
                 new ControllerClass(userService,friendshipService);
-        String user = "";
         Scanner keyboard = new Scanner(System.in);
 
         while(true){
@@ -44,15 +45,16 @@ public class Main {
                 break;
             }
             if(cmd.equals("login")){
-                user = keyboard.nextLine();
-                if(user.equals("admin")){
-                    adminUI adminUi = new adminUI(controller);
-                    adminUi.start();
+                System.out.println("Username:");
+                cmd = keyboard.nextLine();
+                if(cmd.equals("admin")){
+                    adminUI ui = new adminUI(controller);
+                    ui.start();
                 }
-                else if(controller.findUserByUsername(user) != null){
-
-                }
-                else{
+                else try{
+                    userUI ui = new userUI(controller, cmd);
+                    ui.start();
+                } catch(RepositoryException e){
                     System.out.println("Invalid username!");
                 }
             }
