@@ -2,13 +2,17 @@ package com.main;
 
 import com.main.controller.Controller;
 import com.main.controller.ControllerClass;
+import com.main.repository.RepositoryException;
 import com.main.repository.db.FriendshipDbRepository;
 import com.main.repository.db.UserDbRepository;
 import com.main.service.FriendshipService;
 import com.main.service.UserService;
 import com.main.model.validators.PrietenieValidator;
 import com.main.model.validators.UtilizatorValidator;
-import com.main.view.UI;
+import com.main.view.adminUI;
+import com.main.view.userUI;
+
+import java.util.Scanner;
 
 public class Main {
 
@@ -29,9 +33,32 @@ public class Main {
                 new FriendshipService(friendshipRepo);
         Controller controller =
                 new ControllerClass(userService,friendshipService);
+        Scanner keyboard = new Scanner(System.in);
 
-        UI ui = new UI(controller);
-        ui.start();
+        while(true){
+            System.out.println("Available actions:");
+            System.out.println("1. login");
+            System.out.println("2. exit");
+            System.out.print(">>>");
+            String cmd = keyboard.nextLine();
+            if(cmd.equals("exit")){
+                break;
+            }
+            if(cmd.equals("login")){
+                System.out.println("Username:");
+                cmd = keyboard.nextLine();
+                if(cmd.equals("admin")){
+                    adminUI ui = new adminUI(controller);
+                    ui.start();
+                }
+                else try{
+                    userUI ui = new userUI(controller, cmd);
+                    ui.start();
+                } catch(RepositoryException e){
+                    System.out.println("Invalid username!");
+                }
+            }
+        }
         System.out.println("Sayonara");
     }
 }
