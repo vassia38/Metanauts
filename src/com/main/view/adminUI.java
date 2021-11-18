@@ -1,6 +1,7 @@
 package com.main.view;
 
 import com.main.controller.Controller;
+import com.main.model.Tuple;
 import com.main.service.ServiceException;
 import com.main.model.Friendship;
 import com.main.model.User;
@@ -15,34 +16,34 @@ import java.time.format.DateTimeParseException;
 import java.util.*;
 
 /**
- * a basic command line UI
+ * a basic command line adminUI
  */
-public class UI extends Thread{
+public class adminUI extends Thread{
     private static final Map<String, Method> cmdList = new HashMap<>();
     private static Controller controller;
     private static final Scanner keyboard = new Scanner(System.in);
     private User currentUser;
     /**
-     * a basic command line UI
+     * a basic command line adminUI
      * @param controller for friendships and users services
      */
-    public UI(Controller controller){
-        UI.controller = controller;
+    public adminUI(Controller controller){
+        adminUI.controller = controller;
         try {
-            cmdList.put("login", UI.class.getMethod("loginUser"));
-            cmdList.put("logout", UI.class.getMethod("logoutUser"));
-            cmdList.put("add user",UI.class.getMethod("addUser"));
-            cmdList.put("delete user",UI.class.getMethod("deleteUser"));
-            cmdList.put("update user",UI.class.getMethod("updateUser"));
-            cmdList.put("users",UI.class.getMethod("showUsers"));
-            cmdList.put("find user",UI.class.getMethod("findUserByUsername"));
-            cmdList.put("add friendship",UI.class.getMethod("addFriendship"));
-            cmdList.put("delete friendship",UI.class.getMethod("deleteFriendship"));
-            cmdList.put("update friendship",UI.class.getMethod("updateFriendship"));
-            cmdList.put("friendships",UI.class.getMethod("showAllFriendships"));
-            cmdList.put("communities",UI.class.getMethod("showCommunities"));
-            cmdList.put("communities max",UI.class.getMethod("biggestCommunity"));
-            cmdList.put("help",UI.class.getMethod("help"));
+            cmdList.put("login", adminUI.class.getMethod("loginUser"));
+            cmdList.put("logout", adminUI.class.getMethod("logoutUser"));
+            cmdList.put("add user", adminUI.class.getMethod("addUser"));
+            cmdList.put("delete user", adminUI.class.getMethod("deleteUser"));
+            cmdList.put("update user", adminUI.class.getMethod("updateUser"));
+            cmdList.put("users", adminUI.class.getMethod("showUsers"));
+            cmdList.put("find user", adminUI.class.getMethod("findUserByUsername"));
+            cmdList.put("add friendship", adminUI.class.getMethod("addFriendship"));
+            cmdList.put("delete friendship", adminUI.class.getMethod("deleteFriendship"));
+            cmdList.put("update friendship", adminUI.class.getMethod("updateFriendship"));
+            cmdList.put("friendships", adminUI.class.getMethod("showAllFriendships"));
+            cmdList.put("communities", adminUI.class.getMethod("showCommunities"));
+            cmdList.put("communities max", adminUI.class.getMethod("biggestCommunity"));
+            cmdList.put("help", adminUI.class.getMethod("help"));
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
         }
@@ -56,7 +57,6 @@ public class UI extends Thread{
             System.out.println("Logged in as " + user.getUsername());
         }
     }
-
     public void logoutUser(){
         if(this.currentUser != null){
             System.out.println("Logged out!");
@@ -75,6 +75,10 @@ public class UI extends Thread{
         controller.addUser(user);
     }
     public void deleteUser(){
+        if(this.currentUser == null){
+            System.out.println("You are not logged in!\n");
+            return;
+        }
         System.out.println("Are you sure (Y/N) ?");
         String confirm = keyboard.nextLine();
         if(Objects.equals(confirm, "Y") || Objects.equals(confirm, "y")){
@@ -88,12 +92,11 @@ public class UI extends Thread{
         String firstName = keyboard.nextLine();
         System.out.println("New last name:");
         String lastName = keyboard.nextLine();
-
         controller.updateUser(currentUser,firstName,lastName);
     }
     public void showUsers(){
-        for(Object u : controller.getAllUsers())
-            System.out.println(u);
+        for(User u : controller.getAllUsers())
+            System.out.println("ID " + u.getId() + " " + u);
     }
     public void findUserByUsername(){
         System.out.println("Username:");
@@ -101,40 +104,38 @@ public class UI extends Thread{
         System.out.println(controller.findUserByUsername(username));
     }
 
+    private Tuple<Long,Long> inputFriendship(){
+        try {
+            long id1, id2;
+            System.out.println("ID user 1:");
+            id1 = Long.parseLong(keyboard.nextLine());
+            System.out.println("ID user 2:");
+            id2 = Long.parseLong(keyboard.nextLine());
+            return new Tuple<>(id1, id2);
+        }catch(NumberFormatException e){
+            System.out.println("Number required!");
+            throw new InputMismatchException();
+        }
+    }
+
     public void addFriendship(){
-        System.out.println("ID user 1:");
-        keyboard.nextLine();
-        Long ID1 = keyboard.nextLong();
-        System.out.println("ID user 2:");
-        keyboard.nextLine();
-        Long ID2 = keyboard.nextLong();
-        Friendship friendship = new Friendship(ID1,ID2);
+        Tuple<Long,Long> id = inputFriendship();
+        Friendship friendship = new Friendship(id.getLeft(),id.getRight());
         controller.addFriendship(friendship);
     }
     public void deleteFriendship(){
-        System.out.println("ID user 1:");
-        keyboard.nextLine();
-        Long ID1 = keyboard.nextLong();
-        System.out.println("ID user 2:");
-        keyboard.nextLine();
-        Long ID2 = keyboard.nextLong();
-        Friendship friendship = new Friendship(ID1,ID2);
+        Tuple<Long,Long> id = inputFriendship();
+        Friendship friendship = new Friendship(id.getLeft(),id.getRight());
         controller.deleteFriendship(friendship);
     }
     public void updateFriendship(){
-        System.out.println("ID user 1:");
-        keyboard.nextLine();
-        Long ID1 = keyboard.nextLong();
-        System.out.println("ID user 2:");
-        keyboard.nextLine();
-        Long ID2 = keyboard.nextLong();
+        Tuple<Long,Long> id = inputFriendship();
         System.out.println("New date-time (yyyy-MM-dd HH:mm):");
-        keyboard.nextLine();
         String dateStr = keyboard.nextLine();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         try {
             LocalDateTime date = LocalDateTime.parse(dateStr, formatter);
-            Friendship friendship = new Friendship(ID1,ID2,date);
+            Friendship friendship = new Friendship(id.getLeft(),id.getRight(),date);
             controller.updateFriendship(friendship);
         }catch(DateTimeParseException e){
             throw new InputMismatchException();
