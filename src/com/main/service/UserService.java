@@ -1,7 +1,6 @@
 package com.main.service;
 
 import com.main.model.User;
-import com.main.repository.Repository;
 import com.main.repository.db.UserDbRepository;
 
 public class UserService {
