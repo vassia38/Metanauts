@@ -2,13 +2,17 @@ package com.main.controller;
 
 import com.main.algo.Graph;
 import com.main.model.Friendship;
+import com.main.model.FriendshipDTO;
 import com.main.model.User;
 import com.main.repository.RepositoryException;
 import com.main.service.FriendshipService;
 import com.main.service.UserService;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 public class ControllerClass implements Controller{
     public final UserService userService;
@@ -204,5 +208,35 @@ public class ControllerClass implements Controller{
     public int getBiggestCommunitySize(){
         this.runGraph();
         return graph.maxSize();
+    }
+
+    @Override
+    public Stream<FriendshipDTO> getRightFriends(User user, List<Friendship> friendshipList) {
+        Predicate<Friendship> friends1 = x -> x.getId().getLeft() == user.getId();
+        return friendshipList.stream().filter(friends1).map(x ->
+                new FriendshipDTO(findUserById(x.getId().getRight()).getLastName(),
+                        findUserById(x.getId().getRight()).getFirstName(), x.getDate()));
+    }
+
+    @Override
+    public Stream<FriendshipDTO> getLeftFriends(User user, List<Friendship> friendshipList) {
+        Predicate<Friendship> friends2 = x -> x.getId().getRight() == user.getId();
+        return friendshipList.stream().filter(friends2).map(x ->
+                new FriendshipDTO(findUserById(x.getId().getLeft()).getLastName(),
+                        findUserById(x.getId().getLeft()).getFirstName(), x.getDate()));
+    }
+
+    public String getAllFriends(User user) {
+        String friends = "";
+        Iterable<Friendship> friendships = getAllFriendships();
+        List<Friendship>friendshipList = new ArrayList<Friendship>();
+        for(Friendship friendship : friendships) {
+            friendshipList.add(friendship);
+        }
+
+        Stream<FriendshipDTO> rightFriends = getRightFriends(user,friendshipList);
+        rightFriends.forEach(x -> x.toString());
+
+        return friends;
     }
 }

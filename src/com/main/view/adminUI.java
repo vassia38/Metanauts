@@ -1,6 +1,7 @@
 package com.main.view;
 
 import com.main.controller.Controller;
+import com.main.model.FriendshipDTO;
 import com.main.model.Tuple;
 import com.main.service.ServiceException;
 import com.main.model.Friendship;
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * a basic command line adminUI
@@ -43,6 +45,7 @@ public class adminUI extends Thread{
             cmdList.put("friendships", adminUI.class.getMethod("showAllFriendships"));
             cmdList.put("communities", adminUI.class.getMethod("showCommunities"));
             cmdList.put("communities max", adminUI.class.getMethod("biggestCommunity"));
+            cmdList.put("show friends", adminUI.class.getMethod("showFriends"));
             cmdList.put("help", adminUI.class.getMethod("help"));
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
@@ -162,6 +165,31 @@ public class adminUI extends Thread{
                 controller.getBiggestCommunitySize() + " users");
     }
 
+    public void showFriends() {
+        System.out.println("username:");
+        String username = keyboard.nextLine();
+
+        Iterable<Friendship> friendships = controller.getAllFriendships();
+        List<Friendship>friendshipList = new ArrayList<Friendship>();
+        for(Friendship friendship : friendships) {
+            friendshipList.add(friendship);
+        }
+
+        Stream<FriendshipDTO> rightFriends = controller.getRightFriends(controller.findUserByUsername(username),friendshipList);
+        Stream<FriendshipDTO> leftFriends = controller.getLeftFriends(controller.findUserByUsername(username),friendshipList);
+
+        if(rightFriends == null && leftFriends == null) {
+            System.out.println("This user has no friends :<");
+            return;
+        }
+        if (rightFriends != null) {
+            leftFriends.forEach(x-> System.out.println(x));
+        }
+        if (rightFriends != null) {
+            rightFriends.forEach(x-> System.out.println(x));
+        }
+    }
+
     public void help(){
         if(this.currentUser != null)
             System.out.println("Current user is " + this.currentUser);
@@ -179,6 +207,7 @@ public class adminUI extends Thread{
         System.out.println("friendships = show all friendships");
         System.out.println("communities = show all communities");
         System.out.println("communities max = size of biggest community");
+        System.out.println("show friends = show all friends of a certain user");
         System.out.println("help");
         System.out.println("exit");
     }
