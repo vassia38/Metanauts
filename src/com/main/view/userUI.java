@@ -123,7 +123,7 @@ public class userUI extends Thread{
 
     public void showFriends() {
         Iterable<Friendship> friendships = controller.getAllFriendships();
-        List<Friendship>friendshipList = new ArrayList<Friendship>();
+        List<Friendship>friendshipList = new ArrayList<>();
         for(Friendship friendship : friendships) {
             friendshipList.add(friendship);
         }
@@ -136,10 +136,10 @@ public class userUI extends Thread{
             return;
         }
         if (leftFriends != null) {
-            leftFriends.forEach(x-> System.out.println(x));
+            leftFriends.forEach(System.out::println);
         }
         if (rightFriends != null) {
-            rightFriends.forEach(x-> System.out.println(x));
+            rightFriends.forEach(System.out::println);
         }
     }
 

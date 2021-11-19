@@ -212,7 +212,7 @@ public class ControllerClass implements Controller{
 
     @Override
     public Stream<FriendshipDTO> getRightFriends(User user, List<Friendship> friendshipList) {
-        Predicate<Friendship> friends1 = x -> x.getId().getLeft() == user.getId();
+        Predicate<Friendship> friends1 = x -> Objects.equals(x.getId().getLeft(), user.getId());
         return friendshipList.stream().filter(friends1).map(x ->
                 new FriendshipDTO(findUserById(x.getId().getRight()).getLastName(),
                         findUserById(x.getId().getRight()).getFirstName(), x.getDate()));
@@ -220,7 +220,7 @@ public class ControllerClass implements Controller{
 
     @Override
     public Stream<FriendshipDTO> getLeftFriends(User user, List<Friendship> friendshipList) {
-        Predicate<Friendship> friends2 = x -> x.getId().getRight() == user.getId();
+        Predicate<Friendship> friends2 = x -> Objects.equals(x.getId().getRight(), user.getId());
         return friendshipList.stream().filter(friends2).map(x ->
                 new FriendshipDTO(findUserById(x.getId().getLeft()).getLastName(),
                         findUserById(x.getId().getLeft()).getFirstName(), x.getDate()));
