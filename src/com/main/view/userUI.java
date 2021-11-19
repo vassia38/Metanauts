@@ -135,7 +135,7 @@ public class userUI extends Thread{
             System.out.println("This user has no friends :<");
             return;
         }
-        if (rightFriends != null) {
+        if (leftFriends != null) {
             leftFriends.forEach(x-> System.out.println(x));
         }
         if (rightFriends != null) {

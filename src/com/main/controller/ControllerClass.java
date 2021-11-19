@@ -225,18 +225,4 @@ public class ControllerClass implements Controller{
                 new FriendshipDTO(findUserById(x.getId().getLeft()).getLastName(),
                         findUserById(x.getId().getLeft()).getFirstName(), x.getDate()));
     }
-
-    public String getAllFriends(User user) {
-        String friends = "";
-        Iterable<Friendship> friendships = getAllFriendships();
-        List<Friendship>friendshipList = new ArrayList<Friendship>();
-        for(Friendship friendship : friendships) {
-            friendshipList.add(friendship);
-        }
-
-        Stream<FriendshipDTO> rightFriends = getRightFriends(user,friendshipList);
-        rightFriends.forEach(x -> x.toString());
-
-        return friends;
-    }
 }

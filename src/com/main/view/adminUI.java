@@ -184,7 +184,7 @@ public class adminUI extends Thread{
             System.out.println("This user has no friends :<");
             return;
         }
-        if (rightFriends != null) {
+        if (leftFriends != null) {
             leftFriends.forEach(System.out::println);
         }
         if (rightFriends != null) {
