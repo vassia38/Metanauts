@@ -1,11 +1,12 @@
 package com.main.controller;
 
 import com.main.model.Friendship;
+import com.main.model.FriendshipDTO;
 import com.main.model.User;
-import com.main.service.FriendshipService;
-import com.main.service.UserService;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Stream;
 
 public interface Controller {
     void addUser(User entity);
@@ -20,5 +21,7 @@ public interface Controller {
     Iterable<Friendship> getAllFriendships();
     ArrayList<ArrayList<Long>> getAllCommunities();
     int getBiggestCommunitySize();
+    public Stream<FriendshipDTO> getRightFriends(User user, List<Friendship> friendshipList);
+    public Stream<FriendshipDTO> getLeftFriends(User user, List<Friendship> friendshipList);
 
 }
