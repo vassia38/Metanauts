@@ -39,10 +39,10 @@ public class FriendshipDTO {
 
     @Override
     public String toString() {
-        return "FriendshipDTO{" +
+        return "{ " +
                 "friendLastName='" + friendLastName + '\'' +
                 ", friendFirstName='" + friendFirstName + '\'' +
                 ", friendshipDate=" + friendshipDate.toString() +
-                '}';
+                " }";
     }
 }

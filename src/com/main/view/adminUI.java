@@ -61,10 +61,12 @@ public class adminUI extends Thread{
         }
     }
     public void logoutUser(){
-        if(this.currentUser != null){
-            System.out.println("Logged out!");
-            this.currentUser = null;
+        if(this.currentUser == null) {
+            System.out.println("Not logged in as a user in admin-mode!\n");
+            return;
         }
+        System.out.println("Logged out!");
+        this.currentUser = null;
     }
 
     public void addUser(){
@@ -170,7 +172,7 @@ public class adminUI extends Thread{
         String username = keyboard.nextLine();
 
         Iterable<Friendship> friendships = controller.getAllFriendships();
-        List<Friendship>friendshipList = new ArrayList<Friendship>();
+        List<Friendship>friendshipList = new ArrayList<>();
         for(Friendship friendship : friendships) {
             friendshipList.add(friendship);
         }
@@ -183,10 +185,10 @@ public class adminUI extends Thread{
             return;
         }
         if (rightFriends != null) {
-            leftFriends.forEach(x-> System.out.println(x));
+            leftFriends.forEach(System.out::println);
         }
         if (rightFriends != null) {
-            rightFriends.forEach(x-> System.out.println(x));
+            rightFriends.forEach(System.out::println);
         }
     }
 
