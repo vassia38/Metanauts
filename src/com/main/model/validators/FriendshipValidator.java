@@ -5,7 +5,7 @@ import com.main.model.Friendship;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-public class PrietenieValidator  implements Validator<Friendship>{
+public class FriendshipValidator implements Validator<Friendship>{
     @Override
     public void validate(Friendship entity) throws ValidationException {
         String msg="";
