@@ -12,6 +12,7 @@ import com.main.repository.RepositoryException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
@@ -46,6 +47,7 @@ public class adminUI extends Thread{
             cmdList.put("communities", adminUI.class.getMethod("showCommunities"));
             cmdList.put("communities max", adminUI.class.getMethod("biggestCommunity"));
             cmdList.put("show friends", adminUI.class.getMethod("showFriends"));
+            cmdList.put("show friends in month", adminUI.class.getMethod("showFriendsMonth"));
             cmdList.put("help", adminUI.class.getMethod("help"));
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
@@ -167,21 +169,18 @@ public class adminUI extends Thread{
                 controller.getBiggestCommunitySize() + " users");
     }
 
-    public void showFriends() {
-        System.out.println("username:");
-        String username = keyboard.nextLine();
-
+    private List<Friendship> getFriendshipList() {
         Iterable<Friendship> friendships = controller.getAllFriendships();
         List<Friendship>friendshipList = new ArrayList<>();
         for(Friendship friendship : friendships) {
             friendshipList.add(friendship);
         }
+        return friendshipList;
+    }
 
-        Stream<FriendshipDTO> rightFriends = controller.getRightFriends(controller.findUserByUsername(username),friendshipList);
-        Stream<FriendshipDTO> leftFriends = controller.getLeftFriends(controller.findUserByUsername(username),friendshipList);
-
+    private void printFriends(Stream<FriendshipDTO> leftFriends, Stream<FriendshipDTO> rightFriends){
         if(rightFriends == null && leftFriends == null) {
-            System.out.println("This user has no friends :<");
+            System.out.println("No friends to show :<");
             return;
         }
         if (leftFriends != null) {
@@ -190,6 +189,57 @@ public class adminUI extends Thread{
         if (rightFriends != null) {
             rightFriends.forEach(System.out::println);
         }
+    }
+
+    public void showFriends() {
+        System.out.println("username:");
+        String username = keyboard.nextLine();
+
+        List<Friendship>friendshipList = getFriendshipList();
+
+        Stream<FriendshipDTO> rightFriends = controller.getRightFriends(controller.findUserByUsername(username),friendshipList);
+        Stream<FriendshipDTO> leftFriends = controller.getLeftFriends(controller.findUserByUsername(username),friendshipList);
+
+        printFriends(leftFriends,rightFriends);
+    }
+
+    private Month getMonth(String monthString) {
+        Integer monthInt;
+        try {
+            monthInt = Integer.parseInt(monthString);
+        } catch (NumberFormatException e) {
+            throw new NumberFormatException("Month must be a number!");
+        }
+        if(monthInt > 12 || monthInt < 1) {
+            throw new NumberFormatException("Month must be a number from 1 to 12!");
+        }
+
+        return Month.of(monthInt);
+    }
+
+    public void showFriendsMonth() {
+        System.out.println("username:");
+        String username = keyboard.nextLine();
+        System.out.println("month (as a number from 1 to 12):");
+        String monthString = keyboard.nextLine();
+
+        Month month;
+
+        try {
+            month = getMonth(monthString);
+        } catch (NumberFormatException e) {
+            System.out.println(e.getMessage());
+            return;
+        }
+
+        List<Friendship>friendshipList = getFriendshipList();
+
+        Stream<FriendshipDTO> rightFriends = controller.getRightFriendsMonth(
+                controller.findUserByUsername(username), month, friendshipList);
+        Stream<FriendshipDTO> leftFriends = controller.getLeftFriendsMonth(
+                controller.findUserByUsername(username), month, friendshipList);
+
+        printFriends(leftFriends,rightFriends);
     }
 
     public void help(){
@@ -210,6 +260,7 @@ public class adminUI extends Thread{
         System.out.println("communities = show all communities");
         System.out.println("communities max = size of biggest community");
         System.out.println("show friends = show all friends of a certain user");
+        System.out.println("show friends in month = show all friends a certain user from a certain month");
         System.out.println("help");
         System.out.println("exit");
     }
