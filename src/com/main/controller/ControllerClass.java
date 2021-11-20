@@ -8,6 +8,7 @@ import com.main.repository.RepositoryException;
 import com.main.service.FriendshipService;
 import com.main.service.UserService;
 
+import java.time.Month;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -212,16 +213,36 @@ public class ControllerClass implements Controller{
 
     @Override
     public Stream<FriendshipDTO> getRightFriends(User user, List<Friendship> friendshipList) {
-        Predicate<Friendship> friends1 = x -> Objects.equals(x.getId().getLeft(), user.getId());
-        return friendshipList.stream().filter(friends1).map(x ->
+        Predicate<Friendship> friends = x -> x.getId().getLeft() == user.getId();
+        return friendshipList.stream().filter(friends).map(x ->
                 new FriendshipDTO(findUserById(x.getId().getRight()).getLastName(),
                         findUserById(x.getId().getRight()).getFirstName(), x.getDate()));
     }
 
     @Override
     public Stream<FriendshipDTO> getLeftFriends(User user, List<Friendship> friendshipList) {
-        Predicate<Friendship> friends2 = x -> Objects.equals(x.getId().getRight(), user.getId());
-        return friendshipList.stream().filter(friends2).map(x ->
+        Predicate<Friendship> friends = x -> x.getId().getRight() == user.getId();
+        return friendshipList.stream().filter(friends).map(x ->
+                new FriendshipDTO(findUserById(x.getId().getLeft()).getLastName(),
+                        findUserById(x.getId().getLeft()).getFirstName(), x.getDate()));
+    }
+
+    @Override
+    public Stream<FriendshipDTO> getRightFriendsMonth(User user, Month month, List<Friendship> friendshipList) {
+        Predicate<Friendship> friends = x -> x.getId().getLeft() == user.getId();
+        Predicate<Friendship> friendsMonth = x -> x.getDate().getMonth() == month;
+        Predicate<Friendship> filtered = friends.and(friendsMonth);
+        return friendshipList.stream().filter(filtered).map(x ->
+                new FriendshipDTO(findUserById(x.getId().getRight()).getLastName(),
+                        findUserById(x.getId().getRight()).getFirstName(), x.getDate()));
+    }
+
+    @Override
+    public Stream<FriendshipDTO> getLeftFriendsMonth(User user, Month month, List<Friendship> friendshipList) {
+        Predicate<Friendship> friends = x -> x.getId().getRight() == user.getId();
+        Predicate<Friendship> friendsMonth = x -> x.getDate().getMonth() == month;
+        Predicate<Friendship> filtered = friends.and(friendsMonth);
+        return friendshipList.stream().filter(filtered).map(x ->
                 new FriendshipDTO(findUserById(x.getId().getLeft()).getLastName(),
                         findUserById(x.getId().getLeft()).getFirstName(), x.getDate()));
     }
