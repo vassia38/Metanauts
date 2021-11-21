@@ -10,6 +10,7 @@ import com.main.repository.db.FriendshipDbRepository;
 import com.main.repository.db.MessageDbRepository;
 import com.main.repository.db.UserDbRepository;
 import com.main.service.FriendshipService;
+import com.main.service.MessageService;
 import com.main.service.UserService;
 import com.main.model.validators.FriendshipValidator;
 import com.main.model.validators.UserValidator;
@@ -27,21 +28,21 @@ public class Main {
         String url = "jdbc:postgresql://localhost:5432/socialnetwork";
         String username = "postgres";
         String password = "postgres";
+
         UserValidator userValidator = new UserValidator();
+        UserDbRepository userRepo = new UserDbRepository(url, username,password, userValidator);
 
         FriendshipValidator friendshipValidator = new FriendshipValidator();
-        UserDbRepository userRepo = new UserDbRepository(
-                url, username,password, userValidator);
-        FriendshipDbRepository friendshipRepo =
-                new FriendshipDbRepository(url, username, password, friendshipValidator);
-        UserService userService =
-                new UserService(userRepo);
-        FriendshipService friendshipService =
-                new FriendshipService(friendshipRepo);
-        Controller controller =
-                new ControllerClass(userService,friendshipService);
-        Scanner keyboard = new Scanner(System.in);
+        FriendshipDbRepository friendshipRepo = new FriendshipDbRepository(url, username, password, friendshipValidator);
 
+        MessageValidator messageValidator = new MessageValidator();
+        MessageDbRepository messageRepo = new MessageDbRepository(url,username,password, messageValidator);
+
+        UserService userService = new UserService(userRepo);
+        FriendshipService friendshipService = new FriendshipService(friendshipRepo);
+        MessageService messageService = new MessageService(messageRepo);
+
+        Controller controller = new ControllerClass(userService,friendshipService, messageService);
 
         /*List<User> all = new ArrayList<>();
         all.add(controller.findUserById(2L));
@@ -64,7 +65,7 @@ public class Main {
         msg2 = messageRepo.findMessageById(2L);
         System.out.println(msg1);
         System.out.println(msg2);*/
-
+        Scanner keyboard = new Scanner(System.in);
         while(true){
             System.out.println("Available actions:");
             System.out.println("1. login");

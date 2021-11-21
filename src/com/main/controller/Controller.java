@@ -4,6 +4,7 @@ import com.main.model.Friendship;
 import com.main.model.FriendshipDTO;
 import com.main.model.User;
 
+import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,5 +27,5 @@ public interface Controller {
     Stream<FriendshipDTO> getLeftFriends(User user, List<Friendship> friendshipList);
     Stream<FriendshipDTO> getRightFriendsMonth(User user, Month month, List<Friendship> friendshipList);
     Stream<FriendshipDTO> getLeftFriendsMonth(User user, Month month, List<Friendship> friendshipList);
-
+    void sendMessage(User source, List<User> destination, String message, LocalDateTime date, Long repliedMessageId);
 }

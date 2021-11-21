@@ -25,7 +25,7 @@ public class UserDbRepository implements Repository<Long, User> {
     @Override
     public User findOneById(Long id) {
         if (id==null)
-            throw new IllegalArgumentException("entity must be not null");
+            throw new IllegalArgumentException("id must be not null");
         String sqlSelect = "select * from users where id=?";
         try(Connection connection = DriverManager.getConnection(url,username,password);
              PreparedStatement psSelect = connection.prepareStatement(sqlSelect)){
@@ -106,6 +106,8 @@ public class UserDbRepository implements Repository<Long, User> {
 
     @Override
     public User delete(Long id) {
+        if (id==null)
+            throw new IllegalArgumentException("id must be not null");
         User found = this.findOneById(id);
         if(found == null)
             return null;
@@ -137,6 +139,7 @@ public class UserDbRepository implements Repository<Long, User> {
 
     @Override
     public User update(User entity) {
+        this.validator.validate(entity);
         User oldState = this.findOneById(entity.getId());
         if(oldState == null)
             return null;

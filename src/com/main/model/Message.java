@@ -59,15 +59,15 @@ public class Message extends Entity<Long>{
     public String toString() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         String formattedDate = date.format(formatter);
-        String msg = source.getFirstName() + " " +
+        String msg = "[msg id " + this.getId() + "] " + source.getFirstName() + " " +
                 source.getLastName() + " (" +
                 formattedDate + ") :" +
                 messageText;
        if(repliedMessage != null)
-           msg = msg + "\n\t[in reply to " +
+           msg = msg + "\n\t{in reply to " + "[msg id " + repliedMessage.getId() + "] " +
                    repliedMessage.getSource().getFirstName() + " " +
                    repliedMessage.getSource().getLastName() +
-                   " :" + repliedMessage.getMessageText() + "]";
+                   " :" + repliedMessage.getMessageText() + "}";
         return msg;
     }
 

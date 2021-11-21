@@ -28,7 +28,7 @@ public class MessageDbRepository implements Repository<Long, Message> {
     @Override
     public Message findOneById(Long id) {
         if (id==null)
-            throw new IllegalArgumentException("entity must be not null");
+            throw new IllegalArgumentException("id must be not null");
         String sqlSelect = "select * from messages where id=?";
         List<User> destinationList = new ArrayList<>();
         try(Connection connection = DriverManager.getConnection(url,username,password);
@@ -78,7 +78,7 @@ public class MessageDbRepository implements Repository<Long, Message> {
 
     private User findUser(Long id){
         if (id==null)
-            throw new IllegalArgumentException("entity must be not null");
+            throw new IllegalArgumentException("id must be not null");
         String sqlSelect = "select * from users where id=?";
         try(Connection connection = DriverManager.getConnection(url,username,password);
             PreparedStatement psSelect = connection.prepareStatement(sqlSelect)){
@@ -93,11 +93,6 @@ public class MessageDbRepository implements Repository<Long, Message> {
         }catch(SQLException e){
             e.printStackTrace();
         }
-        return null;
-    }
-
-    @Override
-    public Iterable<Message> findAll() {
         return null;
     }
 
@@ -127,17 +122,59 @@ public class MessageDbRepository implements Repository<Long, Message> {
     }
 
     @Override
-    public Message delete(Long aLong) {
-        return null;
+    public Message update(Message entity) {
+        this.validator.validate(entity);
+        Message oldState = this.findMessageById(entity.getId());
+        if(oldState == null)
+            return null;
+        String sqlUpdate = "update messages set message_text=? where id=?";
+        try(Connection connection = DriverManager.getConnection(url,username,password);
+            PreparedStatement psUpdate = connection.prepareStatement(sqlUpdate)){
+            psUpdate.setString(1,entity.getMessageText());
+            psUpdate.setLong(3,entity.getId());
+            psUpdate.executeUpdate();
+        }catch(SQLException e){
+            e.printStackTrace();
+        }
+        return oldState;
+    }
+
+    @Override
+    public Message delete(Long id) {
+        if (id==null)
+            throw new IllegalArgumentException("id must be not null");
+        Message found = this.findMessageById(id);
+        if(found == null)
+            return null;
+        String sqlDelete = "delete from messages where (id=?)";
+        try (Connection connection = DriverManager.getConnection(url, username, password);
+             PreparedStatement psDelete = connection.prepareStatement(sqlDelete)){
+            psDelete.setLong(1, id);
+            psDelete.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return found;
     }
 
     @Override
     public Integer size() {
-        return null;
+        String sqlCount = "select count(*) from messages";
+        try(Connection connection = DriverManager.getConnection(url,username,password);
+            PreparedStatement psCount = connection.prepareStatement(sqlCount)){
+            ResultSet resultSet = psCount.executeQuery();
+            resultSet.next();
+            return resultSet.getInt(1);
+        }
+        catch(SQLException e){
+            e.printStackTrace();
+        }
+        return 0;
     }
 
     @Override
-    public Message update(Message entity) {
+    public Iterable<Message> findAll() {
         return null;
     }
+
 }
