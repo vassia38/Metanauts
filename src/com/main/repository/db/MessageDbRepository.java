@@ -7,10 +7,7 @@ import com.main.repository.Repository;
 
 import java.sql.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static java.sql.Types.INTEGER;
 
@@ -40,16 +37,12 @@ public class MessageDbRepository implements Repository<Long, Message> {
 
             psSelectMsg.setLong(1,id);
             ResultSet resultSet = psSelectMsg.executeQuery();
-            User source;
-            String messageText;
-            LocalDateTime date;
-            long repliedMessageId;
             if(resultSet.next()) {
                 Long sourceId = resultSet.getLong("source_id");
-                source = new User(sourceId,null,null,null);
-                messageText = resultSet.getString("message_text");
-                date = LocalDateTime.parse(resultSet.getString("date"));
-                repliedMessageId = resultSet.getLong("replied_message_id");
+                User source = new User(sourceId,null,null,null);
+                String messageText = resultSet.getString("message_text");
+                LocalDateTime date = LocalDateTime.parse(resultSet.getString("date"));
+                long repliedMessageId = resultSet.getLong("replied_message_id");
                 psSelectDest.setLong(1,id);
                 resultSet = psSelectDest.executeQuery();
                 while(resultSet.next()){
@@ -117,6 +110,47 @@ public class MessageDbRepository implements Repository<Long, Message> {
                 messages.add(msg);
             }
         }catch(SQLException e){
+            e.printStackTrace();
+        }
+        return messages;
+    }
+
+    public Set<Message> findConversation(Long id1, Long id2){
+        Set<Message> messages = new TreeSet<>();
+        String sqlSelectMessage =
+                "select M.id,M.source_id,SD.destination_id,M.message_text,M.date,M.replied_message_id " +
+                        "from messages M, source_destination SD " +
+                        "where M.id = SD.message_id and (SD.source_id=? and SD.destination_id=? or SD.source_id=? and SD.destination_id=?) " +
+                        "order by id";
+        try(Connection connection = DriverManager.getConnection(url,username,password);
+             PreparedStatement psSelectMessage = connection.prepareStatement(sqlSelectMessage)){
+
+            psSelectMessage.setLong(1,id1);
+            psSelectMessage.setLong(2,id2);
+            psSelectMessage.setLong(3,id2);
+            psSelectMessage.setLong(4,id1);
+            ResultSet resultSet = psSelectMessage.executeQuery();
+            while(resultSet.next()){
+                Long messageId = resultSet.getLong("id");
+                Long sourceId = resultSet.getLong("source_id");
+                User source = new User(sourceId,null,null,null);
+                Long destinationId = resultSet.getLong("destination_id");
+                User destination = new User(destinationId,null,null,null);
+                String messageText = resultSet.getString("message_text");
+                LocalDateTime date = LocalDateTime.parse(resultSet.getString("date"));
+                long repliedMessageId = resultSet.getLong("replied_message_id");
+                Message replied = null;
+                if(repliedMessageId != 0){
+                    replied = new Message(null,null,null,null);
+                    replied.setId(repliedMessageId);
+                }
+                List<User> destinationList= new ArrayList<>();
+                destinationList.add(destination);
+                Message msg = new Message(source,destinationList,messageText,date, replied);
+                msg.setId(messageId);
+                messages.add(msg);
+            }
+        }catch (SQLException e){
             e.printStackTrace();
         }
         return messages;

@@ -15,6 +15,7 @@ import java.time.Month;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -284,11 +285,25 @@ public class ControllerClass implements Controller{
     @Override
     public Iterable<Message> getAllMesagesOfUser(String username) {
         User source = this.userService.findOneByUsername(username);
-        System.out.println(source);
         Iterable<Message> messages = this.messageService.findAllMessagesBySource(source.getId());
         for(Message m : messages){
             setupMessage(m);
         }
         return messages;
+    }
+
+    @Override
+    public Iterable<Message> getConversation(String username1, String username2) {
+        User user1 = this.userService.findOneByUsername(username1);
+        Long id1 = user1.getId();
+        User user2 = this.userService.findOneByUsername(username2);
+        Long id2 = user2.getId();
+        Set<Message> messages = this.messageService.findConversation(id1,id2);
+        List<Message> orderedMessages = new ArrayList<>();
+        for(Message m : messages){
+            setupMessage(m);
+            orderedMessages.add(0,m);
+        }
+        return orderedMessages;
     }
 }

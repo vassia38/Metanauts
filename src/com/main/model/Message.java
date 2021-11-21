@@ -5,7 +5,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
 
-public class Message extends Entity<Long>{
+public class Message extends Entity<Long> implements Comparable{
     private User source;
     private final List<User> destination;
     private String messageText;
@@ -102,4 +102,10 @@ public class Message extends Entity<Long>{
         return Objects.hash(getId(), getSource(), getMessageText(), getDate());
     }
 
+    @Override
+    public int compareTo(Object o) {
+        if (this.equals(o)) return 0;
+        if (!(o instanceof User that)) return -2;
+        return getId() < that.getId() ? -1 : 1;
+    }
 }

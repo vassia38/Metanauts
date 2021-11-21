@@ -44,15 +44,10 @@ public class Main {
 
         Controller controller = new ControllerClass(userService,friendshipService, messageService);
 
-        List<User> all = new ArrayList<>();
-        for(User u : controller.getAllUsers())
-            all.add(u);
-        /*controller.sendMessage(controller.findUserById(3L), all,
-                "Now i'm spamming all",
-                LocalDateTime.now(), 7L);*/
-        for(Message m : controller.getAllMesagesOfUser("vassco")){
+        for(Message m : controller.getConversation("vassco","chosenOne")){
             System.out.println(m);
         }
+
         Scanner keyboard = new Scanner(System.in);
         while(true){
             System.out.println("Available actions:");
