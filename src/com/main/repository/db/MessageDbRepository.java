@@ -8,7 +8,9 @@ import com.main.repository.Repository;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static java.sql.Types.INTEGER;
 
@@ -29,38 +31,41 @@ public class MessageDbRepository implements Repository<Long, Message> {
     public Message findOneById(Long id) {
         if (id==null)
             throw new IllegalArgumentException("id must be not null");
-        String sqlSelect = "select * from messages where id=?";
+        String sqlSelectMsg = "select * from messages where id=?";
+        String sqlSelectDestination = "select * from source_destination where message_id=?";
         List<User> destinationList = new ArrayList<>();
         try(Connection connection = DriverManager.getConnection(url,username,password);
-            PreparedStatement psSelect = connection.prepareStatement(sqlSelect)){
-            psSelect.setLong(1,id);
-            ResultSet resultSet = psSelect.executeQuery();
-            User source = null;
-            String messageText = null;
-            LocalDateTime date = null;
-            Long repliedMessageId = null;
+            PreparedStatement psSelectMsg = connection.prepareStatement(sqlSelectMsg);
+            PreparedStatement psSelectDest = connection.prepareStatement(sqlSelectDestination)){
+
+            psSelectMsg.setLong(1,id);
+            ResultSet resultSet = psSelectMsg.executeQuery();
+            User source;
+            String messageText;
+            LocalDateTime date;
+            long repliedMessageId;
             if(resultSet.next()) {
                 Long sourceId = resultSet.getLong("source_id");
-                source = this.findUser(sourceId);
-                Long destinationId = resultSet.getLong("destination_id");
-                User destination = this.findUser(destinationId);
-                destinationList.add(destination);
+                source = new User(sourceId,null,null,null);
                 messageText = resultSet.getString("message_text");
                 date = LocalDateTime.parse(resultSet.getString("date"));
                 repliedMessageId = resultSet.getLong("replied_message_id");
+                psSelectDest.setLong(1,id);
+                resultSet = psSelectDest.executeQuery();
+                while(resultSet.next()){
+                    Long destinationId = resultSet.getLong("destination_id");
+                    User destination = new User(destinationId,null,null,null);
+                    destinationList.add(destination);
+                }
+                Message replied = null;
+                if(repliedMessageId != 0){
+                    replied = new Message(null,null,null,null);
+                    replied.setId(repliedMessageId);
+                }
+                Message msg = new Message(source,destinationList,messageText,date, replied);
+                msg.setId(id);
+                return msg;
             }
-            while(resultSet.next()){
-                Long destinationId = resultSet.getLong("destination_id");
-                User destination = this.findUser(destinationId);
-                destinationList.add(destination);
-            }
-            if(source == null){
-                return null;
-            }
-            Message replied = null;
-            if(repliedMessageId != null)
-                replied = new Message(repliedMessageId,null,null,null,null);
-            return new Message(id,source,destinationList,messageText,date, replied);
         }catch(SQLException e){
             e.printStackTrace();
         }
@@ -69,51 +74,80 @@ public class MessageDbRepository implements Repository<Long, Message> {
 
     public Message findMessageById(Long id){
         Message msg = this.findOneById(id);
-        if(msg.getRepliedMessage() != null){
+        Message replied;
+        if(msg != null && msg.getRepliedMessage() != null){
             Long repliedMsgId = msg.getRepliedMessage().getId();
-            msg.setRepliedMessage(this.findOneById(repliedMsgId));
+            replied = this.findOneById(repliedMsgId);
+            msg.setRepliedMessage(replied);
         }
         return msg;
     }
 
-    private User findUser(Long id){
-        if (id==null)
-            throw new IllegalArgumentException("id must be not null");
-        String sqlSelect = "select * from users where id=?";
+    public Iterable<Message> findAllMessagesBySource(Long sourceId){
+        Set<Message> messages = new HashSet<>();
+        User source = new User(sourceId, null, null, null);
+        String sqlSelectMsg = "select * from messages where source_id=? order by id";
+        String sqlSelectDest = "select * from source_destination where source_id=? order by message_id";
         try(Connection connection = DriverManager.getConnection(url,username,password);
-            PreparedStatement psSelect = connection.prepareStatement(sqlSelect)){
-            psSelect.setLong(1,id);
-            ResultSet resultSet = psSelect.executeQuery();
-            if(resultSet.next()) {
-                String userName = resultSet.getString("username");
-                String firstName = resultSet.getString("first_name");
-                String lastName = resultSet.getString("last_name");
-                return new User(id, userName,firstName, lastName);
+            PreparedStatement psSelectMsg = connection.prepareStatement(sqlSelectMsg);
+            PreparedStatement psSelectDest = connection.prepareStatement(sqlSelectDest)){
+
+            psSelectMsg.setLong(1,sourceId);
+            psSelectDest.setLong(1,sourceId);
+            ResultSet messageSet = psSelectMsg.executeQuery();
+            ResultSet destinationSet = psSelectDest.executeQuery();
+            while(messageSet.next()){
+                long id = messageSet.getLong("id");
+                String messageText = messageSet.getString("message_text");
+                LocalDateTime date = LocalDateTime.parse(messageSet.getString("date"));
+                long repliedMessageId = messageSet.getLong("replied_message_id");
+                List<User> destinationList = new ArrayList<>();
+                while(destinationSet.next() && id == destinationSet.getLong("message_id")){
+                    Long destinationId = destinationSet.getLong("destination_id");
+                    User destination = new User(destinationId,null,null,null);
+                    destinationList.add(destination);
+                }
+                Message replied = null;
+                if(repliedMessageId != 0){
+                    replied = new Message(null,null,null,null);
+                    replied.setId(repliedMessageId);
+                }
+                Message msg = new Message(source,destinationList,messageText,date,replied);
+                msg.setId(id);
+                messages.add(msg);
             }
         }catch(SQLException e){
             e.printStackTrace();
         }
-        return null;
+        return messages;
     }
 
     @Override
     public Message save(Message entity) {
         this.validator.validate(entity);
-        String sql = "insert into messages (id, source_id, destination_id, " +
-                "message_text, date, replied_message_id) values (?, ?, ?, ?, ?, ?)";
+        String insertMsg = "insert into messages (source_id, message_text," +
+                "date, replied_message_id) values (?, ?, ?, ?)";
+        String insertDestination ="insert into source_destination (source_id, destination_id,message_id)" +
+                "values(?,?,?)";
         try (Connection connection = DriverManager.getConnection(url, username, password);
-             PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setLong(1, entity.getId());
-            ps.setLong(2, entity.getSource().getId());
-            ps.setString(4, entity.getMessageText());
-            ps.setString(5,entity.getDate().toString());
+             PreparedStatement psMsg = connection.prepareStatement(insertMsg, Statement.RETURN_GENERATED_KEYS);
+             PreparedStatement psDest = connection.prepareStatement(insertDestination)) {
+            //psMsg.setLong(1, entity.getId());
+            psMsg.setLong(1, entity.getSource().getId());
+            psMsg.setString(2, entity.getMessageText());
+            psMsg.setString(3,entity.getDate().toString());
             Message replied = entity.getRepliedMessage();
-            ps.setNull(6, INTEGER);
+            psMsg.setNull(4, INTEGER);
             if(replied != null)
-                ps.setLong(6, entity.getRepliedMessage().getId());
-            for(User user : entity.getDestination()){
-                ps.setLong(3,user.getId());
-                ps.executeUpdate();
+                psMsg.setLong(4, entity.getRepliedMessage().getId());
+            psMsg.executeUpdate();
+            ResultSet rs = psMsg.getGeneratedKeys();
+            rs.next();
+            for(User u : entity.getDestination()){
+                psDest.setLong(1, entity.getSource().getId());
+                psDest.setLong(2, u.getId());
+                psDest.setLong(3, rs.getLong(1));
+                psDest.executeUpdate();
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -131,7 +165,7 @@ public class MessageDbRepository implements Repository<Long, Message> {
         try(Connection connection = DriverManager.getConnection(url,username,password);
             PreparedStatement psUpdate = connection.prepareStatement(sqlUpdate)){
             psUpdate.setString(1,entity.getMessageText());
-            psUpdate.setLong(3,entity.getId());
+            psUpdate.setLong(2,entity.getId());
             psUpdate.executeUpdate();
         }catch(SQLException e){
             e.printStackTrace();

@@ -3,6 +3,7 @@ package com.main.controller;
 import com.main.algo.Graph;
 import com.main.model.Friendship;
 import com.main.model.FriendshipDTO;
+import com.main.model.Message;
 import com.main.model.User;
 import com.main.repository.RepositoryException;
 import com.main.service.FriendshipService;
@@ -94,7 +95,7 @@ public class ControllerClass implements Controller{
     public User findUserById(Long id) {
         User user = userService.findOneById(id);
         if(user == null)
-            throw new RepositoryException("User doesn't exist!\n");
+            throw new RepositoryException("User with id = " + id + " doesn't exist!\n");
         return user;
     }
 
@@ -108,7 +109,7 @@ public class ControllerClass implements Controller{
     public User findUserByUsername(String username) {
         User user = userService.findOneByUsername(username);
         if(user == null)
-            throw new RepositoryException("User doesn't exist!\n");
+            throw new RepositoryException("User with username = " + " doesn't exist!\n");
         return user;
     }
 
@@ -254,8 +255,40 @@ public class ControllerClass implements Controller{
 
     @Override
     public void sendMessage(User source, List<User> destination, String message, LocalDateTime date, Long repliedMessageId) {
-
+        Message repliedMsg = messageService.findMessageById(repliedMessageId);
+        Message msg = new Message(source,destination, message, date, repliedMsg);
+        this.messageService.add(msg);
     }
 
+    private void setupMessage(Message msg){
+        User user = userService.findOneById(msg.getSource().getId());
+        msg.setSource(user);
+        List<User> destinationUsers = new ArrayList<>();
+        for(User dest : msg.getDestination()){
+            try{
+                destinationUsers.add(this.userService.findOneById(dest.getId()));
+            }catch(RepositoryException e){
+                System.out.println("#[Controller]" + e.getMessage());
+            }
+        }
+        msg.setDestination(destinationUsers);
+        Message repliedMessage = msg.getRepliedMessage();
+        if(repliedMessage != null){
+            repliedMessage = messageService.findMessageById(repliedMessage.getId());
+            User rUser = userService.findOneById(repliedMessage.getSource().getId());
+            repliedMessage.setSource(rUser);
+            msg.setRepliedMessage(repliedMessage);
+        }
+    }
 
+    @Override
+    public Iterable<Message> getAllMesagesOfUser(String username) {
+        User source = this.userService.findOneByUsername(username);
+        System.out.println(source);
+        Iterable<Message> messages = this.messageService.findAllMessagesBySource(source.getId());
+        for(Message m : messages){
+            setupMessage(m);
+        }
+        return messages;
+    }
 }

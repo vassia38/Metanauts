@@ -21,6 +21,9 @@ public class MessageService {
     public Message findMessageById(Long id){
         return messageRepo.findMessageById(id);
     }
+    public Iterable<Message> findAllMessagesBySource(Long sourceId){
+        return messageRepo.findAllMessagesBySource(sourceId);
+    }
     public Integer size(){
         return messageRepo.size();
     }

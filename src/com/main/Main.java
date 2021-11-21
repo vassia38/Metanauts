@@ -44,27 +44,15 @@ public class Main {
 
         Controller controller = new ControllerClass(userService,friendshipService, messageService);
 
-        /*List<User> all = new ArrayList<>();
-        all.add(controller.findUserById(2L));
-        all.add(controller.findUserById(4L));
-        all.add(controller.findUserById(6L));
-        MessageValidator messageValidator = new MessageValidator();
-        MessageDbRepository messageRepo = new MessageDbRepository(url,username,password, messageValidator);
-        Message msg1 = new Message(1L,controller.findUserById(3L),
-                all, "Hello all!", LocalDateTime.now());
-        messageRepo.save(msg1);
-        all.add(controller.findUserById(3L));
-        all.remove(controller.findUserById(2L));
-        all.remove(controller.findUserById(4L));
-        all.remove(controller.findUserById(6L));
-        Message msg2 = new Message(2L, controller.findUserById(7L),
-                all, "Hi vasi!", LocalDateTime.now(), msg1);
-        messageRepo.save(msg2);
-
-        msg1 = messageRepo.findMessageById(1L);
-        msg2 = messageRepo.findMessageById(2L);
-        System.out.println(msg1);
-        System.out.println(msg2);*/
+        List<User> all = new ArrayList<>();
+        for(User u : controller.getAllUsers())
+            all.add(u);
+        /*controller.sendMessage(controller.findUserById(3L), all,
+                "Now i'm spamming all",
+                LocalDateTime.now(), 7L);*/
+        for(Message m : controller.getAllMesagesOfUser("vassco")){
+            System.out.println(m);
+        }
         Scanner keyboard = new Scanner(System.in);
         while(true){
             System.out.println("Available actions:");
