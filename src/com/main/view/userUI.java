@@ -1,16 +1,14 @@
 package com.main.view;
 
 import com.main.controller.Controller;
-import com.main.model.FriendshipDTO;
-import com.main.model.Tuple;
+import com.main.model.*;
 import com.main.service.ServiceException;
-import com.main.model.Friendship;
-import com.main.model.User;
 import com.main.model.validators.ValidationException;
 import com.main.repository.RepositoryException;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.*;
 import java.util.stream.Stream;
@@ -31,6 +29,8 @@ public class userUI extends Thread{
         userUI.controller = controller;
         currentUser = controller.findUserByUsername(user);
         try {
+            cmdList.put("message",userUI.class.getMethod("sendMessage"));
+            cmdList.put("find conversation",userUI.class.getMethod("findConversation"));
             cmdList.put("delete user", userUI.class.getMethod("deleteUser"));
             cmdList.put("update user", userUI.class.getMethod("updateUser"));
             cmdList.put("users", userUI.class.getMethod("showUsers"));
@@ -45,6 +45,40 @@ public class userUI extends Thread{
             cmdList.put("help", userUI.class.getMethod("help"));
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
+        }
+    }
+
+    public void sendMessage(){
+        System.out.println("""
+                Type usernames separated by ENTER.
+                Leave empty and press ENTER again when done.
+                Destinations:""");
+        List<String> usernames =new ArrayList<>();
+        String str;
+        str = keyboard.nextLine();
+        while(!str.equals("")){
+            usernames.add(str);
+            str = keyboard.nextLine();
+        }
+        System.out.println("Replying to (type message id, leave empty if not):");
+        long repliedId = 0;
+        str = keyboard.nextLine();
+        try{
+            repliedId = Long.parseLong(str);
+        }catch(NumberFormatException e){
+            if(!Objects.equals(str, ""))
+                throw new InputMismatchException("ID requires a number!");
+        }
+        System.out.println("Message (press ENTER = send):");
+        String messageText = keyboard.nextLine();
+        controller.sendMessage(currentUser,usernames,messageText, LocalDateTime.now(), repliedId);
+    }
+
+    public void findConversation(){
+        System.out.println("Username of other participant:");
+        String username = keyboard.nextLine();
+        for(Message m : controller.getConversation(currentUser.getUsername(), username)){
+            System.out.println(m);
         }
     }
 
@@ -155,7 +189,7 @@ public class userUI extends Thread{
     }
 
     private Month getMonth(String monthString) {
-        Integer monthInt;
+        int monthInt;
         try {
             monthInt = Integer.parseInt(monthString);
         } catch (NumberFormatException e) {
@@ -196,6 +230,8 @@ public class userUI extends Thread{
             System.out.println("Current user is " + this.currentUser);
         System.out.println("Commands:");
         System.out.println("logout / exit");
+        System.out.println("message = write and send a message to multiple users");
+        System.out.println("find conversation");
         System.out.println("delete user");
         System.out.println("update user");
         System.out.println("users = show all users");

@@ -108,9 +108,11 @@ public class ControllerClass implements Controller{
      */
     @Override
     public User findUserByUsername(String username) {
+        if(username == null || username.equals(""))
+            throw new RepositoryException("Username empty!\n");
         User user = userService.findOneByUsername(username);
         if(user == null)
-            throw new RepositoryException("User with username = " + " doesn't exist!\n");
+            throw new RepositoryException("User with username = " + username + " doesn't exist!\n");
         return user;
     }
 
@@ -255,19 +257,24 @@ public class ControllerClass implements Controller{
     }
 
     @Override
-    public void sendMessage(User source, List<User> destination, String message, LocalDateTime date, Long repliedMessageId) {
+    public void sendMessage(User source, List<String> destinationUsernames, String message, LocalDateTime date, Long repliedMessageId) {
+        List<User> destination = new ArrayList<>();
+        for(String s : destinationUsernames){
+            User user = this.findUserByUsername(s);
+            destination.add(user);
+        }
         Message repliedMsg = messageService.findMessageById(repliedMessageId);
         Message msg = new Message(source,destination, message, date, repliedMsg);
         this.messageService.add(msg);
     }
 
     private void setupMessage(Message msg){
-        User user = userService.findOneById(msg.getSource().getId());
+        User user = this.findUserById(msg.getSource().getId());
         msg.setSource(user);
         List<User> destinationUsers = new ArrayList<>();
         for(User dest : msg.getDestination()){
             try{
-                destinationUsers.add(this.userService.findOneById(dest.getId()));
+                destinationUsers.add(this.findUserById(dest.getId()));
             }catch(RepositoryException e){
                 System.out.println("#[Controller]" + e.getMessage());
             }
@@ -276,7 +283,7 @@ public class ControllerClass implements Controller{
         Message repliedMessage = msg.getRepliedMessage();
         if(repliedMessage != null){
             repliedMessage = messageService.findMessageById(repliedMessage.getId());
-            User rUser = userService.findOneById(repliedMessage.getSource().getId());
+            User rUser = this.findUserById(repliedMessage.getSource().getId());
             repliedMessage.setSource(rUser);
             msg.setRepliedMessage(repliedMessage);
         }
@@ -294,16 +301,14 @@ public class ControllerClass implements Controller{
 
     @Override
     public Iterable<Message> getConversation(String username1, String username2) {
-        User user1 = this.userService.findOneByUsername(username1);
+        User user1 = this.findUserByUsername(username1);
         Long id1 = user1.getId();
-        User user2 = this.userService.findOneByUsername(username2);
+        User user2 = this.findUserByUsername(username2);
         Long id2 = user2.getId();
         Set<Message> messages = this.messageService.findConversation(id1,id2);
-        List<Message> orderedMessages = new ArrayList<>();
         for(Message m : messages){
             setupMessage(m);
-            orderedMessages.add(0,m);
         }
-        return orderedMessages;
+        return messages;
     }
 }

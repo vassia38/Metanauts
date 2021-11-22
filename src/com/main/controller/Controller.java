@@ -28,7 +28,7 @@ public interface Controller {
     Stream<FriendshipDTO> getLeftFriends(User user, List<Friendship> friendshipList);
     Stream<FriendshipDTO> getRightFriendsMonth(User user, Month month, List<Friendship> friendshipList);
     Stream<FriendshipDTO> getLeftFriendsMonth(User user, Month month, List<Friendship> friendshipList);
-    void sendMessage(User source, List<User> destination, String message, LocalDateTime date, Long repliedMessageId);
+    void sendMessage(User source, List<String> destinationUsernames, String message, LocalDateTime date, Long repliedMessageId);
     Iterable<Message> getAllMesagesOfUser(String username);
     Iterable<Message> getConversation(String username1, String username2);
 }

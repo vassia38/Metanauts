@@ -5,7 +5,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
 
-public class Message extends Entity<Long> implements Comparable{
+public class Message extends Entity<Long> implements Comparable<Message>{
     private User source;
     private final List<User> destination;
     private String messageText;
@@ -77,17 +77,19 @@ public class Message extends Entity<Long> implements Comparable{
         if(date != null){
             formattedDate = date.format(formatter);
         }
-        String msg = "[msg id " + this.getId() + "] " + firstname + " " +
+        return "[msg id " + this.getId() + "] " + firstname + " " +
                 lastname + " (" +
                 formattedDate + ") :\n" +
-                messageText;
-       if(repliedMessage != null && repliedMessage.getSource() != null){
-           msg = msg + "\n\t{in reply to " + "[msg id " + repliedMessage.getId() + "] " +
-                   repliedMessage.getSource().getFirstName() + " " +
-                   repliedMessage.getSource().getLastName() +
-                   " :" + repliedMessage.getMessageText() + "}";
-       }
-        return msg;
+                messageText + repliedToString();
+    }
+
+    private String repliedToString() {
+        if(repliedMessage == null || repliedMessage.getSource() == null)
+            return "";
+        return "\n\t{in reply to " + "[msg id " + repliedMessage.getId() + "] " +
+                repliedMessage.getSource().getFirstName() + " " +
+                repliedMessage.getSource().getLastName() +
+                " :\n\t " + repliedMessage.getMessageText() + "}";
     }
 
     @Override
@@ -102,10 +104,10 @@ public class Message extends Entity<Long> implements Comparable{
         return Objects.hash(getId(), getSource(), getMessageText(), getDate());
     }
 
+
     @Override
-    public int compareTo(Object o) {
+    public int compareTo(Message o) {
         if (this.equals(o)) return 0;
-        if (!(o instanceof User that)) return -2;
-        return getId() < that.getId() ? -1 : 1;
+        return getId() < o.getId() ? -1 : 1;
     }
 }

@@ -2,8 +2,6 @@ package com.main;
 
 import com.main.controller.Controller;
 import com.main.controller.ControllerClass;
-import com.main.model.Message;
-import com.main.model.User;
 import com.main.model.validators.MessageValidator;
 import com.main.repository.RepositoryException;
 import com.main.repository.db.FriendshipDbRepository;
@@ -17,9 +15,6 @@ import com.main.model.validators.UserValidator;
 import com.main.view.adminUI;
 import com.main.view.userUI;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
 
 public class Main {
@@ -44,9 +39,6 @@ public class Main {
 
         Controller controller = new ControllerClass(userService,friendshipService, messageService);
 
-        for(Message m : controller.getConversation("vassco","chosenOne")){
-            System.out.println(m);
-        }
 
         Scanner keyboard = new Scanner(System.in);
         while(true){
