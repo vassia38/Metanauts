@@ -1,9 +1,7 @@
 package com.main.controller;
 
-import com.main.model.Friendship;
-import com.main.model.FriendshipDTO;
-import com.main.model.Message;
-import com.main.model.User;
+
+import com.main.model.*;
 
 import java.time.LocalDateTime;
 import java.time.Month;
@@ -31,4 +29,9 @@ public interface Controller {
     void sendMessage(User source, List<String> destinationUsernames, String message, LocalDateTime date, Long repliedMessageId);
     Iterable<Message> getAllMesagesOfUser(String username);
     Iterable<Message> getConversation(String username1, String username2);
+    void addRequest(Request request);
+    void answerRequest(Request request, String answer);
+    Iterable<Request> showRequests(User user);
+    Iterable<Request> showAllRequests();
+    Friendship findFriendshipById(Tuple<Long,Long> id);
 }

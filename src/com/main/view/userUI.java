@@ -42,6 +42,9 @@ public class userUI extends Thread{
             cmdList.put("communities max", userUI.class.getMethod("biggestCommunity"));
             cmdList.put("show friends", userUI.class.getMethod("showFriends"));
             cmdList.put("show friends in month", userUI.class.getMethod("showFriendsMonth"));
+            cmdList.put("show requests", userUI.class.getMethod("showRequests"));
+            cmdList.put("answer request", userUI.class.getMethod("answerRequest"));
+            cmdList.put("send request", userUI.class.getMethod("sendRequest"));
             cmdList.put("help", userUI.class.getMethod("help"));
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
@@ -81,7 +84,7 @@ public class userUI extends Thread{
         }
     }
 
-    public void deleteUser(){
+    public void deleteUser() throws IllegalAccessException {
         if(this.currentUser == null){
             System.out.println("You are not logged in!\n");
             return;
@@ -89,9 +92,9 @@ public class userUI extends Thread{
         System.out.println("Are you sure (Y/N) ?");
         String confirm = keyboard.nextLine();
         if(Objects.equals(confirm, "Y") || Objects.equals(confirm, "y")){
-            User deleted = controller.deleteUser(this.currentUser);
-            if(deleted == this.currentUser)
-                this.currentUser = null;
+            controller.deleteUser(this.currentUser);
+            this.currentUser = null;
+            throw new IllegalAccessException("Sys exit");
         }
     }
     public void updateUser(){
@@ -225,6 +228,68 @@ public class userUI extends Thread{
         printFriends(leftFriends,rightFriends);
     }
 
+    public void showRequests() {
+        Iterable<Request> requests = controller.showRequests(currentUser);
+        for (Request request : requests) {
+            System.out.println(controller.findUserById(request.getId().getLeft()).getUsername());
+        }
+    }
+
+    public void answerRequest() {
+        System.out.println("Username of the person that sent the request: ");
+        String username = keyboard.nextLine();
+
+        User user = controller.findUserByUsername(username);
+
+        if(user == null) {
+            System.out.println("This user does not exist!");
+            return;
+        }
+
+        System.out.println("Answer (approve/reject): ");
+        String answer = keyboard.nextLine();
+
+        Request request = new Request(user.getId(),currentUser.getId(),"pending");
+
+        try {
+            controller.answerRequest(request,answer);
+        } catch (RepositoryException ex) {
+            System.out.println(ex.getMessage());
+        }
+    }
+
+    public void sendRequest() {
+        System.out.println("Username of the person you want to send a request: ");
+        String username = keyboard.nextLine();
+
+        if(username.equals(currentUser.getUsername())){
+            System.out.println("You can't send a friend request to yourself!");
+            return;
+        }
+
+        User user = controller.findUserByUsername(username);
+
+        if(user == null) {
+            System.out.println("This user does not exist!");
+            return;
+        }
+
+        Friendship friendship = new Friendship(user.getId(),currentUser.getId());
+        Friendship found = controller.findFriendshipById(friendship.getId());
+        if(found != null) {
+            System.out.println("Friendship already exists!");
+            return;
+        }
+
+       Request request = new Request(currentUser.getId(), user.getId(), "pending");
+
+        try {
+            controller.addRequest(request);
+        } catch (RepositoryException ex) {
+            System.out.println(ex.getMessage());
+        }
+    }
+
     public void help(){
         if(this.currentUser != null)
             System.out.println("Current user is " + this.currentUser);
@@ -243,6 +308,9 @@ public class userUI extends Thread{
         System.out.println("communities max = size of biggest community");
         System.out.println("show friends = show all friends of the current user");
         System.out.println("show friends in month = show all friends of the current user from a certain month");
+        System.out.println("show requests = show all requests of the current user");
+        System.out.println("answer request = answer a request of the current user");
+        System.out.println("send request = send a request to another user");
         System.out.println("help");
     }
     public void start(){
@@ -262,9 +330,12 @@ public class userUI extends Thread{
             }catch(ValidationException | RepositoryException | ServiceException ex){
                 System.out.println(ex.getMessage());
             }catch(InvocationTargetException ex){
+                if(ex.getCause() instanceof IllegalAccessException){
+                    return;
+                }
                 System.out.println(ex.getCause().getMessage());
             }catch (IllegalAccessException e) {
-                e.printStackTrace();
+                return;
             }
         }
     }

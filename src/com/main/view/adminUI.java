@@ -1,11 +1,8 @@
 package com.main.view;
 
 import com.main.controller.Controller;
-import com.main.model.FriendshipDTO;
-import com.main.model.Tuple;
+import com.main.model.*;
 import com.main.service.ServiceException;
-import com.main.model.Friendship;
-import com.main.model.User;
 import com.main.model.validators.ValidationException;
 import com.main.repository.RepositoryException;
 
@@ -48,6 +45,7 @@ public class adminUI extends Thread{
             cmdList.put("communities max", adminUI.class.getMethod("biggestCommunity"));
             cmdList.put("show friends", adminUI.class.getMethod("showFriends"));
             cmdList.put("show friends in month", adminUI.class.getMethod("showFriendsMonth"));
+            cmdList.put("show requests", adminUI.class.getMethod("showRequests"));
             cmdList.put("help", adminUI.class.getMethod("help"));
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
@@ -204,7 +202,7 @@ public class adminUI extends Thread{
     }
 
     private Month getMonth(String monthString) {
-        Integer monthInt;
+        int monthInt;
         try {
             monthInt = Integer.parseInt(monthString);
         } catch (NumberFormatException e) {
@@ -242,12 +240,19 @@ public class adminUI extends Thread{
         printFriends(leftFriends,rightFriends);
     }
 
+    public void showRequests() {
+        Iterable<Request> requests = controller.showAllRequests();
+        for (Request request : requests) {
+            System.out.println(request);
+        }
+    }
+
     public void help(){
         if(this.currentUser != null)
             System.out.println("Current user is " + this.currentUser);
         System.out.println("Commands:");
-        System.out.println("login");
-        System.out.println("logout");
+        System.out.println("login = pseudo-login as a user");
+        System.out.println("logout = pseudo-logout from a user");
         System.out.println("add user");
         System.out.println("delete user");
         System.out.println("update user");
@@ -261,6 +266,7 @@ public class adminUI extends Thread{
         System.out.println("communities max = size of biggest community");
         System.out.println("show friends = show all friends of a certain user");
         System.out.println("show friends in month = show all friends a certain user from a certain month");
+        System.out.println("show requests = show all friend requests");
         System.out.println("help");
         System.out.println("exit");
     }

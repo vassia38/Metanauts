@@ -9,6 +9,8 @@ import com.main.repository.db.MessageDbRepository;
 import com.main.repository.db.UserDbRepository;
 import com.main.service.FriendshipService;
 import com.main.service.MessageService;
+import com.main.repository.db.RequestDbRepository;
+import com.main.service.RequestService;
 import com.main.service.UserService;
 import com.main.model.validators.FriendshipValidator;
 import com.main.model.validators.UserValidator;
@@ -33,11 +35,14 @@ public class Main {
         MessageValidator messageValidator = new MessageValidator();
         MessageDbRepository messageRepo = new MessageDbRepository(url,username,password, messageValidator);
 
+        RequestDbRepository requestRepo =
+                new RequestDbRepository(url, username, password);
+
         UserService userService = new UserService(userRepo);
         FriendshipService friendshipService = new FriendshipService(friendshipRepo);
         MessageService messageService = new MessageService(messageRepo);
-
-        Controller controller = new ControllerClass(userService,friendshipService, messageService);
+        RequestService requestService = new RequestService(requestRepo);
+        Controller controller = new ControllerClass(userService,friendshipService,messageService, requestService);
 
 
         Scanner keyboard = new Scanner(System.in);
