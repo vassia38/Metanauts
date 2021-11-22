@@ -9,8 +9,8 @@ import com.main.repository.db.UserDbRepository;
 import com.main.service.FriendshipService;
 import com.main.service.RequestService;
 import com.main.service.UserService;
-import com.main.model.validators.PrietenieValidator;
-import com.main.model.validators.UtilizatorValidator;
+import com.main.model.validators.FriendshipValidator;
+import com.main.model.validators.UserValidator;
 import com.main.view.adminUI;
 import com.main.view.userUI;
 
@@ -22,9 +22,9 @@ public class Main {
         String url = "jdbc:postgresql://localhost:5432/socialnetwork";
         String username = "postgres";
         String password = "postgres";
-        UtilizatorValidator userValidator = new UtilizatorValidator();
+        UserValidator userValidator = new UserValidator();
 
-        PrietenieValidator friendshipValidator = new PrietenieValidator();
+        FriendshipValidator friendshipValidator = new FriendshipValidator();
         UserDbRepository userRepo = new UserDbRepository(
                 url, username,password, userValidator);
         FriendshipDbRepository friendshipRepo =

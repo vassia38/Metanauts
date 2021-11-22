@@ -155,7 +155,7 @@ public class userUI extends Thread{
     }
 
     private Month getMonth(String monthString) {
-        Integer monthInt;
+        int monthInt;
         try {
             monthInt = Integer.parseInt(monthString);
         } catch (NumberFormatException e) {

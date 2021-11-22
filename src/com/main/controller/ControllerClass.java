@@ -5,7 +5,6 @@ import com.main.model.*;
 import com.main.repository.RepositoryException;
 import com.main.service.FriendshipService;
 import com.main.service.RequestService;
-import com.main.service.ServiceException;
 import com.main.service.UserService;
 
 import java.time.Month;
@@ -215,7 +214,7 @@ public class ControllerClass implements Controller{
 
     @Override
     public Stream<FriendshipDTO> getRightFriends(User user, List<Friendship> friendshipList) {
-        Predicate<Friendship> friends = x -> x.getId().getLeft() == user.getId();
+        Predicate<Friendship> friends = x -> x.getId().getLeft().equals(user.getId());
         return friendshipList.stream().filter(friends).map(x ->
                 new FriendshipDTO(findUserById(x.getId().getRight()).getLastName(),
                         findUserById(x.getId().getRight()).getFirstName(), x.getDate()));
@@ -223,7 +222,7 @@ public class ControllerClass implements Controller{
 
     @Override
     public Stream<FriendshipDTO> getLeftFriends(User user, List<Friendship> friendshipList) {
-        Predicate<Friendship> friends = x -> x.getId().getRight() == user.getId();
+        Predicate<Friendship> friends = x -> x.getId().getRight().equals(user.getId());
         return friendshipList.stream().filter(friends).map(x ->
                 new FriendshipDTO(findUserById(x.getId().getLeft()).getLastName(),
                         findUserById(x.getId().getLeft()).getFirstName(), x.getDate()));
@@ -231,7 +230,7 @@ public class ControllerClass implements Controller{
 
     @Override
     public Stream<FriendshipDTO> getRightFriendsMonth(User user, Month month, List<Friendship> friendshipList) {
-        Predicate<Friendship> friends = x -> x.getId().getLeft() == user.getId();
+        Predicate<Friendship> friends = x -> x.getId().getLeft().equals(user.getId());
         Predicate<Friendship> friendsMonth = x -> x.getDate().getMonth() == month;
         Predicate<Friendship> filtered = friends.and(friendsMonth);
         return friendshipList.stream().filter(filtered).map(x ->
@@ -241,7 +240,7 @@ public class ControllerClass implements Controller{
 
     @Override
     public Stream<FriendshipDTO> getLeftFriendsMonth(User user, Month month, List<Friendship> friendshipList) {
-        Predicate<Friendship> friends = x -> x.getId().getRight() == user.getId();
+        Predicate<Friendship> friends = x -> x.getId().getRight().equals(user.getId());
         Predicate<Friendship> friendsMonth = x -> x.getDate().getMonth() == month;
         Predicate<Friendship> filtered = friends.and(friendsMonth);
         return friendshipList.stream().filter(filtered).map(x ->
@@ -264,11 +263,7 @@ public class ControllerClass implements Controller{
     }
 
     public void answerRequest(Request request, String answer) {
-        try {
-            validateAnswer(answer);
-        } catch (ServiceException ex) {
-            throw ex;
-        }
+        validateAnswer(answer);
 
         Request found = requestService.findOneById(request.getId());
         if(found == null) {
@@ -291,9 +286,9 @@ public class ControllerClass implements Controller{
 
     public Iterable<Request> showRequests(User user) {
         Iterable<Request> requests = requestService.getAllEntities();
-        ArrayList<Request> requestsToUser = new ArrayList<Request>();
+        ArrayList<Request> requestsToUser = new ArrayList<>();
         for(Request request : requests) {
-            if(request.getId().getRight() == user.getId() && request.getStatus().equals("pending")) {
+            if(request.getId().getRight().equals(user.getId()) && request.getStatus().equals("pending")) {
                 requestsToUser.add(request);
             }
         }
