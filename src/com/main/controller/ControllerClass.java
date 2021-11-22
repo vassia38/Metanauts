@@ -1,28 +1,37 @@
 package com.main.controller;
 
 import com.main.algo.Graph;
-import com.main.model.*;
+import com.main.model.Friendship;
+import com.main.model.FriendshipDTO;
+import com.main.model.Message;
+import com.main.model.User;
 import com.main.repository.RepositoryException;
 import com.main.service.FriendshipService;
+import com.main.service.MessageService;
+import com.main.model.*;
 import com.main.service.RequestService;
 import com.main.service.UserService;
 
+import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public class ControllerClass implements Controller{
     public final UserService userService;
     public final  FriendshipService friendshipService;
+    public final MessageService messageService;
     public final RequestService requestService;
     Graph graph;
-
-    public ControllerClass(UserService userService, FriendshipService friendshipService, RequestService requestService){
+    public ControllerClass(UserService userService, FriendshipService friendshipService,
+                           MessageService messageService,RequestService requestService){
         this.userService = userService;
         this.friendshipService = friendshipService;
+        this.messageService = messageService;
         this.requestService = requestService;
     }
 
@@ -90,7 +99,7 @@ public class ControllerClass implements Controller{
     public User findUserById(Long id) {
         User user = userService.findOneById(id);
         if(user == null)
-            throw new RepositoryException("User doesn't exist!\n");
+            throw new RepositoryException("User with id = " + id + " doesn't exist!\n");
         return user;
     }
 
@@ -102,9 +111,11 @@ public class ControllerClass implements Controller{
      */
     @Override
     public User findUserByUsername(String username) {
+        if(username == null || username.equals(""))
+            throw new RepositoryException("Username empty!\n");
         User user = userService.findOneByUsername(username);
         if(user == null)
-            throw new RepositoryException("User doesn't exist!\n");
+            throw new RepositoryException("User with username = " + username + " doesn't exist!\n");
         return user;
     }
 
@@ -248,6 +259,63 @@ public class ControllerClass implements Controller{
                         findUserById(x.getId().getLeft()).getFirstName(), x.getDate()));
     }
 
+    @Override
+    public void sendMessage(User source, List<String> destinationUsernames, String message, LocalDateTime date, Long repliedMessageId) {
+        List<User> destination = new ArrayList<>();
+        for(String s : destinationUsernames){
+            User user = this.findUserByUsername(s);
+            destination.add(user);
+        }
+        Message repliedMsg = messageService.findMessageById(repliedMessageId);
+        Message msg = new Message(source,destination, message, date, repliedMsg);
+        this.messageService.add(msg);
+    }
+
+    private void setupMessage(Message msg){
+        User user = this.findUserById(msg.getSource().getId());
+        msg.setSource(user);
+        List<User> destinationUsers = new ArrayList<>();
+        for(User dest : msg.getDestination()){
+            try{
+                destinationUsers.add(this.findUserById(dest.getId()));
+            }catch(RepositoryException e){
+                System.out.println("#[Controller]" + e.getMessage());
+            }
+        }
+        msg.setDestination(destinationUsers);
+        Message repliedMessage = msg.getRepliedMessage();
+        if(repliedMessage != null){
+            repliedMessage = messageService.findMessageById(repliedMessage.getId());
+            User rUser = this.findUserById(repliedMessage.getSource().getId());
+            repliedMessage.setSource(rUser);
+            msg.setRepliedMessage(repliedMessage);
+        }
+    }
+
+    @Override
+    public Iterable<Message> getAllMesagesOfUser(String username) {
+        User source = this.userService.findOneByUsername(username);
+        Iterable<Message> messages = this.messageService.findAllMessagesBySource(source.getId());
+        for(Message m : messages){
+            setupMessage(m);
+        }
+        return messages;
+    }
+
+    @Override
+    public Iterable<Message> getConversation(String username1, String username2) {
+        User user1 = this.findUserByUsername(username1);
+        Long id1 = user1.getId();
+        User user2 = this.findUserByUsername(username2);
+        Long id2 = user2.getId();
+        Set<Message> messages = this.messageService.findConversation(id1,id2);
+        for(Message m : messages){
+            setupMessage(m);
+        }
+        return messages;
+    }
+
+    @Override
     public void addRequest(Request request) {
         Request found = requestService.findOneById(request.getId());
         if (found != null) {
@@ -262,6 +330,7 @@ public class ControllerClass implements Controller{
         }
     }
 
+    @Override
     public void answerRequest(Request request, String answer) {
         validateAnswer(answer);
 
@@ -284,6 +353,7 @@ public class ControllerClass implements Controller{
         }
     }
 
+    @Override
     public Iterable<Request> showRequests(User user) {
         Iterable<Request> requests = requestService.getAllEntities();
         ArrayList<Request> requestsToUser = new ArrayList<>();
@@ -295,10 +365,12 @@ public class ControllerClass implements Controller{
         return requestsToUser;
     }
 
+    @Override
     public Iterable<Request> showAllRequests() {
         return requestService.getAllEntities();
     }
 
+    @Override
     public Friendship findFriendshipById(Tuple<Long,Long> id) {
         return friendshipService.findFriendshipById(id);
     }

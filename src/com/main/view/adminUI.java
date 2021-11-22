@@ -202,7 +202,7 @@ public class adminUI extends Thread{
     }
 
     private Month getMonth(String monthString) {
-        Integer monthInt;
+        int monthInt;
         try {
             monthInt = Integer.parseInt(monthString);
         } catch (NumberFormatException e) {
@@ -251,8 +251,8 @@ public class adminUI extends Thread{
         if(this.currentUser != null)
             System.out.println("Current user is " + this.currentUser);
         System.out.println("Commands:");
-        System.out.println("login");
-        System.out.println("logout");
+        System.out.println("login = pseudo-login as a user");
+        System.out.println("logout = pseudo-logout from a user");
         System.out.println("add user");
         System.out.println("delete user");
         System.out.println("update user");

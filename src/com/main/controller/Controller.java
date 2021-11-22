@@ -1,7 +1,9 @@
 package com.main.controller;
 
+
 import com.main.model.*;
 
+import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,9 +26,12 @@ public interface Controller {
     Stream<FriendshipDTO> getLeftFriends(User user, List<Friendship> friendshipList);
     Stream<FriendshipDTO> getRightFriendsMonth(User user, Month month, List<Friendship> friendshipList);
     Stream<FriendshipDTO> getLeftFriendsMonth(User user, Month month, List<Friendship> friendshipList);
-    public void addRequest(Request request);
-    public void answerRequest(Request request, String answer);
-    public Iterable<Request> showRequests(User user);
-    public Iterable<Request> showAllRequests();
-    public Friendship findFriendshipById(Tuple<Long,Long> id);
+    void sendMessage(User source, List<String> destinationUsernames, String message, LocalDateTime date, Long repliedMessageId);
+    Iterable<Message> getAllMesagesOfUser(String username);
+    Iterable<Message> getConversation(String username1, String username2);
+    void addRequest(Request request);
+    void answerRequest(Request request, String answer);
+    Iterable<Request> showRequests(User user);
+    Iterable<Request> showAllRequests();
+    Friendship findFriendshipById(Tuple<Long,Long> id);
 }

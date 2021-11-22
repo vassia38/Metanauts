@@ -25,7 +25,7 @@ public class FriendshipDbRepository implements Repository<Tuple<Long,Long>,Frien
     @Override
     public Friendship findOneById(Tuple<Long, Long> id) {
         if (id==null)
-            throw new IllegalArgumentException("entity must be not null");
+            throw new IllegalArgumentException("id must be not null");
         String sqlSelect = "select * from friendships where id1=? and id2=?";
         try(Connection connection = DriverManager.getConnection(url,username,password);
             PreparedStatement psSelect = connection.prepareStatement(sqlSelect)){
@@ -63,12 +63,12 @@ public class FriendshipDbRepository implements Repository<Tuple<Long,Long>,Frien
 
     @Override
     public Friendship save(Friendship entity) {
+        this.validator.validate(entity);
         if (entity==null)
             throw new IllegalArgumentException("entity must be not null");
         if(entity.equals(this.findOneById(entity.getId()))){
             return entity;
         }
-        this.validator.validate(entity);
         String sqlInsert = "insert into friendships values(?,?,?)";
         try(Connection connection = DriverManager.getConnection(url,username,password);
              PreparedStatement psInsert = connection.prepareStatement(sqlInsert)){
@@ -84,6 +84,8 @@ public class FriendshipDbRepository implements Repository<Tuple<Long,Long>,Frien
 
     @Override
     public Friendship delete(Tuple<Long, Long> id) {
+        if (id==null)
+            throw new IllegalArgumentException("id must be not null");
         Friendship found = this.findOneById(id);
         if(found == null)
             return null;
@@ -117,6 +119,7 @@ public class FriendshipDbRepository implements Repository<Tuple<Long,Long>,Frien
 
     @Override
     public Friendship update(Friendship entity) {
+        this.validator.validate(entity);
         Friendship oldState = this.findOneById(entity.getId());
         if(oldState == null)
             return null;

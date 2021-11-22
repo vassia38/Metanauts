@@ -2,11 +2,14 @@ package com.main;
 
 import com.main.controller.Controller;
 import com.main.controller.ControllerClass;
+import com.main.model.validators.MessageValidator;
 import com.main.repository.RepositoryException;
 import com.main.repository.db.FriendshipDbRepository;
-import com.main.repository.db.RequestDbRepository;
+import com.main.repository.db.MessageDbRepository;
 import com.main.repository.db.UserDbRepository;
 import com.main.service.FriendshipService;
+import com.main.service.MessageService;
+import com.main.repository.db.RequestDbRepository;
 import com.main.service.RequestService;
 import com.main.service.UserService;
 import com.main.model.validators.FriendshipValidator;
@@ -22,25 +25,27 @@ public class Main {
         String url = "jdbc:postgresql://localhost:5432/socialnetwork";
         String username = "postgres";
         String password = "postgres";
+
         UserValidator userValidator = new UserValidator();
+        UserDbRepository userRepo = new UserDbRepository(url, username,password, userValidator);
 
         FriendshipValidator friendshipValidator = new FriendshipValidator();
-        UserDbRepository userRepo = new UserDbRepository(
-                url, username,password, userValidator);
-        FriendshipDbRepository friendshipRepo =
-                new FriendshipDbRepository(url, username, password, friendshipValidator);
+        FriendshipDbRepository friendshipRepo = new FriendshipDbRepository(url, username, password, friendshipValidator);
+
+        MessageValidator messageValidator = new MessageValidator();
+        MessageDbRepository messageRepo = new MessageDbRepository(url,username,password, messageValidator);
+
         RequestDbRepository requestRepo =
                 new RequestDbRepository(url, username, password);
-        UserService userService =
-                new UserService(userRepo);
-        FriendshipService friendshipService =
-                new FriendshipService(friendshipRepo);
-        RequestService requestService =
-                new RequestService(requestRepo);
-        Controller controller =
-                new ControllerClass(userService,friendshipService,requestService);
-        Scanner keyboard = new Scanner(System.in);
 
+        UserService userService = new UserService(userRepo);
+        FriendshipService friendshipService = new FriendshipService(friendshipRepo);
+        MessageService messageService = new MessageService(messageRepo);
+        RequestService requestService = new RequestService(requestRepo);
+        Controller controller = new ControllerClass(userService,friendshipService,messageService, requestService);
+
+
+        Scanner keyboard = new Scanner(System.in);
         while(true){
             System.out.println("Available actions:");
             System.out.println("1. login");
