@@ -73,7 +73,6 @@ public class userUI extends Thread{
         String messageText = keyboard.nextLine();
         controller.sendMessage(currentUser,usernames,messageText, LocalDateTime.now(), repliedId);
     }
-
     public void findConversation(){
         System.out.println("Username of other participant:");
         String username = keyboard.nextLine();
@@ -90,8 +89,9 @@ public class userUI extends Thread{
         System.out.println("Are you sure (Y/N) ?");
         String confirm = keyboard.nextLine();
         if(Objects.equals(confirm, "Y") || Objects.equals(confirm, "y")){
-            controller.deleteUser(this.currentUser);
-            this.currentUser = null;
+            User deleted = controller.deleteUser(this.currentUser);
+            if(deleted == this.currentUser)
+                this.currentUser = null;
         }
     }
     public void updateUser(){
