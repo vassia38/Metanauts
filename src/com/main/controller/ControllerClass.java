@@ -1,11 +1,11 @@
 package com.main.controller;
 
 import com.main.algo.Graph;
-import com.main.model.Friendship;
-import com.main.model.FriendshipDTO;
-import com.main.model.User;
+import com.main.model.*;
 import com.main.repository.RepositoryException;
 import com.main.service.FriendshipService;
+import com.main.service.RequestService;
+import com.main.service.ServiceException;
 import com.main.service.UserService;
 
 import java.time.Month;
@@ -18,11 +18,13 @@ import java.util.stream.Stream;
 public class ControllerClass implements Controller{
     public final UserService userService;
     public final  FriendshipService friendshipService;
+    public final RequestService requestService;
     Graph graph;
 
-    public ControllerClass(UserService userService, FriendshipService friendshipService){
+    public ControllerClass(UserService userService, FriendshipService friendshipService, RequestService requestService){
         this.userService = userService;
         this.friendshipService = friendshipService;
+        this.requestService = requestService;
     }
 
     /**
@@ -245,5 +247,64 @@ public class ControllerClass implements Controller{
         return friendshipList.stream().filter(filtered).map(x ->
                 new FriendshipDTO(findUserById(x.getId().getLeft()).getLastName(),
                         findUserById(x.getId().getLeft()).getFirstName(), x.getDate()));
+    }
+
+    public void addRequest(Request request) {
+        Request found = requestService.findOneById(request.getId());
+        if (found != null) {
+            throw new RepositoryException("Friendship request already sent!");
+        }
+        requestService.add(request);
+    }
+
+    private void validateAnswer(String answer) {
+        if(!answer.equals("approve") && !answer.equals("reject")) {
+            throw new RepositoryException("Invalid answer!");
+        }
+    }
+
+    public void answerRequest(Request request, String answer) {
+        try {
+            validateAnswer(answer);
+        } catch (ServiceException ex) {
+            throw ex;
+        }
+
+        Request found = requestService.findOneById(request.getId());
+        if(found == null) {
+            throw new RepositoryException("Request does not exist!");
+        }
+        if(found.getStatus().equals("approved")) {
+            throw new RepositoryException("Request already approved!");
+        }
+        if(found.getStatus().equals("rejected")) {
+            throw new RepositoryException("Request already rejected!");
+        }
+        Request newRequest = new Request(found.getId().getLeft(), found.getId().getRight(), answer);
+        requestService.update(newRequest);
+
+        if(answer.equals("approve")) {
+            Friendship friendship = new Friendship(request.getId().getLeft(), request.getId().getRight());
+            addFriendship(friendship);
+        }
+    }
+
+    public Iterable<Request> showRequests(User user) {
+        Iterable<Request> requests = requestService.getAllEntities();
+        ArrayList<Request> requestsToUser = new ArrayList<Request>();
+        for(Request request : requests) {
+            if(request.getId().getRight() == user.getId() && request.getStatus().equals("pending")) {
+                requestsToUser.add(request);
+            }
+        }
+        return requestsToUser;
+    }
+
+    public Iterable<Request> showAllRequests() {
+        return requestService.getAllEntities();
+    }
+
+    public Friendship findFriendshipById(Tuple<Long,Long> id) {
+        return friendshipService.findFriendshipById(id);
     }
 }

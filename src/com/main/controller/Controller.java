@@ -1,8 +1,6 @@
 package com.main.controller;
 
-import com.main.model.Friendship;
-import com.main.model.FriendshipDTO;
-import com.main.model.User;
+import com.main.model.*;
 
 import java.time.Month;
 import java.util.ArrayList;
@@ -26,5 +24,9 @@ public interface Controller {
     Stream<FriendshipDTO> getLeftFriends(User user, List<Friendship> friendshipList);
     Stream<FriendshipDTO> getRightFriendsMonth(User user, Month month, List<Friendship> friendshipList);
     Stream<FriendshipDTO> getLeftFriendsMonth(User user, Month month, List<Friendship> friendshipList);
-
+    public void addRequest(Request request);
+    public void answerRequest(Request request, String answer);
+    public Iterable<Request> showRequests(User user);
+    public Iterable<Request> showAllRequests();
+    public Friendship findFriendshipById(Tuple<Long,Long> id);
 }

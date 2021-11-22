@@ -4,8 +4,10 @@ import com.main.controller.Controller;
 import com.main.controller.ControllerClass;
 import com.main.repository.RepositoryException;
 import com.main.repository.db.FriendshipDbRepository;
+import com.main.repository.db.RequestDbRepository;
 import com.main.repository.db.UserDbRepository;
 import com.main.service.FriendshipService;
+import com.main.service.RequestService;
 import com.main.service.UserService;
 import com.main.model.validators.PrietenieValidator;
 import com.main.model.validators.UtilizatorValidator;
@@ -27,12 +29,16 @@ public class Main {
                 url, username,password, userValidator);
         FriendshipDbRepository friendshipRepo =
                 new FriendshipDbRepository(url, username, password, friendshipValidator);
+        RequestDbRepository requestRepo =
+                new RequestDbRepository(url, username, password);
         UserService userService =
                 new UserService(userRepo);
         FriendshipService friendshipService =
                 new FriendshipService(friendshipRepo);
+        RequestService requestService =
+                new RequestService(requestRepo);
         Controller controller =
-                new ControllerClass(userService,friendshipService);
+                new ControllerClass(userService,friendshipService,requestService);
         Scanner keyboard = new Scanner(System.in);
 
         while(true){

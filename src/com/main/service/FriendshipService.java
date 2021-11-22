@@ -25,4 +25,6 @@ public class FriendshipService {
     public Iterable<Friendship> getAllEntities(){
         return friendshipRepository.findAll();
     }
+
+    public Friendship findFriendshipById(Tuple<Long, Long> id) { return friendshipRepository.findOneById(id); }
 }
