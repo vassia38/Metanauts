@@ -24,7 +24,7 @@ tasks.withType(JavaCompile) {
 
 application {
     mainModule = 'com.main'
-    mainClass = 'com.main.HelloApplication'
+    mainClass = 'com.main.Main'
 }
 
 javafx {
@@ -33,6 +33,7 @@ javafx {
 }
 
 dependencies {
+    implementation('org.postgresql:postgresql:42.3.1')
     implementation('org.controlsfx:controlsfx:11.1.0')
     implementation('com.dlsc.formsfx:formsfx-core:11.3.2') {
         exclude(group: 'org.openjfx')
