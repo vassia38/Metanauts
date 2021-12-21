@@ -17,14 +17,18 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Objects;
 
 public class Main extends Application {
 
     @Override
-    public void start(Stage stage) throws IOException {
+    public void start(Stage primaryStage) throws IOException {
         String url = "jdbc:postgresql://localhost:5432/socialnetwork";
         String username = "postgres";
         String password = "postgres";
@@ -55,9 +59,14 @@ public class Main extends Application {
         mainController.afterLoad();
 
         Scene scene = new Scene(root, 695, 427);
-        stage.setTitle("Login menu");
-        stage.setScene(scene);
-        stage.show();
+        primaryStage.setTitle("Metanauts - login");
+        primaryStage.setScene(scene);
+        try{
+            primaryStage.getIcons().add(new Image(Objects.requireNonNull(Main.class.getResourceAsStream("logo.png"))));
+        } catch(NullPointerException e){
+            System.out.println("icon could not load!");
+        }
+        primaryStage.show();
     }
 
     public static void main(String[] args) {

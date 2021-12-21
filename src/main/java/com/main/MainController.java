@@ -2,18 +2,21 @@ package com.main;
 
 import com.main.controller.Controller;
 import com.main.model.User;
+import com.main.repository.RepositoryException;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainController {
     private Controller serviceController;
     ObservableList<User> users = FXCollections.observableArrayList();
+    User currentUser = null;
 
     @FXML
     TableColumn<User, String> username;
@@ -30,6 +33,7 @@ public class MainController {
 
     @FXML
     Button login_button;
+
 
     @FXML
     public void initialize() {
@@ -48,9 +52,6 @@ public class MainController {
     public void setServiceController(Controller serviceController) {
         this.serviceController = serviceController;
     }
-    public Controller getServiceController() {
-        return this.serviceController;
-    }
 
     private List<User> getUsersList() {
         Iterable<User> users = serviceController.getAllUsers();
@@ -64,23 +65,19 @@ public class MainController {
 
     @FXML
     protected void onLoginButtonClick(ActionEvent event) {
-        String username;
-        try {
-            username = loginTextField.getText();
-        }catch(NullPointerException e){
+        String username = loginTextField.getText();
+        if(username.equals("")){
             return;
         }
-        User user = serviceController.findUserByUsername(username);
-        if(user == null){
+        try {
+            User user = serviceController.findUserByUsername(username);
+            currentUser = user;
+            System.out.println(user);
+        }catch(RepositoryException e) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Error!");
-            alert.setHeaderText("This user does not exist! :<");
-            alert.setContentText("Please enter a different username!");
-
+            alert.setHeaderText("This user doesn't exist!\n");
             alert.showAndWait();
-        }
-        else {
-
         }
     }
 }
