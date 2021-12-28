@@ -6,7 +6,6 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -26,6 +25,22 @@ public class MainController {
     @FXML
     ComboBox<String> comboBoxSearch;
     @FXML
+    Button searchButton;
+
+    @FXML
+    Button messageButton;
+
+    /***
+     * TODO functionalitatea F1 pt butoanele astea 2
+     */
+    @FXML
+    Button addFriendButton;
+    @FXML
+    Button removeFriendButton;
+    @FXML
+    Label profileTitle;
+
+    @FXML
     TableColumn<User, String> friendUser;
     @FXML
     TableColumn<User, String> first_name;
@@ -33,14 +48,27 @@ public class MainController {
     TableColumn<User, String> last_name;
     @FXML
     TableView<User> tableViewFriends;
-    @FXML
-    Button searchButton;
+
 
     @FXML
     public void initialize() {
-        friendUser.setCellValueFactory(new PropertyValueFactory<User, String>("username"));
-        first_name.setCellValueFactory(new PropertyValueFactory<User, String>("firstName"));
-        last_name.setCellValueFactory(new PropertyValueFactory<User, String>("lastName"));
+        tableViewFriends.setOnMouseClicked(click -> {
+            if (click.getClickCount() == 2) {
+                User user = tableViewFriends.getSelectionModel().getSelectedItem();
+                System.out.println("Double-clicked on " + user);
+                this.showProfile(user);
+            }
+        });
+        this.addFriendButton.setVisible(false);
+        this.removeFriendButton.setVisible(false);
+        this.messageButton.setVisible(false);
+        this.addFriendButton.managedProperty().bind(this.addFriendButton.visibleProperty());
+        this.removeFriendButton.managedProperty().bind(this.removeFriendButton.visibleProperty());
+        this.messageButton.managedProperty().bind(this.removeFriendButton.visibleProperty());
+
+        friendUser.setCellValueFactory(new PropertyValueFactory<>("username"));
+        first_name.setCellValueFactory(new PropertyValueFactory<>("firstName"));
+        last_name.setCellValueFactory(new PropertyValueFactory<>("lastName"));
         tableViewFriends.setItems(friends);
 
         comboBoxSearch.getEditor().textProperty().addListener((obs, oldValue, newValue) -> {
@@ -51,35 +79,62 @@ public class MainController {
             // here: https://bugs.openjdk.java.net/browse/JDK-8081700.
             Platform.runLater(() -> {
                 if (selected == null || !selected.equals(editor.getText())) {
-                    filteredItems.setPredicate(item -> {
-                        if (item.toUpperCase().startsWith(newValue.toUpperCase())) {
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    });
+                    filteredItems.setPredicate(item -> item.toUpperCase().startsWith(newValue.toUpperCase()));
                 }
             });
         });
-
         comboBoxSearch.setItems(filteredItems);
     }
 
+    /***
+     * load profile page of a certain user
+     * @param user User
+     */
+    private void showProfile(User user) {
+        this.profileTitle.textProperty().set(user.getFirstName() + " " +user.getLastName() +
+                "\n" + user.getUsername());
+        if(user != currentUser) {
+            if(this.friends.contains(user)){
+                this.messageButton.setVisible(true);
+                this.removeFriendButton.setVisible(true);
+            }
+            else {
+                this.addFriendButton.setVisible(true);
+            }
+        }
+        else {
+            this.messageButton.setVisible(false);
+            this.removeFriendButton.setVisible(false);
+            this.addFriendButton.setVisible(false);
+        }
+    }
+
+
+    /***
+     * custom initializer to be explicitly called after the fxml file has been loaded
+     * @param serviceController Controller
+     * @param user current user
+     */
     public void afterLoad(Controller serviceController, User user) {
         this.setServiceController(serviceController);
         this.setCurrentUser(user);
+        this.showProfile(user);
 
-        this.friends.removeAll();
+        this.friends.clear();
         List<User> friends = serviceController.getAllFriends(currentUser);
         this.friends.addAll(friends);
 
-        this.usernames.removeAll();
+        this.usernames.clear();
         Iterable<User> users = this.serviceController.getAllUsers();
         this.setUsernames(users);
     }
 
-    public void searchUser(ActionEvent actionEvent) {
 
+    /***
+     * TODO here should be handled the searchButton; search user by username and call showProfile()
+     */
+    public void searchUser() {
+        System.out.println("Searching for " + this.comboBoxSearch.getEditor().getText());
     }
 
     public void setServiceController(Controller serviceController) {

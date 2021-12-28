@@ -33,7 +33,11 @@
         </VBox>
         <VBox styleClass="profile-page" prefWidth="700">
             <Label fx:id="profileTitle">My profile page</Label>
-            <Text fx:id="profileContent">Lorem ipsum dolor set amet</Text>
+            <HBox alignment="CENTER_RIGHT" spacing="50">
+                <Button fx:id="messageButton">Message</Button>
+                <Button fx:id="addFriendButton">Add friend</Button>
+                <Button fx:id="removeFriendButton">Remove friend</Button>
+            </HBox>
         </VBox>
     </HBox>
 </VBox>
