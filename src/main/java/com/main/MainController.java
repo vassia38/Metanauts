@@ -5,14 +5,15 @@ import com.main.model.Request;
 import com.main.model.User;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.util.Callback;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 
 import java.util.List;
 
@@ -26,6 +27,9 @@ public class MainController {
     ObservableList<Request> requests = FXCollections.observableArrayList();
     ObservableList<User> friends = FXCollections.observableArrayList();
     FilteredList<String> filteredItems = new FilteredList<>(usernames);
+
+    @FXML
+    ImageView homeLogo;
 
     @FXML
     ComboBox<String> comboBoxSearch;
@@ -65,6 +69,11 @@ public class MainController {
 
     @FXML
     public void initialize() {
+        homeLogo.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
+            showProfile(currentUser);
+            event.consume();
+        });
+
         tableViewFriends.setOnMouseClicked(click -> {
             if (click.getClickCount() == 2) {
                 User user = tableViewFriends.getSelectionModel().getSelectedItem();
@@ -78,6 +87,7 @@ public class MainController {
         this.addFriendButton.managedProperty().bind(this.addFriendButton.visibleProperty());
         this.removeFriendButton.managedProperty().bind(this.removeFriendButton.visibleProperty());
         this.messageButton.managedProperty().bind(this.removeFriendButton.visibleProperty());
+        this.tableViewRequests.managedProperty().bind(this.tableViewRequests.visibleProperty());
 
         friendUser.setCellValueFactory(new PropertyValueFactory<>("username"));
         first_name.setCellValueFactory(new PropertyValueFactory<>("firstName"));
@@ -97,6 +107,7 @@ public class MainController {
             });
         });
         comboBoxSearch.setItems(filteredItems);
+
         fromUser.setCellValueFactory(param -> {
             User user = this.serviceController.findUserById(param.getValue().getId().getLeft());
             return new ReadOnlyObjectWrapper<>(user.getUsername());
@@ -104,9 +115,10 @@ public class MainController {
         acceptFriendship.setCellValueFactory(
             param -> new ReadOnlyObjectWrapper<>(param.getValue())
         );
+
         acceptFriendship.setCellFactory(
             param -> new TableCell<>() {
-                private final Button addButton = new Button("Reject");
+                private final Button addButton = new Button("Accept");
 
                 @Override
                 protected void updateItem(Request req, boolean empty) {
@@ -123,6 +135,7 @@ public class MainController {
                     );
                 }
             });
+
         rejectFriendship.setCellValueFactory(
             param -> new ReadOnlyObjectWrapper<>(param.getValue())
         );
@@ -145,6 +158,7 @@ public class MainController {
                     );
                 }
             });
+        tableViewRequests.setItems(this.requests);
     }
 
     /***
@@ -155,6 +169,7 @@ public class MainController {
         this.profileTitle.textProperty().set(user.getFirstName() + " " +user.getLastName() +
                 "\n" + user.getUsername());
         if(user != currentUser) {
+            this.tableViewRequests.setVisible(false);
             if(this.friends.contains(user)){
                 this.messageButton.setVisible(true);
                 this.removeFriendButton.setVisible(true);
@@ -162,6 +177,13 @@ public class MainController {
             else {
                 this.addFriendButton.setVisible(true);
             }
+        }
+        else {
+            this.messageButton.setVisible(false);
+            this.removeFriendButton.setVisible(false);
+            this.addFriendButton.setVisible(false);
+            this.tableViewRequests.setVisible(true);
+
         }
     }
 
@@ -177,7 +199,7 @@ public class MainController {
         this.showProfile(user);
 
         this.friends.clear();
-        List<User> friends = serviceController.getAllFriends(currentUser);
+        List<User> friends = this.serviceController.getAllFriends(currentUser);
         this.friends.addAll(friends);
 
         this.usernames.clear();
@@ -185,7 +207,8 @@ public class MainController {
         this.setUsernames(users);
 
         this.requests.clear();
-
+        Iterable<Request> requests = this.serviceController.showRequests(this.currentUser);
+        this.setRequests(requests);
     }
 
 
@@ -200,13 +223,16 @@ public class MainController {
         this.serviceController = serviceController;
     }
 
-    public void setCurrentUser(User user){
+    public void setCurrentUser(User user) {
         this.currentUser = user;
     }
 
-    public void setUsernames(Iterable<User> users){
+    public void setUsernames(Iterable<User> users) {
         users.forEach( u -> this.usernames.add(u.getUsername()));
     }
 
+    public void setRequests(Iterable<Request> requests) {
+        requests.forEach( req -> this.requests.add(req));
+    }
 
 }

@@ -12,7 +12,7 @@
         <URL value="@style.css"/>
     </stylesheets>
     <HBox>
-        <ImageView fitWidth="30" fitHeight="30">
+        <ImageView fx:id="homeLogo" fitWidth="30" fitHeight="30">
             <Image url="@logo.png"/>
         </ImageView>
         <ComboBox fx:id="comboBoxSearch" editable="true" promptText="Search by username" minHeight="30" prefWidth="500" />
@@ -37,7 +37,7 @@
                 <Button fx:id="addFriendButton">Add friend</Button>
                 <Button fx:id="removeFriendButton">Remove friend</Button>
             </HBox>
-            <TableView fx:id="tableViewRequests">
+            <TableView fx:id="tableViewRequests" prefHeight="200">
                 <columns>
                     <TableColumn fx:id="fromUser" text="From"/>
                     <TableColumn fx:id="acceptFriendship"/>
