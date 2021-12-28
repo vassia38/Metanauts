@@ -50,14 +50,12 @@ public class LoginController {
         tableViewUsers.setItems(users);
         TextField locvar = loginTextField;
         tableViewUsers.getSelectionModel().selectedItemProperty().addListener(
-                new ChangeListener<User>() {
-                    @Override
-                    public void changed(ObservableValue<? extends User> observable, User oldValue, User newValue) {
-                        System.out.println("User " + newValue + " was selected");
-                        locvar.textProperty().set(newValue.getUsername());
-                    }
+            (observable, oldValue, newValue) -> {
+                if(newValue != null) {
+                    System.out.println("User " + newValue + " was selected");
+                    locvar.textProperty().set(newValue.getUsername());
                 }
-        );
+            });
     }
 
     public void afterLoad() {
