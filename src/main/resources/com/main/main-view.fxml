@@ -16,8 +16,8 @@
         <ImageView fitWidth="30" fitHeight="30">
             <Image url="@logo.png"/>
         </ImageView>
-        <ComboBox fx:id="comboBoxSearch" minHeight="30" prefWidth="500"/>
-        <Button minHeight="30">Search</Button>
+        <ComboBox fx:id="comboBoxSearch" editable="true" promptText="Search by username" minHeight="30" prefWidth="500" />
+        <Button fx:id="searchButton" minHeight="30" onAction="#searchUser">Search</Button>
     </HBox>
 
     <HBox>
@@ -32,8 +32,8 @@
             </TableView>
         </VBox>
         <VBox styleClass="profile-page" prefWidth="700">
-            <Label>My profile page</Label>
-            <Text>Lorem ipsum dolor set amet</Text>
+            <Label fx:id="profileTitle">My profile page</Label>
+            <Text fx:id="profileContent">Lorem ipsum dolor set amet</Text>
         </VBox>
     </HBox>
 </VBox>

@@ -96,10 +96,7 @@ public class LoginController {
             current.setTitle("Metanauts - " + user.getUsername());
             current.setScene(scene);
             MainController ctrl = fxmlLoader.getController();
-            ctrl.setCurrentUser(user);
-            ctrl.setUsers(users);
-            ctrl.setServiceController(this.serviceController);
-            ctrl.afterLoad();
+            ctrl.afterLoad(this.serviceController, user);
         } catch(RepositoryException e) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Error!");
