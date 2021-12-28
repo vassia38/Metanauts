@@ -6,7 +6,6 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -30,6 +29,10 @@ public class MainController {
 
     @FXML
     Button messageButton;
+
+    /***
+     * TODO functionalitatea F1 pt butoanele astea 2
+     */
     @FXML
     Button addFriendButton;
     @FXML
@@ -80,10 +83,13 @@ public class MainController {
                 }
             });
         });
-
         comboBoxSearch.setItems(filteredItems);
     }
 
+    /***
+     * load profile page of a certain user
+     * @param user User
+     */
     private void showProfile(User user) {
         this.profileTitle.textProperty().set(user.getFirstName() + " " +user.getLastName() +
                 "\n" + user.getUsername());
@@ -98,6 +104,12 @@ public class MainController {
         }
     }
 
+
+    /***
+     * custom initializer to be explicitly called after the fxml file has been loaded
+     * @param serviceController Controller
+     * @param user current user
+     */
     public void afterLoad(Controller serviceController, User user) {
         this.setServiceController(serviceController);
         this.setCurrentUser(user);
@@ -112,7 +124,11 @@ public class MainController {
         this.setUsernames(users);
     }
 
-    public void searchUser(ActionEvent actionEvent) {
+
+    /***
+     * TODO here should be handled the searchButton; search user by username and call showProfile()
+     */
+    public void searchUser() {
         System.out.println("Searching for " + this.comboBoxSearch.getEditor().getText());
     }
 
