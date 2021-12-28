@@ -25,6 +25,8 @@ public interface Repository<ID, E extends Entity<ID>> {
      */
     Iterable<E> findAll();
 
+    Iterable<E> findAll(ID id);
+
     /**
      * @param entity entity must be not null
      * @return null- if the given entity is saved

@@ -89,6 +89,11 @@ public class UserDbRepository implements Repository<Long, User> {
     }
 
     @Override
+    public Iterable<User> findAll(Long id) {
+        return null;
+    }
+
+    @Override
     public User save(User entity) {
         this.validator.validate(entity);
         String sql = "insert into users (username, first_name, last_name ) values (?, ?, ?)";

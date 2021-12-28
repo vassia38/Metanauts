@@ -194,6 +194,22 @@ public class ControllerClass implements Controller{
         return friendshipService.getAllEntities();
     }
 
+    @Override
+    public List<User> getAllFriends(User user) {
+        List<User> friends = new ArrayList<>();
+        Tuple<Long,Long> id = new Tuple<>(user.getId(),0L);
+        Iterable<Friendship> friendships = friendshipService.getFriendships(id);
+        for(Friendship fr : friendships) {
+            Long friendId = fr.getId().getLeft().equals(user.getId())
+                            ? fr.getId().getRight()
+                            : fr.getId().getLeft();
+            User friend = userService.findOneById(friendId);
+            if(friend != null)
+                friends.add(friend);
+        }
+        return friends;
+    }
+
     /**
      * draw graph of all existing friendships
      */

@@ -20,6 +20,7 @@ public interface Controller {
     Friendship deleteFriendship(Friendship entity);
     Friendship updateFriendship(Friendship entity);
     Iterable<Friendship> getAllFriendships();
+    List<User> getAllFriends(User user);
     ArrayList<ArrayList<Long>> getAllCommunities();
     int getBiggestCommunitySize();
     Stream<FriendshipDTO> getRightFriends(User user, List<Friendship> friendshipList);

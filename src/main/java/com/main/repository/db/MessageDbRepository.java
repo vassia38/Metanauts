@@ -245,4 +245,9 @@ public class MessageDbRepository implements Repository<Long, Message> {
         return null;
     }
 
+    @Override
+    public Iterable<Message> findAll(Long source) {
+        return findAllMessagesBySource(source);
+    }
+
 }

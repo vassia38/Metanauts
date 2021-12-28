@@ -62,6 +62,30 @@ public class FriendshipDbRepository implements Repository<Tuple<Long,Long>,Frien
     }
 
     @Override
+    public Iterable<Friendship> findAll(Tuple<Long, Long> id) {
+        if (id==null)
+            throw new IllegalArgumentException("id must be not null");
+        Set<Friendship> friendships = new HashSet<>();
+        String sqlSelect = "SELECT * from friendships where id1=? or id2=?";
+        try (Connection connection = DriverManager.getConnection(url, username, password);
+             PreparedStatement psSelect = connection.prepareStatement(sqlSelect)) {
+            psSelect.setLong(1,id.getLeft());
+            psSelect.setLong(2,id.getLeft());
+            ResultSet resultSet = psSelect.executeQuery();
+            while (resultSet.next()) {
+                Long id1 = resultSet.getLong("id1");
+                Long id2 = resultSet.getLong("id2");
+                LocalDateTime date = LocalDateTime.parse(resultSet.getString("date_friendship"));
+                Friendship friendship = new Friendship(id1, id2, date);
+                friendships.add(friendship);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return friendships;
+    }
+
+    @Override
     public Friendship save(Friendship entity) {
         this.validator.validate(entity);
         if (entity==null)

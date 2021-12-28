@@ -1,27 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
 
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 <?import java.net.URL?>
-<VBox id="body" alignment="CENTER" prefHeight="427.0" prefWidth="695.0" spacing="20.0"
+
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.text.Text?>
+<VBox id="body" alignment="TOP_CENTER" prefHeight="427.0" prefWidth="695.0" spacing="20.0"
       xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.main.MainController">
     <stylesheets>
         <URL value="@style.css"/>
     </stylesheets>
-    <TableView fx:id="tableViewUsers" styleClass="table" prefHeight="200.0" prefWidth="200.0">
-        <columns>
-            <TableColumn fx:id="username" prefWidth="219.19997787475586" text="Username" />
-            <TableColumn fx:id="first_name" prefWidth="221.6000518798828" text="First Name" />
-            <TableColumn fx:id="last_name" prefWidth="216.7999267578125" text="Last Name" />
-        </columns>
-    </TableView>
-    <HBox id="hbox" alignment="CENTER" cacheShape="false" prefHeight="100.0" prefWidth="200.0">
-        <TextField fx:id="loginTextField" alignment="CENTER" prefHeight="38.0" prefWidth="174.0" promptText="Enter your username" />
-        <Button fx:id="login_button" onAction="#onLoginButtonClick" alignment="CENTER" contentDisplay="CENTER" prefHeight="31.0" prefWidth="77.0" text="Login" textAlignment="CENTER">
-        </Button>
+    <HBox>
+        <ImageView fitWidth="30" fitHeight="30">
+            <Image url="@logo.png"/>
+        </ImageView>
+        <ComboBox fx:id="comboBoxSearch" minHeight="30" prefWidth="500"/>
+        <Button minHeight="30">Search</Button>
+    </HBox>
+
+    <HBox>
+        <VBox>
+            <TextField promptText="Search friend list"/>
+            <TableView fx:id="tableViewFriends" styleClass="table">
+                <columns>
+                    <TableColumn fx:id="friendUser" minWidth="100" text="Username" />
+                    <TableColumn fx:id="first_name" minWidth="100" text="First Name" />
+                    <TableColumn fx:id="last_name" minWidth="100" text="Last Name" />
+                </columns>
+            </TableView>
+        </VBox>
+        <VBox styleClass="profile-page" prefWidth="700">
+            <Label>My profile page</Label>
+            <Text>Lorem ipsum dolor set amet</Text>
+        </VBox>
     </HBox>
 </VBox>

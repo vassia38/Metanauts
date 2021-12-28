@@ -17,12 +17,10 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Objects;
 
 public class Main extends Application {
@@ -52,9 +50,9 @@ public class Main extends Application {
         Controller controller = new ControllerClass(userService,friendshipService,messageService, requestService);
 
 
-        FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("main-view.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("login-view.fxml"));
         Parent root = fxmlLoader.load();
-        MainController mainController = fxmlLoader.getController();
+        LoginController mainController = fxmlLoader.getController();
         mainController.setServiceController(controller);
         mainController.afterLoad();
 

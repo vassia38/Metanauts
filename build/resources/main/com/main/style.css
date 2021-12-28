@@ -65,11 +65,15 @@
 }
 
 
-Button {
+.button {
     -fx-border-width: 0;
-    -fx-background-color: #e1e1e1;
+    -fx-background-color: #beb9ff;
 }
 
 *:selected{
     -fx-border-width: 0;
+}
+
+.profile-page {
+    -fx-background-color: #f5f4ff;
 }
