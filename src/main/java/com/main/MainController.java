@@ -1,14 +1,18 @@
 package com.main;
 
 import com.main.controller.Controller;
+import com.main.model.Request;
 import com.main.model.User;
 import javafx.application.Platform;
+import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.util.Callback;
 
 import java.util.List;
 
@@ -19,6 +23,7 @@ public class MainController {
     private User currentUser;
     private Controller serviceController;
     ObservableList<String> usernames = FXCollections.observableArrayList();
+    ObservableList<Request> requests = FXCollections.observableArrayList();
     ObservableList<User> friends = FXCollections.observableArrayList();
     FilteredList<String> filteredItems = new FilteredList<>(usernames);
 
@@ -39,6 +44,14 @@ public class MainController {
     Button removeFriendButton;
     @FXML
     Label profileTitle;
+    @FXML
+    TableView<Request> tableViewRequests;
+    @FXML
+    TableColumn<Request, String> fromUser;
+    @FXML
+    TableColumn<Request, Request> acceptFriendship;
+    @FXML
+    TableColumn<Request, Request> rejectFriendship;
 
     @FXML
     TableColumn<User, String> friendUser;
@@ -84,6 +97,54 @@ public class MainController {
             });
         });
         comboBoxSearch.setItems(filteredItems);
+        fromUser.setCellValueFactory(param -> {
+            User user = this.serviceController.findUserById(param.getValue().getId().getLeft());
+            return new ReadOnlyObjectWrapper<>(user.getUsername());
+        });
+        acceptFriendship.setCellValueFactory(
+            param -> new ReadOnlyObjectWrapper<>(param.getValue())
+        );
+        acceptFriendship.setCellFactory(
+            param -> new TableCell<>() {
+                private final Button addButton = new Button("Reject");
+
+                @Override
+                protected void updateItem(Request req, boolean empty) {
+                    super.updateItem(req, empty);
+
+                    if (req == null) {
+                        setGraphic(null);
+                        return;
+                    }
+
+                    setGraphic(addButton);
+                    addButton.setOnAction(
+                            event -> getTableView().getItems().remove(req)
+                    );
+                }
+            });
+        rejectFriendship.setCellValueFactory(
+            param -> new ReadOnlyObjectWrapper<>(param.getValue())
+        );
+        rejectFriendship.setCellFactory(
+            param -> new TableCell<>() {
+                private final Button deleteButton = new Button("Reject");
+
+                @Override
+                protected void updateItem(Request req, boolean empty) {
+                    super.updateItem(req, empty);
+
+                    if (req == null) {
+                        setGraphic(null);
+                        return;
+                    }
+
+                    setGraphic(deleteButton);
+                    deleteButton.setOnAction(
+                            event -> getTableView().getItems().remove(req)
+                    );
+                }
+            });
     }
 
     /***
@@ -115,13 +176,16 @@ public class MainController {
         this.setCurrentUser(user);
         this.showProfile(user);
 
-        this.friends.removeAll();
+        this.friends.clear();
         List<User> friends = serviceController.getAllFriends(currentUser);
         this.friends.addAll(friends);
 
-        this.usernames.removeAll();
+        this.usernames.clear();
         Iterable<User> users = this.serviceController.getAllUsers();
         this.setUsernames(users);
+
+        this.requests.clear();
+
     }
 
 

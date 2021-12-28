@@ -6,7 +6,6 @@
 
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.image.Image?>
-<?import javafx.scene.text.Text?>
 <VBox id="body" alignment="TOP_CENTER" prefHeight="427.0" prefWidth="695.0" spacing="20.0"
       xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.main.MainController">
     <stylesheets>
@@ -38,6 +37,13 @@
                 <Button fx:id="addFriendButton">Add friend</Button>
                 <Button fx:id="removeFriendButton">Remove friend</Button>
             </HBox>
+            <TableView fx:id="tableViewRequests">
+                <columns>
+                    <TableColumn fx:id="fromUser" text="From"/>
+                    <TableColumn fx:id="acceptFriendship"/>
+                    <TableColumn fx:id="rejectFriendship"/>
+                </columns>
+            </TableView>
         </VBox>
     </HBox>
 </VBox>
