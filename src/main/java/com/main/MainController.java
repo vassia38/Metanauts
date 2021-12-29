@@ -127,6 +127,7 @@ public class MainController {
                     addButton.setOnAction(
                             event -> {
                                 serviceController.answerRequest(req,"approve");
+                                updateFriends();
                                 getTableView().getItems().remove(req);
                             }
                     );
@@ -197,14 +198,26 @@ public class MainController {
         this.setCurrentUser(user);
         this.showProfile(user);
 
+        this.updateFriends();
+
+        this.updateUsernames();
+
+        this.updateRequests();
+    }
+
+    void updateFriends() {
         this.friends.clear();
         List<User> friends = this.serviceController.getAllFriends(currentUser);
         this.friends.addAll(friends);
+    }
 
+    void updateUsernames() {
         this.usernames.clear();
         Iterable<User> users = this.serviceController.getAllUsers();
         this.setUsernames(users);
+    }
 
+    void updateRequests() {
         this.requests.clear();
         Iterable<Request> requests = this.serviceController.showRequests(this.currentUser);
         this.setRequests(requests);
