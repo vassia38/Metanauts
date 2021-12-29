@@ -8,7 +8,6 @@ import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -18,9 +17,6 @@ import javafx.scene.input.MouseEvent;
 import java.util.List;
 
 public class MainController {
-
-
-
     private User currentUser;
     private Controller serviceController;
     ObservableList<String> usernames = FXCollections.observableArrayList();
@@ -112,10 +108,10 @@ public class MainController {
             User user = this.serviceController.findUserById(param.getValue().getId().getLeft());
             return new ReadOnlyObjectWrapper<>(user.getUsername());
         });
+
         acceptFriendship.setCellValueFactory(
             param -> new ReadOnlyObjectWrapper<>(param.getValue())
         );
-
         acceptFriendship.setCellFactory(
             param -> new TableCell<>() {
                 private final Button addButton = new Button("Accept");
@@ -123,15 +119,16 @@ public class MainController {
                 @Override
                 protected void updateItem(Request req, boolean empty) {
                     super.updateItem(req, empty);
-
                     if (req == null) {
                         setGraphic(null);
                         return;
                     }
-
                     setGraphic(addButton);
                     addButton.setOnAction(
-                            event -> getTableView().getItems().remove(req)
+                            event -> {
+                                serviceController.answerRequest(req,"approve");
+                                getTableView().getItems().remove(req);
+                            }
                     );
                 }
             });
@@ -146,18 +143,20 @@ public class MainController {
                 @Override
                 protected void updateItem(Request req, boolean empty) {
                     super.updateItem(req, empty);
-
                     if (req == null) {
                         setGraphic(null);
                         return;
                     }
-
                     setGraphic(deleteButton);
                     deleteButton.setOnAction(
-                            event -> getTableView().getItems().remove(req)
+                            event -> {
+                                serviceController.answerRequest(req,"reject");
+                                getTableView().getItems().remove(req);
+                            }
                     );
                 }
             });
+
         tableViewRequests.setItems(this.requests);
     }
 
