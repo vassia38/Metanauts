@@ -3,6 +3,7 @@ package com.main;
 import com.main.controller.Controller;
 import com.main.model.Request;
 import com.main.model.User;
+import com.main.utils.observer.Observer;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
@@ -16,7 +17,7 @@ import javafx.scene.input.MouseEvent;
 
 import java.util.List;
 
-public class MainController {
+public class MainController implements Observer {
     private User currentUser;
     private Controller serviceController;
     ObservableList<String> usernames = FXCollections.observableArrayList();
@@ -127,7 +128,7 @@ public class MainController {
                     addButton.setOnAction(
                             event -> {
                                 serviceController.answerRequest(req,"approve");
-                                updateFriends();
+                                /*updateFriends();*/
                                 getTableView().getItems().remove(req);
                             }
                     );
@@ -197,6 +198,7 @@ public class MainController {
         this.setServiceController(serviceController);
         this.setCurrentUser(user);
         this.showProfile(user);
+        this.serviceController.addObserver(this);
 
         this.updateFriends();
 
@@ -205,22 +207,35 @@ public class MainController {
         this.updateRequests();
     }
 
-    void updateFriends() {
-        this.friends.clear();
-        List<User> friends = this.serviceController.getAllFriends(currentUser);
-        this.friends.addAll(friends);
-    }
+
 
     void updateUsernames() {
         this.usernames.clear();
         Iterable<User> users = this.serviceController.getAllUsers();
         this.setUsernames(users);
     }
+    @Override
+    public void updateFriends() {
+        this.friends.clear();
+        List<User> friends = this.serviceController.getAllFriends(currentUser);
+        this.friends.addAll(friends);
+    }
 
-    void updateRequests() {
+    @Override
+    public void updateRequests() {
         this.requests.clear();
         Iterable<Request> requests = this.serviceController.showRequests(this.currentUser);
         this.setRequests(requests);
+    }
+
+    @Override
+    public void updateUsers() {
+        this.updateUsernames();
+    }
+
+    @Override
+    public void updateMessages() {
+        // TODO
     }
 
 

@@ -11,6 +11,8 @@ import com.main.service.MessageService;
 import com.main.model.*;
 import com.main.service.RequestService;
 import com.main.service.UserService;
+import com.main.utils.observer.Observer;
+import com.main.utils.observer.UpdateType;
 
 import java.time.LocalDateTime;
 import java.time.Month;
@@ -33,6 +35,22 @@ public class ControllerClass implements Controller{
         this.friendshipService = friendshipService;
         this.messageService = messageService;
         this.requestService = requestService;
+    }
+
+    public UserService getUserService(){
+        return this.userService;
+    }
+
+    public FriendshipService getFriendshipService() {
+        return this.friendshipService;
+    }
+
+    public MessageService getMessageService() {
+        return this.messageService;
+    }
+
+    public RequestService getRequestService() {
+        return this.requestService;
     }
 
     /**
@@ -338,6 +356,7 @@ public class ControllerClass implements Controller{
             throw new RepositoryException("Friendship request already sent!");
         }
         requestService.add(request);
+        this.notifyObservers(UpdateType.REQUESTS);
     }
 
     private void validateAnswer(String answer) {
@@ -362,10 +381,11 @@ public class ControllerClass implements Controller{
         }
         Request newRequest = new Request(found.getId().getLeft(), found.getId().getRight(), answer);
         requestService.update(newRequest);
-
+        this.notifyObservers(UpdateType.REQUESTS);
         if(answer.equals("approve")) {
             Friendship friendship = new Friendship(request.getId().getLeft(), request.getId().getRight());
             addFriendship(friendship);
+            this.notifyObservers(UpdateType.FRIENDS);
         }
     }
 
@@ -389,5 +409,36 @@ public class ControllerClass implements Controller{
     @Override
     public Friendship findFriendshipById(Tuple<Long,Long> id) {
         return friendshipService.findFriendshipById(id);
+    }
+
+
+    private final List<Observer> observers = new ArrayList<>();
+
+    @Override
+    public void notifyObservers(UpdateType type) {
+        for (Observer observer : this.observers) {
+            if(type == UpdateType.USERS){
+                observer.updateUsers();
+            }
+            if(type == UpdateType.FRIENDS){
+                observer.updateFriends();
+            }
+            if(type == UpdateType.REQUESTS){
+                observer.updateRequests();
+            }
+            if(type == UpdateType.MESSAGES){
+                observer.updateMessages();
+            }
+        }
+    }
+
+    @Override
+    public void addObserver(Observer obs) {
+        this.observers.add(obs);
+    }
+
+    @Override
+    public void removeObserver(Observer obs) {
+        this.observers.remove(obs);
     }
 }

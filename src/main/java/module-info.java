@@ -10,4 +10,5 @@ module com.main {
     opens com.main to javafx.fxml, javafx.base, javafx.graphics, javafx.controls;
     opens com.main.model to javafx.base;
     exports com.main.controller;
+    exports com.main.utils.observer;
 }

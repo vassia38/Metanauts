@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LoginController {
+public class LoginController{
     private Controller serviceController;
     ObservableList<User> users = FXCollections.observableArrayList();
 
