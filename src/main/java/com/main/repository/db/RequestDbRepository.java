@@ -1,13 +1,10 @@
 package com.main.repository.db;
 
-import com.main.model.Friendship;
 import com.main.model.Request;
 import com.main.model.Tuple;
-import com.main.model.validators.Validator;
 import com.main.repository.Repository;
 
 import java.sql.*;
-import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -48,6 +45,30 @@ public class RequestDbRepository implements Repository<Tuple<Long,Long>, Request
         try (Connection connection = DriverManager.getConnection(url, username, password);
              PreparedStatement statement = connection.prepareStatement("SELECT * from requests");
              ResultSet resultSet = statement.executeQuery()) {
+            while (resultSet.next()) {
+                Long id1 = resultSet.getLong("id1");
+                Long id2 = resultSet.getLong("id2");
+                String status = resultSet.getString("status");
+                Request request = new Request(id1, id2, status);
+                requests.add(request);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return requests;
+    }
+
+    @Override
+    public Iterable<Request> findAll(Tuple<Long, Long> id) {
+        if(id == null) {
+            throw new IllegalArgumentException("entity must be not null");
+        }
+        Set<Request> requests = new HashSet<>();
+        String sqlSelect = "SELECT * from requests where id2=?";
+        try (Connection connection = DriverManager.getConnection(url, username, password);
+             PreparedStatement psSelect = connection.prepareStatement(sqlSelect)) {
+            psSelect.setLong(1, id.getRight());
+            ResultSet resultSet = psSelect.executeQuery();
             while (resultSet.next()) {
                 Long id1 = resultSet.getLong("id1");
                 Long id2 = resultSet.getLong("id2");

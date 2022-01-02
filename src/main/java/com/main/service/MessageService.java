@@ -2,7 +2,11 @@ package com.main.service;
 
 import com.main.model.Message;
 import com.main.repository.db.MessageDbRepository;
+import com.main.utils.observer.Observable;
+import com.main.utils.observer.Observer;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 public class MessageService {

@@ -2,6 +2,11 @@ package com.main.controller;
 
 
 import com.main.model.*;
+import com.main.service.FriendshipService;
+import com.main.service.MessageService;
+import com.main.service.RequestService;
+import com.main.service.UserService;
+import com.main.utils.observer.Observable;
 
 import java.time.LocalDateTime;
 import java.time.Month;
@@ -9,7 +14,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-public interface Controller {
+public interface Controller extends Observable {
+     UserService getUserService();
+    FriendshipService getFriendshipService();
+    MessageService getMessageService();
+    RequestService getRequestService();
+
     void addUser(User entity);
     User deleteUser(User entity);
     User updateUser(User entity, String firstName, String lastName);
@@ -20,6 +30,7 @@ public interface Controller {
     Friendship deleteFriendship(Friendship entity);
     Friendship updateFriendship(Friendship entity);
     Iterable<Friendship> getAllFriendships();
+    List<User> getAllFriends(User user);
     ArrayList<ArrayList<Long>> getAllCommunities();
     int getBiggestCommunitySize();
     Stream<FriendshipDTO> getRightFriends(User user, List<Friendship> friendshipList);

@@ -26,5 +26,9 @@ public class FriendshipService {
         return friendshipRepository.findAll();
     }
 
+    public Iterable<Friendship> getFriendships(Tuple<Long,Long> id){
+        return friendshipRepository.findAll(id);
+    }
+
     public Friendship findFriendshipById(Tuple<Long, Long> id) { return friendshipRepository.findOneById(id); }
 }
