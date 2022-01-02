@@ -5,8 +5,6 @@ import com.main.model.Request;
 import com.main.model.User;
 import com.main.utils.observer.Observer;
 import com.main.model.Friendship;
-import com.main.model.Request;
-import com.main.model.User;
 import com.main.repository.RepositoryException;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -172,10 +170,9 @@ public class MainController implements Observer {
      * @param user User
      */
     private void showProfile(User user) {
-        this.shownUser = user;
         this.profileTitle.textProperty().set(user.getFirstName() + " " +user.getLastName() +
                 "\n" + user.getUsername());
-        if(user != currentUser) {
+        if(!user.getUsername().equals(currentUser.getUsername())) {
             this.tableViewRequests.setVisible(false);
             if(this.friends.contains(user)) {
                 this.messageButton.setVisible(true);
@@ -198,8 +195,8 @@ public class MainController implements Observer {
             this.removeFriendButton.setVisible(false);
             this.addFriendButton.setVisible(false);
             this.tableViewRequests.setVisible(true);
-
         }
+        this.shownUser = user;
     }
 
 
@@ -284,6 +281,7 @@ public class MainController implements Observer {
         try {
             Request request = new Request(currentUser.getId(), shownUser.getId());
             this.serviceController.addRequest(request);
+            this.showProfile(shownUser);
         } catch (RepositoryException ex) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Error!");
@@ -296,6 +294,7 @@ public class MainController implements Observer {
         try {
             Friendship friendship = new Friendship(currentUser.getId(), shownUser.getId());
             this.serviceController.deleteFriendship(friendship);
+            this.showProfile(shownUser);
         } catch (RepositoryException ex) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Error!");
