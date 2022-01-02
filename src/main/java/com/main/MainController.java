@@ -1,7 +1,10 @@
 package com.main;
 
 import com.main.controller.Controller;
+import com.main.model.Friendship;
+import com.main.model.Request;
 import com.main.model.User;
+import com.main.repository.RepositoryException;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -21,6 +24,7 @@ public class MainController {
     ObservableList<String> usernames = FXCollections.observableArrayList();
     ObservableList<User> friends = FXCollections.observableArrayList();
     FilteredList<String> filteredItems = new FilteredList<>(usernames);
+    private User shownUser;
 
     @FXML
     ComboBox<String> comboBoxSearch;
@@ -91,15 +95,24 @@ public class MainController {
      * @param user User
      */
     private void showProfile(User user) {
+        this.shownUser = user;
         this.profileTitle.textProperty().set(user.getFirstName() + " " +user.getLastName() +
                 "\n" + user.getUsername());
         if(user != currentUser) {
-            if(this.friends.contains(user)){
+            if(this.friends.contains(user)) {
                 this.messageButton.setVisible(true);
+                this.addFriendButton.setVisible(false);
                 this.removeFriendButton.setVisible(true);
             }
+            /*else if() {
+                this.messageButton.setVisible(false);
+                this.addFriendButton.setVisible(false);
+                this.removeFriendButton.setVisible(false);
+            }*/
             else {
+                this.messageButton.setVisible(false);
                 this.addFriendButton.setVisible(true);
+                this.removeFriendButton.setVisible(false);
             }
         }
         else {
@@ -135,6 +148,15 @@ public class MainController {
      */
     public void searchUser() {
         System.out.println("Searching for " + this.comboBoxSearch.getEditor().getText());
+        try {
+            User user = this.serviceController.findUserByUsername(this.comboBoxSearch.getEditor().getText());
+            this.showProfile(user);
+        } catch (RepositoryException ex) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error!");
+            alert.setHeaderText(ex.getMessage());
+            alert.showAndWait();
+        }
     }
 
     public void setServiceController(Controller serviceController) {
@@ -149,5 +171,28 @@ public class MainController {
         users.forEach( u -> this.usernames.add(u.getUsername()));
     }
 
+    public void addFriend() {
+        try {
+            Request request = new Request(currentUser.getId(), shownUser.getId());
+            this.serviceController.addRequest(request);
+        } catch (RepositoryException ex) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error!");
+            alert.setHeaderText(ex.getMessage());
+            alert.showAndWait();
+        }
+    }
+
+    public void removeFriend() {
+        try {
+            Friendship friendship = new Friendship(currentUser.getId(),shownUser.getId());
+            this.serviceController.deleteFriendship(friendship);
+        } catch (RepositoryException ex) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error!");
+            alert.setHeaderText(ex.getMessage());
+            alert.showAndWait();
+        }
+    }
 
 }
