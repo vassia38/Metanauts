@@ -352,7 +352,7 @@ public class MainController implements Observer {
             Stage chatStage = new Stage();
             FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("chat-view.fxml"));
             Parent root = fxmlLoader.load();
-            Scene scene = new Scene(root, 680, 920);
+            Scene scene = new Scene(root, 680, 800);
             chatStage.setTitle("Metanauts - " + currentUser.getUsername() + " | "
                     + shownUser.getUsername());
             chatStage.setScene(scene);
