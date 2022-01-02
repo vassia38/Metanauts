@@ -36,6 +36,7 @@
                 <Button fx:id="messageButton">Message</Button>
                 <Button fx:id="addFriendButton" onAction="#addFriend">Add friend</Button>
                 <Button fx:id="removeFriendButton" onAction="#removeFriend">Remove friend</Button>
+                <Button fx:id="cancelRequestButton" onAction="#cancelRequest">Cancel Request</Button>
             </HBox>
             <TableView fx:id="tableViewRequests" prefHeight="200">
                 <columns>
