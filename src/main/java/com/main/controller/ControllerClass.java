@@ -407,6 +407,26 @@ public class ControllerClass implements Controller{
     }
 
     @Override
+    public Request findRequest(Request request) {
+        Iterable<Request> requests = requestService.getAllEntities();
+        for(Request request1 : requests) {
+            if(request.equals(request1))
+                return request1;
+        }
+        return null;
+        //throw new RepositoryException("Request not found!");
+    }
+
+    @Override
+   public Request deleteRequest(Request request) {
+        Request re = requestService.delete(request);
+        if(re == null)
+            throw new RepositoryException("Request doesn't exist!\n");
+        this.notifyObservers(UpdateType.REQUESTS);
+        return re;
+    }
+
+    @Override
     public Iterable<Request> showAllRequests() {
         return requestService.getAllEntities();
     }
