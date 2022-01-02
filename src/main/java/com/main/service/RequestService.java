@@ -4,7 +4,6 @@ import com.main.model.Request;
 import com.main.model.Tuple;
 import com.main.repository.Repository;
 
-import java.util.ArrayList;
 
 public class RequestService{
     final Repository<Tuple<Long,Long>, Request> requestRepository;

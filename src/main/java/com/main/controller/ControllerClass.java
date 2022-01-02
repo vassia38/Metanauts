@@ -63,6 +63,7 @@ public class ControllerClass implements Controller{
         User user = userService.add(entity);
         if(user != null)
             throw new RepositoryException("User already exists!\n");
+        this.notifyObservers(UpdateType.USERS);
     }
 
     /**
@@ -86,6 +87,7 @@ public class ControllerClass implements Controller{
                 friendshipService.delete(fr);
             }
         }
+        this.notifyObservers(UpdateType.USERS);
         return deleted;
     }
 
@@ -104,6 +106,7 @@ public class ControllerClass implements Controller{
         User oldState = userService.update(entity);
         if(oldState == null)
             throw new RepositoryException("User doesn't exist!\n");
+        this.notifyObservers(UpdateType.USERS);
         return oldState;
     }
 
@@ -162,6 +165,7 @@ public class ControllerClass implements Controller{
         if(user1 == null || user2 == null)
             throw new RepositoryException("User(s) doesn't exist!\n");
         Friendship fr = friendshipService.add(entity);
+        this.notifyObservers(UpdateType.FRIENDS);
         if(fr != null)
             throw new RepositoryException("Friendship already exists!\n");
     }
@@ -185,6 +189,7 @@ public class ControllerClass implements Controller{
         Friendship fr = friendshipService.delete(entity);
         if(fr == null)
             throw new RepositoryException("Friendship doesn't exist!\n");
+        this.notifyObservers(UpdateType.FRIENDS);
         return fr;
     }
 
@@ -200,6 +205,7 @@ public class ControllerClass implements Controller{
         Friendship oldState = friendshipService.update(entity);
         if(oldState == null)
             throw new RepositoryException("Friendship doesn't exist!\n");
+        this.notifyObservers(UpdateType.FRIENDS);
         return oldState;
     }
 
@@ -384,8 +390,7 @@ public class ControllerClass implements Controller{
         this.notifyObservers(UpdateType.REQUESTS);
         if(answer.equals("approve")) {
             Friendship friendship = new Friendship(request.getId().getLeft(), request.getId().getRight());
-            addFriendship(friendship);
-            this.notifyObservers(UpdateType.FRIENDS);
+            this.addFriendship(friendship);
         }
     }
 
