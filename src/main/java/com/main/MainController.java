@@ -11,13 +11,22 @@ import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.stage.Stage;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
 public class MainController implements Observer {
     private User currentUser;
@@ -246,13 +255,11 @@ public class MainController implements Observer {
 
     @Override
     public void updateMessages() {
-        // TODO
+        // nothing
     }
 
 
-    /***
-     * TODO here should be handled the searchButton; search user by username and call showProfile()
-     */
+
     public void searchUser() {
         System.out.println("Searching for " + this.comboBoxSearch.getEditor().getText());
         try {
@@ -307,4 +314,32 @@ public class MainController implements Observer {
         requests.forEach( req -> this.requests.add(req));
     }
 
+    @FXML
+    protected void messageFriend(ActionEvent actionEvent) {
+        try {
+            System.out.println("Opening chat with: " + shownUser);
+            Stage chatStage = new Stage();
+            FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("chat-view.fxml"));
+            Parent root = fxmlLoader.load();
+            Scene scene = new Scene(root, 680, 920);
+            chatStage.setTitle("Metanauts - " + currentUser.getUsername() + " | "
+                    + shownUser.getUsername());
+            chatStage.setScene(scene);
+            try{
+                chatStage.getIcons().add(new Image(Objects.requireNonNull(Main.class.getResourceAsStream("logo.png"))));
+            } catch(NullPointerException e){
+                System.out.println("icon could not load!");
+            }
+            chatStage.show();
+            ChatController ctrl = fxmlLoader.getController();
+            ctrl.afterLoad(this.serviceController, currentUser, shownUser);
+        } catch(RepositoryException e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error!");
+            alert.setHeaderText("Can't chat with this person!\n");
+            alert.showAndWait();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

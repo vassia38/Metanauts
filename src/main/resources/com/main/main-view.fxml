@@ -6,7 +6,7 @@
 
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.image.Image?>
-<VBox id="body" alignment="TOP_CENTER" prefHeight="427.0" prefWidth="695.0" spacing="20.0"
+<VBox id="body" alignment="TOP_CENTER" spacing="20.0"
       xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.main.MainController">
     <stylesheets>
         <URL value="@style.css"/>
@@ -33,7 +33,7 @@
         <VBox styleClass="profile-page" prefWidth="700">
             <Label fx:id="profileTitle">My profile page</Label>
             <HBox alignment="CENTER_RIGHT" spacing="50">
-                <Button fx:id="messageButton">Message</Button>
+                <Button fx:id="messageButton" onAction="#messageFriend">Message</Button>
                 <Button fx:id="addFriendButton" onAction="#addFriend">Add friend</Button>
                 <Button fx:id="removeFriendButton" onAction="#removeFriend">Remove friend</Button>
             </HBox>

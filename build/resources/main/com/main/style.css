@@ -70,6 +70,12 @@
     -fx-background-color: #beb9ff;
 }
 
+#destinationLabel {
+    -fx-background-color: #beb9ff;
+    -fx-padding: 5;
+    -fx-font-size: 20;
+}
+
 *:selected{
     -fx-border-width: 0;
 }
