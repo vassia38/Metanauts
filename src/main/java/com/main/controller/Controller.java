@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public interface Controller extends Observable {
-     UserService getUserService();
+    UserService getUserService();
     FriendshipService getFriendshipService();
     MessageService getMessageService();
     RequestService getRequestService();
@@ -45,4 +45,6 @@ public interface Controller extends Observable {
     Iterable<Request> showRequests(User user);
     Iterable<Request> showAllRequests();
     Friendship findFriendshipById(Tuple<Long,Long> id);
+    Request findRequest(Request request);
+    Request deleteRequest(Request request);
 }

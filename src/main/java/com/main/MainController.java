@@ -54,6 +54,8 @@ public class MainController implements Observer {
     @FXML
     Button addFriendButton;
     @FXML
+    Button cancelRequestButton;
+    @FXML
     Button removeFriendButton;
     @FXML
     Label profileTitle;
@@ -92,6 +94,7 @@ public class MainController implements Observer {
         });
         this.addFriendButton.setVisible(false);
         this.removeFriendButton.setVisible(false);
+        this.cancelRequestButton.setVisible(false);
         this.messageButton.setVisible(false);
         this.addFriendButton.managedProperty().bind(this.addFriendButton.visibleProperty());
         this.removeFriendButton.managedProperty().bind(this.removeFriendButton.visibleProperty());
@@ -181,31 +184,46 @@ public class MainController implements Observer {
     private void showProfile(User user) {
         this.profileTitle.textProperty().set(user.getFirstName() + " " +user.getLastName() +
                 "\n" + user.getUsername());
+        this.shownUser = user;
         if(!user.getUsername().equals(currentUser.getUsername())) {
             this.tableViewRequests.setVisible(false);
+            //friends
             if(this.friends.contains(user)) {
                 this.messageButton.setVisible(true);
                 this.addFriendButton.setVisible(false);
                 this.removeFriendButton.setVisible(true);
+                this.cancelRequestButton.setVisible(false);
             }
-            /*else if() {
+            //request already sent by current user
+            else if(this.serviceController.findRequest(new Request(currentUser.getId(),shownUser.getId())) != null) {
                 this.messageButton.setVisible(false);
                 this.addFriendButton.setVisible(false);
                 this.removeFriendButton.setVisible(false);
-            }*/
+                this.cancelRequestButton.setVisible(true);
+            }
+            //request already sent to current user
+            else if(this.serviceController.findRequest(new Request(shownUser.getId(),currentUser.getId())) != null) {
+                this.messageButton.setVisible(false);
+                this.addFriendButton.setVisible(false);
+                this.removeFriendButton.setVisible(false);
+                this.cancelRequestButton.setVisible(false);
+            }
+            //no connection
             else {
                 this.messageButton.setVisible(false);
                 this.addFriendButton.setVisible(true);
                 this.removeFriendButton.setVisible(false);
+                this.cancelRequestButton.setVisible(false);
             }
         }
+        //same person
         else {
             this.messageButton.setVisible(false);
             this.removeFriendButton.setVisible(false);
             this.addFriendButton.setVisible(false);
+            this.cancelRequestButton.setVisible(false);
             this.tableViewRequests.setVisible(true);
         }
-        this.shownUser = user;
     }
 
 
@@ -314,6 +332,19 @@ public class MainController implements Observer {
         requests.forEach( req -> this.requests.add(req));
     }
 
+    public void cancelRequest() {
+        try {
+            Request request = new Request(currentUser.getId(),shownUser.getId());
+            this.serviceController.deleteRequest(request);
+            this.showProfile(shownUser);
+        } catch (RepositoryException ex) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error!");
+            alert.setHeaderText(ex.getMessage());
+            alert.showAndWait();
+        }
+    }
+
     @FXML
     protected void messageFriend(ActionEvent actionEvent) {
         try {
@@ -342,4 +373,6 @@ public class MainController implements Observer {
             e.printStackTrace();
         }
     }
+
+
 }
