@@ -34,8 +34,8 @@
             <Label fx:id="profileTitle">My profile page</Label>
             <HBox alignment="CENTER_RIGHT" spacing="50">
                 <Button fx:id="messageButton">Message</Button>
-                <Button fx:id="addFriendButton">Add friend</Button>
-                <Button fx:id="removeFriendButton">Remove friend</Button>
+                <Button fx:id="addFriendButton" onAction="#addFriend">Add friend</Button>
+                <Button fx:id="removeFriendButton" onAction="#removeFriend">Remove friend</Button>
             </HBox>
             <TableView fx:id="tableViewRequests" prefHeight="200">
                 <columns>
