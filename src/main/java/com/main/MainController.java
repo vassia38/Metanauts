@@ -194,26 +194,32 @@ public class MainController implements Observer {
                 this.removeFriendButton.setVisible(true);
                 this.cancelRequestButton.setVisible(false);
             }
-            //request already sent by current user
-            else if(this.serviceController.findRequest(new Request(currentUser.getId(),shownUser.getId())) != null) {
-                this.messageButton.setVisible(false);
-                this.addFriendButton.setVisible(false);
-                this.removeFriendButton.setVisible(false);
-                this.cancelRequestButton.setVisible(true);
-            }
-            //request already sent to current user
-            else if(this.serviceController.findRequest(new Request(shownUser.getId(),currentUser.getId())) != null) {
-                this.messageButton.setVisible(false);
-                this.addFriendButton.setVisible(false);
-                this.removeFriendButton.setVisible(false);
-                this.cancelRequestButton.setVisible(false);
-            }
-            //no connection
             else {
-                this.messageButton.setVisible(false);
-                this.addFriendButton.setVisible(true);
-                this.removeFriendButton.setVisible(false);
-                this.cancelRequestButton.setVisible(false);
+                Request sentRequest = this.serviceController.findRequest(new Request(currentUser.getId(),shownUser.getId()));
+                //request already sent by current user
+                if(sentRequest != null) {
+                    this.messageButton.setVisible(false);
+                    this.addFriendButton.setVisible(false);
+                    this.removeFriendButton.setVisible(false);
+                    if(sentRequest.getStatus().equals("pending"))
+                        this.cancelRequestButton.setVisible(true);
+                    else
+                        this.cancelRequestButton.setVisible(false);
+                }
+                //request already sent to current user
+                else if(this.serviceController.findRequest(new Request(shownUser.getId(),currentUser.getId())) != null) {
+                    this.messageButton.setVisible(false);
+                    this.addFriendButton.setVisible(false);
+                    this.removeFriendButton.setVisible(false);
+                    this.cancelRequestButton.setVisible(false);
+                }
+                //no connection
+                else {
+                    this.messageButton.setVisible(false);
+                    this.addFriendButton.setVisible(true);
+                    this.removeFriendButton.setVisible(false);
+                    this.cancelRequestButton.setVisible(false);
+                }
             }
         }
         //same person
@@ -319,6 +325,30 @@ public class MainController implements Observer {
         try {
             Friendship friendship = new Friendship(currentUser.getId(), shownUser.getId());
             this.serviceController.deleteFriendship(friendship);
+            Request request1 = this.serviceController.findRequest(new Request(currentUser.getId(), shownUser.getId()));
+            if(request1 != null) {
+                try {
+                    this.serviceController.deleteRequest(request1);
+                } catch (RepositoryException ex) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Error!");
+                    alert.setHeaderText(ex.getMessage());
+                    alert.showAndWait();
+                }
+            }
+            else {
+                Request request2 = this.serviceController.findRequest(new Request(shownUser.getId(), currentUser.getId()));
+                if(request2 != null) {
+                    try {
+                        this.serviceController.deleteRequest(request2);
+                    } catch (RepositoryException ex) {
+                        Alert alert = new Alert(Alert.AlertType.ERROR);
+                        alert.setTitle("Error!");
+                        alert.setHeaderText(ex.getMessage());
+                        alert.showAndWait();
+                    }
+                }
+            }
             this.showProfile(shownUser);
         } catch (RepositoryException ex) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
