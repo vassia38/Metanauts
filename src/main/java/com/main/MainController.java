@@ -11,10 +11,8 @@ import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -201,10 +199,7 @@ public class MainController implements Observer {
                     this.messageButton.setVisible(false);
                     this.addFriendButton.setVisible(false);
                     this.removeFriendButton.setVisible(false);
-                    if(sentRequest.getStatus().equals("pending"))
-                        this.cancelRequestButton.setVisible(true);
-                    else
-                        this.cancelRequestButton.setVisible(false);
+                    this.cancelRequestButton.setVisible(sentRequest.getStatus().equals("pending"));
                 }
                 //request already sent to current user
                 else if(this.serviceController.findRequest(new Request(shownUser.getId(),currentUser.getId())) != null) {
@@ -376,7 +371,7 @@ public class MainController implements Observer {
     }
 
     @FXML
-    protected void messageFriend(ActionEvent actionEvent) {
+    protected void messageFriend() {
         try {
             System.out.println("Opening chat with: " + shownUser);
             Stage chatStage = new Stage();
