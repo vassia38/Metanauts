@@ -187,7 +187,7 @@ public class MainController implements Observer {
             return new ReadOnlyObjectWrapper<>(user.getUsername());
         });
         status.setCellValueFactory(new PropertyValueFactory<>("status"));
-        dateSent.setCellValueFactory(new PropertyValueFactory<>("dateSent"));
+        dateSent.setCellValueFactory(new PropertyValueFactory<>("date"));
         historyTableViewRequests.setItems(this.solvedRequests);
     }
 
@@ -262,6 +262,8 @@ public class MainController implements Observer {
         this.updateUsernames();
 
         this.updateRequests();
+
+        this.updateSolvedRequests();
     }
 
 
@@ -289,7 +291,7 @@ public class MainController implements Observer {
     public void updateSolvedRequests() {
         this.solvedRequests.clear();
         //  TODO
-        // Iterable<Request> requests = this.serviceController.showSolvedRequests(this.currentUser);
+        Iterable<Request> requests = this.serviceController.showAnsweredRequests(this.currentUser);
         this.setSolvedRequests(requests);
     }
 

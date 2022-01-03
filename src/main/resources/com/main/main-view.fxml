@@ -49,7 +49,7 @@
                 <columns>
                     <TableColumn fx:id="historyFromUser" text="From"/>
                     <TableColumn fx:id="status"/>
-                    <TableColumn fx:id="dateSent"/>
+                    <TableColumn fx:id="dateSent" prefWidth="120"/>
                 </columns>
             </TableView>
         </VBox>

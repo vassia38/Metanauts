@@ -386,9 +386,10 @@ public class ControllerClass implements Controller{
         if(found.getStatus().equals("rejected")) {
             throw new RepositoryException("Request already rejected!");
         }
-        Request newRequest = new Request(found.getId().getLeft(), found.getId().getRight(), answer);
+        Request newRequest = new Request(found.getId().getLeft(), found.getId().getRight(), answer, found.getDate());
         requestService.update(newRequest);
         this.notifyObservers(UpdateType.REQUESTS);
+        this.notifyObservers(UpdateType.SOLVEDREQUESTS);
         if(answer.equals("approve")) {
             Friendship friendship = new Friendship(request.getId().getLeft(), request.getId().getRight());
             this.addFriendship(friendship);
@@ -401,6 +402,18 @@ public class ControllerClass implements Controller{
         ArrayList<Request> requestsToUser = new ArrayList<>();
         for(Request request : requests) {
             if(request.getId().getRight().equals(user.getId()) && request.getStatus().equals("pending")) {
+                requestsToUser.add(request);
+            }
+        }
+        return requestsToUser;
+    }
+
+    @Override
+    public Iterable<Request> showAnsweredRequests(User user) {
+        Iterable<Request> requests = requestService.getAllEntities();
+        ArrayList<Request> requestsToUser = new ArrayList<>();
+        for(Request request : requests) {
+            if(request.getId().getRight().equals(user.getId()) && !request.getStatus().equals("pending")) {
                 requestsToUser.add(request);
             }
         }
