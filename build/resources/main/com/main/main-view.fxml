@@ -19,8 +19,8 @@
         <Button fx:id="searchButton" minHeight="30" onAction="#searchUser">Search</Button>
     </HBox>
 
-    <HBox>
-        <VBox>
+    <HBox prefHeight="500">
+        <VBox prefHeight="500">
             <TextField promptText="Search friend list"/>
             <TableView fx:id="tableViewFriends" styleClass="table">
                 <columns>
@@ -30,9 +30,9 @@
                 </columns>
             </TableView>
         </VBox>
-        <VBox styleClass="profile-page" prefWidth="700">
-            <Label fx:id="profileTitle">My profile page</Label>
-            <HBox alignment="CENTER_RIGHT" spacing="50">
+        <VBox styleClass="profile-page" prefWidth="700" prefHeight="500">
+            <Label fx:id="profileTitle" prefHeight="50">My profile page</Label>
+            <HBox alignment="CENTER_RIGHT" spacing="50" prefHeight="50">
                 <Button fx:id="messageButton" onAction="#messageFriend">Message</Button>
                 <Button fx:id="addFriendButton" onAction="#addFriend">Add friend</Button>
                 <Button fx:id="removeFriendButton" onAction="#removeFriend">Remove friend</Button>
@@ -43,6 +43,13 @@
                     <TableColumn fx:id="fromUser" text="From"/>
                     <TableColumn fx:id="acceptFriendship"/>
                     <TableColumn fx:id="rejectFriendship"/>
+                </columns>
+            </TableView>
+            <TableView fx:id="historyTableViewRequests" prefHeight="200">
+                <columns>
+                    <TableColumn fx:id="historyFromUser" text="From"/>
+                    <TableColumn fx:id="status"/>
+                    <TableColumn fx:id="dateSent"/>
                 </columns>
             </TableView>
         </VBox>

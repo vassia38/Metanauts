@@ -31,6 +31,7 @@ public class MainController implements Observer {
     private Controller serviceController;
     ObservableList<String> usernames = FXCollections.observableArrayList();
     ObservableList<Request> requests = FXCollections.observableArrayList();
+    ObservableList<Request> solvedRequests = FXCollections.observableArrayList();
     ObservableList<User> friends = FXCollections.observableArrayList();
     FilteredList<String> filteredItems = new FilteredList<>(usernames);
     private User shownUser;
@@ -45,10 +46,6 @@ public class MainController implements Observer {
 
     @FXML
     Button messageButton;
-
-    /***
-     * TODO functionalitatea F1 pt butoanele astea 2
-     */
     @FXML
     Button addFriendButton;
     @FXML
@@ -57,6 +54,7 @@ public class MainController implements Observer {
     Button removeFriendButton;
     @FXML
     Label profileTitle;
+
     @FXML
     TableView<Request> tableViewRequests;
     @FXML
@@ -74,6 +72,15 @@ public class MainController implements Observer {
     TableColumn<User, String> last_name;
     @FXML
     TableView<User> tableViewFriends;
+
+    @FXML
+    TableView<Request> historyTableViewRequests;
+    @FXML
+    TableColumn<Request, String> historyFromUser;
+    @FXML
+    TableColumn<Request, String> status;
+    @FXML
+    TableColumn<Request, String> dateSent;
 
 
     @FXML
@@ -98,6 +105,7 @@ public class MainController implements Observer {
         this.removeFriendButton.managedProperty().bind(this.removeFriendButton.visibleProperty());
         this.messageButton.managedProperty().bind(this.removeFriendButton.visibleProperty());
         this.tableViewRequests.managedProperty().bind(this.tableViewRequests.visibleProperty());
+        this.historyTableViewRequests.managedProperty().bind(this.tableViewRequests.visibleProperty());
 
         friendUser.setCellValueFactory(new PropertyValueFactory<>("username"));
         first_name.setCellValueFactory(new PropertyValueFactory<>("firstName"));
@@ -173,6 +181,14 @@ public class MainController implements Observer {
             });
 
         tableViewRequests.setItems(this.requests);
+
+        historyFromUser.setCellValueFactory(param -> {
+            User user = this.serviceController.findUserById(param.getValue().getId().getLeft());
+            return new ReadOnlyObjectWrapper<>(user.getUsername());
+        });
+        status.setCellValueFactory(new PropertyValueFactory<>("status"));
+        dateSent.setCellValueFactory(new PropertyValueFactory<>("dateSent"));
+        historyTableViewRequests.setItems(this.solvedRequests);
     }
 
     /***
@@ -185,6 +201,7 @@ public class MainController implements Observer {
         this.shownUser = user;
         if(!user.getUsername().equals(currentUser.getUsername())) {
             this.tableViewRequests.setVisible(false);
+            this.historyTableViewRequests.setVisible(false);
             //friends
             if(this.friends.contains(user)) {
                 this.messageButton.setVisible(true);
@@ -224,6 +241,7 @@ public class MainController implements Observer {
             this.addFriendButton.setVisible(false);
             this.cancelRequestButton.setVisible(false);
             this.tableViewRequests.setVisible(true);
+            this.historyTableViewRequests.setVisible(true);
         }
     }
 
@@ -265,6 +283,14 @@ public class MainController implements Observer {
         this.requests.clear();
         Iterable<Request> requests = this.serviceController.showRequests(this.currentUser);
         this.setRequests(requests);
+    }
+
+    @Override
+    public void updateSolvedRequests() {
+        this.solvedRequests.clear();
+        //  TODO
+        // Iterable<Request> requests = this.serviceController.showSolvedRequests(this.currentUser);
+        this.setSolvedRequests(requests);
     }
 
     @Override
@@ -355,6 +381,10 @@ public class MainController implements Observer {
 
     public void setRequests(Iterable<Request> requests) {
         requests.forEach( req -> this.requests.add(req));
+    }
+
+    public void setSolvedRequests(Iterable<Request> requests) {
+        requests.forEach( req -> this.solvedRequests.add(req));
     }
 
     public void cancelRequest() {

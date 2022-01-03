@@ -176,6 +176,11 @@ public class ChatController implements Observer {
     }
 
     @Override
+    public void updateSolvedRequests() {
+        //nothing
+    }
+
+    @Override
     public void updateUsers() {
         //nothing
     }

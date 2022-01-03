@@ -455,6 +455,9 @@ public class ControllerClass implements Controller{
             if(type == UpdateType.MESSAGES){
                 observer.updateMessages();
             }
+            if(type == UpdateType.SOLVEDREQUESTS){
+                observer.updateSolvedRequests();
+            }
         }
     }
 
