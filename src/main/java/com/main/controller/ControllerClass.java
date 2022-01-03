@@ -359,7 +359,7 @@ public class ControllerClass implements Controller{
     public void addRequest(Request request) {
         Request found = requestService.findOneById(request.getId());
         if (found != null) {
-            throw new RepositoryException("Friendship request already sent!");
+                throw new RepositoryException("Friendship request already sent!");
         }
         requestService.add(request);
         this.notifyObservers(UpdateType.REQUESTS);
