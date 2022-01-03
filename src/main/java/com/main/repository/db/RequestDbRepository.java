@@ -5,6 +5,7 @@ import com.main.model.Tuple;
 import com.main.repository.Repository;
 
 import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -31,7 +32,8 @@ public class RequestDbRepository implements Repository<Tuple<Long,Long>, Request
             ResultSet resultSet = psSelect.executeQuery();
             if(resultSet.next()) {
                String status = resultSet.getString("status");
-                return new Request(id.getLeft(),id.getRight(),status);
+                LocalDateTime date = LocalDateTime.parse(resultSet.getString("dateSent"));
+                return new Request(id.getLeft(),id.getRight(),status,date);
             }
         }catch(SQLException e){
             e.printStackTrace();
@@ -49,7 +51,8 @@ public class RequestDbRepository implements Repository<Tuple<Long,Long>, Request
                 Long id1 = resultSet.getLong("id1");
                 Long id2 = resultSet.getLong("id2");
                 String status = resultSet.getString("status");
-                Request request = new Request(id1, id2, status);
+                LocalDateTime date = LocalDateTime.parse(resultSet.getString("dateSent"));
+                Request request = new Request(id1, id2, status, date);
                 requests.add(request);
             }
         } catch (SQLException e) {
@@ -73,7 +76,8 @@ public class RequestDbRepository implements Repository<Tuple<Long,Long>, Request
                 Long id1 = resultSet.getLong("id1");
                 Long id2 = resultSet.getLong("id2");
                 String status = resultSet.getString("status");
-                Request request = new Request(id1, id2, status);
+                LocalDateTime date = LocalDateTime.parse(resultSet.getString("dateSent"));
+                Request request = new Request(id1, id2, status, date);
                 requests.add(request);
             }
         } catch (SQLException e) {
@@ -89,12 +93,13 @@ public class RequestDbRepository implements Repository<Tuple<Long,Long>, Request
         if(entity.equals(this.findOneById(entity.getId()))) {
             return entity;
         }
-        String sqlInsert = "insert into requests values(?,?,?)";
+        String sqlInsert = "insert into requests values(?,?,?,?)";
         try(Connection connection = DriverManager.getConnection(url,username,password);
             PreparedStatement psInsert = connection.prepareStatement(sqlInsert)){
             psInsert.setLong(1,entity.getId().getLeft());
             psInsert.setLong(2,entity.getId().getRight());
             psInsert.setString(3,entity.getStatus());
+            psInsert.setString(4,entity.getDate().toString());
             psInsert.executeUpdate();
         }catch(SQLException e){
             e.printStackTrace();

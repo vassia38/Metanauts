@@ -47,4 +47,5 @@ public interface Controller extends Observable {
     Friendship findFriendshipById(Tuple<Long,Long> id);
     Request findRequest(Request request);
     Request deleteRequest(Request request);
+    Iterable<Request> showAnsweredRequests(User user);
 }

@@ -249,7 +249,7 @@ public class userUI extends Thread{
         System.out.println("Answer (approve/reject): ");
         String answer = keyboard.nextLine();
 
-        Request request = new Request(user.getId(),currentUser.getId(),"pending");
+        Request request = new Request(user.getId(),currentUser.getId());
 
         try {
             controller.answerRequest(request,answer);
@@ -281,7 +281,7 @@ public class userUI extends Thread{
             return;
         }
 
-       Request request = new Request(currentUser.getId(), user.getId(), "pending");
+       Request request = new Request(currentUser.getId(), user.getId());
 
         try {
             controller.addRequest(request);
