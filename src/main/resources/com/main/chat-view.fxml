@@ -4,10 +4,10 @@
 <?import javafx.scene.layout.*?>
 
 <?import java.net.URL?>
-<BorderPane id="body"
-      xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
-      fx:controller="com.main.ChatController"
-      prefHeight="400.0" prefWidth="600.0">
+<?import javafx.geometry.Insets?>
+<BorderPane id="body" xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml" fx:controller="com.main.ChatController"
+            prefHeight="400.0" prefWidth="600.0">
     <stylesheets>
         <URL value="@style.css"/>
     </stylesheets>
@@ -23,10 +23,20 @@
     </center>
     <bottom>
         <HBox alignment="CENTER_RIGHT">
-            <TextArea fx:id = "textarea" prefHeight="90">
+            <padding>
+                <Insets top="10" bottom="10"/>
+            </padding>
+            <TextArea fx:id="textarea" prefHeight="90">
             </TextArea>
-            <VBox alignment="CENTER">
-                <Button fx:id = "send" prefHeight="90">Send</Button>
+            <VBox alignment="CENTER" spacing="10">
+                <Button fx:id="send" onAction="#sendMessage"
+                        prefHeight="55" prefWidth="80">
+                    Send
+                </Button>
+                <Button fx:id="reset" onAction="#resetReply"
+                        prefHeight="25" prefWidth="80">
+                    No reply
+                </Button>
             </VBox>
         </HBox>
     </bottom>

@@ -11,6 +11,10 @@ import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 public class ChatController implements Observer {
 
     private Controller serviceController;
@@ -25,12 +29,15 @@ public class ChatController implements Observer {
     @FXML
     TextArea textarea;
     @FXML
+    Button reset;
+    @FXML
     Button send;
 
     @FXML
     public void initialize() {
         this.messagesView.setCellFactory(param -> new ListViewCell(currentUser.getId()) );
         this.messagesView.setItems(messages);
+
     }
 
     public void afterLoad(Controller serviceController, User currentUser, User destination) {
@@ -45,17 +52,34 @@ public class ChatController implements Observer {
 
     @Override
     public void updateMessages() {
-        this.messages.removeAll();
+        this.messages.clear();
         this.serviceController.
                 getConversation(currentUser.getUsername(), destination.getUsername()).
                 forEach(messages::add);
     }
 
+    @FXML
+    void sendMessage() {
+        String textMessage = this.textarea.getText();
+        List<String> destinationUsername = new ArrayList<>();
+        destinationUsername.add(destination.getUsername());
+        Message replied = this.messagesView.getSelectionModel().getSelectedItem();
+        this.serviceController.sendMessage(currentUser, destinationUsername, textMessage,
+                LocalDateTime.now(), replied == null ? 0L : replied.getId());
+        this.textarea.clear();
+        this.resetReply();
+    }
+
+    @FXML
+    void resetReply() {
+        this.messagesView.getSelectionModel().clearSelection();
+    }
+
     static final class ListViewCell extends ListCell<Message> {
-        private final Long idUser;
+        private final Long idCurrentUser;
 
         public ListViewCell(Long userId) {
-            this.idUser = userId;
+            this.idCurrentUser = userId;
         }
 
         @Override
@@ -65,14 +89,15 @@ public class ChatController implements Observer {
                 setGraphic(null);
             } else {
                 VBox vBox = new VBox();
-                if (item.getSource().getId().equals(idUser)) {
+                //Messages from currentUser
+                if (item.getSource().getId().equals(idCurrentUser)) {
 
                     vBox.setAlignment(Pos.CENTER_RIGHT);
                     Label label = styleLabel(item.getTextMessage());
                     label.setAlignment(Pos.CENTER_RIGHT);
                     var reply=item.getRepliedMessage();
                     if(reply==null)
-                        vBox.getChildren().addAll(label);
+                        vBox.getChildren().add(label);
                     else
                     {
                         var user=reply.getSource();
@@ -84,13 +109,14 @@ public class ChatController implements Observer {
                         vBox.getChildren().addAll(textReply,replyLabel,label);
                     }
                 }
+                //Messages from other user
                 else{
                     vBox.setAlignment(Pos.CENTER_LEFT);
                     Label label = styleLabel(item.getTextMessage());
                     label.setAlignment(Pos.CENTER_LEFT);
                     var reply=item.getRepliedMessage();
                     if(reply==null)
-                        vBox.getChildren().addAll(label);
+                        vBox.getChildren().add(label);
                     else
                     {
                         var user=reply.getSource();

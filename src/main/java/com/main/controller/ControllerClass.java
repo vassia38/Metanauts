@@ -309,6 +309,7 @@ public class ControllerClass implements Controller{
         Message repliedMsg = messageService.findMessageById(repliedMessageId);
         Message msg = new Message(source,destination, message, date, repliedMsg);
         this.messageService.add(msg);
+        this.notifyObservers(UpdateType.MESSAGES);
     }
 
     private void setupMessage(Message msg){

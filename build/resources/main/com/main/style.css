@@ -64,6 +64,15 @@
     -fx-background-color:  linear-gradient(to right, #beb9ff, #ffffff);
 }
 
+.list-cell:even {
+    -fx-background-color: white;
+}
+.list-cell:odd {
+    -fx-background-color: white;
+}
+.list-cell:selected {
+    -fx-background-color: lightgrey;
+}
 
 .button {
     -fx-border-width: 0;
