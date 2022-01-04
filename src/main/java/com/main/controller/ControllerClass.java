@@ -12,6 +12,7 @@ import com.main.model.*;
 import com.main.service.RequestService;
 import com.main.service.UserService;
 import com.main.utils.observer.Observer;
+import com.main.utils.observer.OperationType;
 import com.main.utils.observer.UpdateType;
 
 import java.time.LocalDateTime;
@@ -454,21 +455,21 @@ public class ControllerClass implements Controller{
     private final List<Observer> observers = new ArrayList<>();
 
     @Override
-    public void notifyObservers(UpdateType type) {
+    public void notifyObservers(UpdateType updateType, OperationType operationType) {
         for (Observer observer : this.observers) {
-            if(type == UpdateType.USERS){
+            if(updateType == UpdateType.USERS){
                 observer.updateUsers();
             }
-            if(type == UpdateType.FRIENDS){
+            if(updateType == UpdateType.FRIENDS){
                 observer.updateFriends();
             }
-            if(type == UpdateType.REQUESTS){
+            if(updateType == UpdateType.REQUESTS){
                 observer.updateRequests();
             }
-            if(type == UpdateType.MESSAGES){
+            if(updateType == UpdateType.MESSAGES){
                 observer.updateMessages();
             }
-            if(type == UpdateType.SOLVEDREQUESTS){
+            if(updateType == UpdateType.SOLVEDREQUESTS){
                 observer.updateSolvedRequests();
             }
         }
