@@ -3,6 +3,7 @@ package com.main;
 import com.main.controller.Controller;
 import com.main.model.Message;
 import com.main.model.User;
+import com.main.utils.events.Event;
 import com.main.utils.observer.Observer;
 import com.main.utils.observer.OperationType;
 import javafx.collections.FXCollections;
@@ -52,7 +53,7 @@ public class ChatController implements Observer {
     }
 
     @Override
-    public void updateMessages(OperationType operationType) {
+    public void updateMessages(Event event) {
         this.messages.clear();
         this.serviceController.
                 getConversation(currentUser.getUsername(), destination.getUsername()).
@@ -167,22 +168,22 @@ public class ChatController implements Observer {
         }
     }
     @Override
-    public void updateFriends(OperationType operationType) {
+    public void updateFriends(Event event) {
         //nothing
     }
 
     @Override
-    public void updateRequests(OperationType operationType) {
+    public void updateRequests(Event event) {
         //nothing
     }
 
     @Override
-    public void updateSolvedRequests(OperationType operationType) {
+    public void updateSolvedRequests(Event event) {
         //nothing
     }
 
     @Override
-    public void updateUsers(OperationType operationType) {
+    public void updateUsers(Event event) {
         //nothing
     }
 }

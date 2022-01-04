@@ -11,6 +11,7 @@ import com.main.service.MessageService;
 import com.main.model.*;
 import com.main.service.RequestService;
 import com.main.service.UserService;
+import com.main.utils.events.*;
 import com.main.utils.observer.Observer;
 import com.main.utils.observer.OperationType;
 import com.main.utils.observer.UpdateType;
@@ -64,7 +65,8 @@ public class ControllerClass implements Controller{
         User user = userService.add(entity);
         if(user != null)
             throw new RepositoryException("User already exists!\n");
-        this.notifyObservers(UpdateType.USERS, OperationType.ADD);
+        this.notifyObservers(UpdateType.USERS,
+                new UserEvent(entity, OperationType.ADD));
     }
 
     /**
@@ -78,17 +80,15 @@ public class ControllerClass implements Controller{
         User deleted = userService.delete(entity);
         if(deleted == null)
             throw new RepositoryException("User doesn't exist!\n");
-        ArrayList<Friendship> list = new ArrayList<>();
-        for (Friendship fr : friendshipService.getAllEntities()) {
-            list.add(fr);
-        }
+        Iterable<Friendship> list = friendshipService.getAllEntities();
         for(Friendship fr : list){
             if (Objects.equals(fr.getId().getLeft(), entity.getId()) ||
                     Objects.equals(fr.getId().getRight(), entity.getId())) {
-                friendshipService.delete(fr);
+                this.deleteFriendship(fr);
             }
         }
-        this.notifyObservers(UpdateType.USERS, OperationType.DELETE);
+        this.notifyObservers(UpdateType.USERS,
+                new UserEvent(entity, OperationType.DELETE));
         return deleted;
     }
 
@@ -107,7 +107,8 @@ public class ControllerClass implements Controller{
         User oldState = userService.update(entity);
         if(oldState == null)
             throw new RepositoryException("User doesn't exist!\n");
-        this.notifyObservers(UpdateType.USERS, OperationType.UPDATE);
+        this.notifyObservers(UpdateType.USERS,
+                new UserEvent(entity, OperationType.UPDATE));
         return oldState;
     }
 
@@ -165,10 +166,11 @@ public class ControllerClass implements Controller{
         User user2 = userService.findOneById(id2);
         if(user1 == null || user2 == null)
             throw new RepositoryException("User(s) doesn't exist!\n");
-        Friendship fr = friendshipService.add(entity);
-        this.notifyObservers(UpdateType.FRIENDS, OperationType.ADD);
-        if(fr != null)
+        Friendship exists = friendshipService.add(entity);
+        if(exists != null)
             throw new RepositoryException("Friendship already exists!\n");
+        this.notifyObservers(UpdateType.FRIENDS,
+                new FriendshipEvent(entity, OperationType.ADD));
     }
 
     /**
@@ -190,7 +192,8 @@ public class ControllerClass implements Controller{
         Friendship fr = friendshipService.delete(entity);
         if(fr == null)
             throw new RepositoryException("Friendship doesn't exist!\n");
-        this.notifyObservers(UpdateType.FRIENDS,OperationType.DELETE);
+        this.notifyObservers(UpdateType.FRIENDS,
+                new FriendshipEvent(entity, OperationType.DELETE));
         return fr;
     }
 
@@ -206,7 +209,8 @@ public class ControllerClass implements Controller{
         Friendship oldState = friendshipService.update(entity);
         if(oldState == null)
             throw new RepositoryException("Friendship doesn't exist!\n");
-        this.notifyObservers(UpdateType.FRIENDS, OperationType.UPDATE);
+        this.notifyObservers(UpdateType.FRIENDS,
+                new FriendshipEvent(entity, OperationType.UPDATE));
         return oldState;
     }
 
@@ -310,7 +314,8 @@ public class ControllerClass implements Controller{
         Message repliedMsg = messageService.findMessageById(repliedMessageId);
         Message msg = new Message(source,destination, message, date, repliedMsg);
         this.messageService.add(msg);
-        this.notifyObservers(UpdateType.MESSAGES,OperationType.ADD);
+        this.notifyObservers(UpdateType.MESSAGES,
+                new MessageEvent(msg, OperationType.ADD));
     }
 
     private void setupMessage(Message msg){
@@ -364,7 +369,8 @@ public class ControllerClass implements Controller{
                 throw new RepositoryException("Friendship request already sent!");
         }
         requestService.add(request);
-        this.notifyObservers(UpdateType.REQUESTS, OperationType.ADD);
+        this.notifyObservers(UpdateType.REQUESTS,
+                new RequestEvent(request, OperationType.ADD));
     }
 
     private void validateAnswer(String answer) {
@@ -388,11 +394,13 @@ public class ControllerClass implements Controller{
         }
         Request newRequest = new Request(found.getId().getLeft(), found.getId().getRight(), answer, found.getDate());
         requestService.update(newRequest);
-        this.notifyObservers(UpdateType.REQUESTS, OperationType.UPDATE);
-        this.notifyObservers(UpdateType.SOLVEDREQUESTS, OperationType.UPDATE);
         if(answer.equals("approve")) {
             Friendship friendship = new Friendship(request.getId().getLeft(), request.getId().getRight());
             this.addFriendship(friendship);
+        this.notifyObservers(UpdateType.REQUESTS,
+                new RequestEvent(newRequest, OperationType.DELETE));
+        this.notifyObservers(UpdateType.SOLVEDREQUESTS,
+                new RequestEvent(newRequest, OperationType.ADD));
         }
     }
 
@@ -436,7 +444,8 @@ public class ControllerClass implements Controller{
         Request re = requestService.delete(request);
         if(re == null)
             throw new RepositoryException("Request doesn't exist!\n");
-        this.notifyObservers(UpdateType.REQUESTS, OperationType.DELETE);
+        this.notifyObservers(UpdateType.REQUESTS,
+                new RequestEvent(request, OperationType.DELETE));
         return re;
     }
 
@@ -454,22 +463,22 @@ public class ControllerClass implements Controller{
     private final List<Observer> observers = new ArrayList<>();
 
     @Override
-    public void notifyObservers(UpdateType updateType, OperationType operationType) {
+    public void notifyObservers(UpdateType updateType, Event event) {
         for (Observer observer : this.observers) {
             if(updateType == UpdateType.USERS){
-                observer.updateUsers(operationType);
+                observer.updateUsers(event);
             }
             if(updateType == UpdateType.FRIENDS){
-                observer.updateFriends(operationType);
+                observer.updateFriends(event);
             }
             if(updateType == UpdateType.REQUESTS){
-                observer.updateRequests(operationType);
+                observer.updateRequests(event);
             }
             if(updateType == UpdateType.MESSAGES){
-                observer.updateMessages(operationType);
+                observer.updateMessages(event);
             }
             if(updateType == UpdateType.SOLVEDREQUESTS){
-                observer.updateSolvedRequests(operationType);
+                observer.updateSolvedRequests(event);
             }
         }
     }

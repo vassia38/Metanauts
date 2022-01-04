@@ -1,10 +1,12 @@
 package com.main.utils.observer;
 
+import com.main.utils.events.Event;
+
 public interface Observer{
 
-    void updateFriends(OperationType operationType);
-    void updateRequests(OperationType operationType);
-    void updateSolvedRequests(OperationType operationType);
-    void updateUsers(OperationType operationType);
-    void updateMessages(OperationType operationType);
+    void updateFriends(Event event);
+    void updateRequests(Event event);
+    void updateSolvedRequests(Event event);
+    void updateUsers(Event event);
+    void updateMessages(Event event);
 }

@@ -3,6 +3,7 @@ package com.main;
 import com.main.controller.Controller;
 import com.main.model.Request;
 import com.main.model.User;
+import com.main.utils.events.Event;
 import com.main.utils.observer.Observer;
 import com.main.model.Friendship;
 import com.main.repository.RepositoryException;
@@ -24,8 +25,8 @@ import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Objects;
+import java.lang.reflect.Method;
+import java.util.*;
 
 public class MainController implements Observer {
     private User currentUser;
@@ -88,6 +89,9 @@ public class MainController implements Observer {
     public void initialize() {
         homeLogo.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
             showProfile(currentUser);
+            updateFriends(null);
+            updateRequests(null);
+            updateSolvedRequests(null);
             event.consume();
         });
 
@@ -184,7 +188,10 @@ public class MainController implements Observer {
         tableViewRequests.setItems(this.requests);
 
         historyFromUser.setCellValueFactory(param -> {
-            User user = this.serviceController.findUserById(param.getValue().getId().getLeft());
+            Long id = param.getValue().getId().getLeft().equals(currentUser.getId())
+                        ? param.getValue().getId().getRight()
+                        : param.getValue().getId().getLeft();
+            User user = this.serviceController.findUserById(id);
             return new ReadOnlyObjectWrapper<>(user.getUsername());
         });
         status.setCellValueFactory(new PropertyValueFactory<>("status"));
@@ -274,34 +281,142 @@ public class MainController implements Observer {
         Iterable<User> users = this.serviceController.getAllUsers();
         this.setUsernames(users);
     }
+
+    private User findUserByFriendship(Friendship friendship) {
+        if(friendship == null)
+            return null;
+        Long idUser = friendship.getId().getLeft().equals(currentUser.getId())
+                ? friendship.getId().getRight()
+                : friendship.getId().getLeft();
+        return this.serviceController.findUserById(idUser);
+    }
+    public void addFriendObserverMethod(Friendship friendship) {
+        User newFriend = this.findUserByFriendship(friendship);
+        System.out.println(newFriend);
+        if(newFriend != null){
+            this.friends.add(newFriend);
+        }
+    }
+    public void deleteFriendObserverMethod(Friendship friendship) {
+        User newStranger = this.findUserByFriendship(friendship);
+        if(newStranger != null) {
+            this.friends.remove(newStranger);
+        }
+    }
+    public void updateFriendObserverMethod(Friendship friendship) {
+        User updatedFriend = this.findUserByFriendship(friendship);
+        if(updatedFriend != null) {
+            for(User u : this.friends) {
+                if(u.getId().equals(updatedFriend.getId())) {
+                    this.friends.set(this.friends.indexOf(u), updatedFriend);
+                    return;
+                }
+            }
+        }
+    }
+    public final Map<OperationType, Method> mapFriendsOperations = new HashMap<>(){{
+        try {
+            put(OperationType.ADD, MainController.class.getMethod("addFriendObserverMethod", Friendship.class));
+            put(OperationType.DELETE, MainController.class.getMethod("deleteFriendObserverMethod", Friendship.class));
+            put(OperationType.UPDATE, MainController.class.getMethod("updateFriendObserverMethod", Friendship.class));
+        } catch(NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+    }};
+
     @Override
-    public void updateFriends(OperationType operationType) {
-        this.friends.clear();
-        List<User> friends = this.serviceController.getAllFriends(currentUser);
-        this.friends.addAll(friends);
+    public void updateFriends(Event event) {
+        if(event == null) {
+            System.out.println("load all data for friends list");
+            this.friends.clear();
+            List<User> friends = this.serviceController.getAllFriends(currentUser);
+            this.friends.addAll(friends);
+            return;
+        }
+        OperationType operationType = event.getOperationType();
+        try {
+            System.out.println(event.getObject());
+            this.mapFriendsOperations.get(operationType).invoke(this, event.getObject());
+            System.out.println(operationType.toString() + " Friend executed successfully");
+        } catch( Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public void addRequestObserverMethod(Request request) {
+        this.requests.add(request);
+    }
+    public void deleteRequestObserverMethod(Request request) {
+        this.requests.remove(request);
+    }
+    public final Map<OperationType, Method> mapRequestsOperations = new HashMap<>(){{
+        try {
+            put(OperationType.ADD, MainController.class.getMethod("addRequestObserverMethod", Request.class));
+            put(OperationType.DELETE, MainController.class.getMethod("deleteRequestObserverMethod", Request.class));
+            put(OperationType.UPDATE, null);
+        } catch(NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+    }};
+
+    @Override
+    public void updateRequests(Event event) {
+        if(event == null) {
+            System.out.println("load all data for requests table");
+            this.requests.clear();
+            Iterable<Request> requests = this.serviceController.showRequests(this.currentUser);
+            this.setRequests(requests);
+            return;
+        }
+        OperationType operationType = event.getOperationType();
+        try {
+            System.out.println(operationType.toString() + " Request executed successfully");
+            this.mapRequestsOperations.get(operationType).invoke(this, event.getObject());
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void addSolvedRequestObserverMethod(Request request) {
+        this.solvedRequests.add(request);
+    }
+    public final Map<OperationType, Method> mapSolvedRequestsOperations = new HashMap<>(){{
+        try {
+            put(OperationType.ADD, MainController.class.getMethod("addSolvedRequestObserverMethod", Request.class));
+            put(OperationType.DELETE, null);
+            put(OperationType.UPDATE, null);
+        } catch(NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+    }};
+
+    @Override
+    public void updateSolvedRequests(Event event) {
+        if(event == null) {
+            System.out.println("load all data for solved requests table");
+            this.solvedRequests.clear();
+            Iterable<Request> requests = this.serviceController.showAnsweredRequests(this.currentUser);
+            this.setSolvedRequests(requests);
+            return;
+        }
+        OperationType operationType = event.getOperationType();
+        try {
+            mapSolvedRequestsOperations.get(operationType).invoke(this, event.getObject());
+            System.out.println(operationType.toString() + " Solved request executed successfully");
+        } catch( Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
-    public void updateRequests(OperationType operationType) {
-        this.requests.clear();
-        Iterable<Request> requests = this.serviceController.showRequests(this.currentUser);
-        this.setRequests(requests);
-    }
-
-    @Override
-    public void updateSolvedRequests(OperationType operationType) {
-        this.solvedRequests.clear();
-        Iterable<Request> requests = this.serviceController.showAnsweredRequests(this.currentUser);
-        this.setSolvedRequests(requests);
-    }
-
-    @Override
-    public void updateUsers(OperationType operationType) {
+    public void updateUsers(Event event) {
         this.updateUsernames();
     }
 
     @Override
-    public void updateMessages(OperationType operationType) {
+    public void updateMessages(Event event) {
         // nothing
     }
 
@@ -350,26 +465,12 @@ public class MainController implements Observer {
             this.serviceController.deleteFriendship(friendship);
             Request request1 = this.serviceController.findRequest(new Request(currentUser.getId(), shownUser.getId()));
             if(request1 != null) {
-                try {
                     this.serviceController.deleteRequest(request1);
-                } catch (RepositoryException ex) {
-                    Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setTitle("Error!");
-                    alert.setHeaderText(ex.getMessage());
-                    alert.showAndWait();
-                }
             }
             else {
                 Request request2 = this.serviceController.findRequest(new Request(shownUser.getId(), currentUser.getId()));
                 if(request2 != null) {
-                    try {
                         this.serviceController.deleteRequest(request2);
-                    } catch (RepositoryException ex) {
-                        Alert alert = new Alert(Alert.AlertType.ERROR);
-                        alert.setTitle("Error!");
-                        alert.setHeaderText(ex.getMessage());
-                        alert.showAndWait();
-                    }
                 }
             }
             this.showProfile(shownUser);
