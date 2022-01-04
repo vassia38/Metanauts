@@ -290,7 +290,6 @@ public class MainController implements Observer {
     @Override
     public void updateSolvedRequests() {
         this.solvedRequests.clear();
-        //  TODO
         Iterable<Request> requests = this.serviceController.showAnsweredRequests(this.currentUser);
         this.setSolvedRequests(requests);
     }
