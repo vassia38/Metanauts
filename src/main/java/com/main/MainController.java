@@ -6,6 +6,7 @@ import com.main.model.User;
 import com.main.utils.observer.Observer;
 import com.main.model.Friendship;
 import com.main.repository.RepositoryException;
+import com.main.utils.observer.OperationType;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
@@ -257,13 +258,13 @@ public class MainController implements Observer {
         this.showProfile(user);
         this.serviceController.addObserver(this);
 
-        this.updateFriends();
+        this.updateFriends(null);
 
-        this.updateUsernames();
+        this.updateUsers(null);
 
-        this.updateRequests();
+        this.updateRequests(null);
 
-        this.updateSolvedRequests();
+        this.updateSolvedRequests(null);
     }
 
 
@@ -274,33 +275,33 @@ public class MainController implements Observer {
         this.setUsernames(users);
     }
     @Override
-    public void updateFriends() {
+    public void updateFriends(OperationType operationType) {
         this.friends.clear();
         List<User> friends = this.serviceController.getAllFriends(currentUser);
         this.friends.addAll(friends);
     }
 
     @Override
-    public void updateRequests() {
+    public void updateRequests(OperationType operationType) {
         this.requests.clear();
         Iterable<Request> requests = this.serviceController.showRequests(this.currentUser);
         this.setRequests(requests);
     }
 
     @Override
-    public void updateSolvedRequests() {
+    public void updateSolvedRequests(OperationType operationType) {
         this.solvedRequests.clear();
         Iterable<Request> requests = this.serviceController.showAnsweredRequests(this.currentUser);
         this.setSolvedRequests(requests);
     }
 
     @Override
-    public void updateUsers() {
+    public void updateUsers(OperationType operationType) {
         this.updateUsernames();
     }
 
     @Override
-    public void updateMessages() {
+    public void updateMessages(OperationType operationType) {
         // nothing
     }
 

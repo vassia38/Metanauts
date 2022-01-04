@@ -64,7 +64,7 @@ public class ControllerClass implements Controller{
         User user = userService.add(entity);
         if(user != null)
             throw new RepositoryException("User already exists!\n");
-        this.notifyObservers(UpdateType.USERS);
+        this.notifyObservers(UpdateType.USERS, OperationType.ADD);
     }
 
     /**
@@ -88,7 +88,7 @@ public class ControllerClass implements Controller{
                 friendshipService.delete(fr);
             }
         }
-        this.notifyObservers(UpdateType.USERS);
+        this.notifyObservers(UpdateType.USERS, OperationType.DELETE);
         return deleted;
     }
 
@@ -107,7 +107,7 @@ public class ControllerClass implements Controller{
         User oldState = userService.update(entity);
         if(oldState == null)
             throw new RepositoryException("User doesn't exist!\n");
-        this.notifyObservers(UpdateType.USERS);
+        this.notifyObservers(UpdateType.USERS, OperationType.UPDATE);
         return oldState;
     }
 
@@ -166,7 +166,7 @@ public class ControllerClass implements Controller{
         if(user1 == null || user2 == null)
             throw new RepositoryException("User(s) doesn't exist!\n");
         Friendship fr = friendshipService.add(entity);
-        this.notifyObservers(UpdateType.FRIENDS);
+        this.notifyObservers(UpdateType.FRIENDS, OperationType.ADD);
         if(fr != null)
             throw new RepositoryException("Friendship already exists!\n");
     }
@@ -190,7 +190,7 @@ public class ControllerClass implements Controller{
         Friendship fr = friendshipService.delete(entity);
         if(fr == null)
             throw new RepositoryException("Friendship doesn't exist!\n");
-        this.notifyObservers(UpdateType.FRIENDS);
+        this.notifyObservers(UpdateType.FRIENDS,OperationType.DELETE);
         return fr;
     }
 
@@ -206,7 +206,7 @@ public class ControllerClass implements Controller{
         Friendship oldState = friendshipService.update(entity);
         if(oldState == null)
             throw new RepositoryException("Friendship doesn't exist!\n");
-        this.notifyObservers(UpdateType.FRIENDS);
+        this.notifyObservers(UpdateType.FRIENDS, OperationType.UPDATE);
         return oldState;
     }
 
@@ -310,7 +310,7 @@ public class ControllerClass implements Controller{
         Message repliedMsg = messageService.findMessageById(repliedMessageId);
         Message msg = new Message(source,destination, message, date, repliedMsg);
         this.messageService.add(msg);
-        this.notifyObservers(UpdateType.MESSAGES);
+        this.notifyObservers(UpdateType.MESSAGES,OperationType.ADD);
     }
 
     private void setupMessage(Message msg){
@@ -364,7 +364,7 @@ public class ControllerClass implements Controller{
                 throw new RepositoryException("Friendship request already sent!");
         }
         requestService.add(request);
-        this.notifyObservers(UpdateType.REQUESTS);
+        this.notifyObservers(UpdateType.REQUESTS, OperationType.ADD);
     }
 
     private void validateAnswer(String answer) {
@@ -376,7 +376,6 @@ public class ControllerClass implements Controller{
     @Override
     public void answerRequest(Request request, String answer) {
         validateAnswer(answer);
-
         Request found = requestService.findOneById(request.getId());
         if(found == null) {
             throw new RepositoryException("Request does not exist!");
@@ -389,8 +388,8 @@ public class ControllerClass implements Controller{
         }
         Request newRequest = new Request(found.getId().getLeft(), found.getId().getRight(), answer, found.getDate());
         requestService.update(newRequest);
-        this.notifyObservers(UpdateType.REQUESTS);
-        this.notifyObservers(UpdateType.SOLVEDREQUESTS);
+        this.notifyObservers(UpdateType.REQUESTS, OperationType.UPDATE);
+        this.notifyObservers(UpdateType.SOLVEDREQUESTS, OperationType.UPDATE);
         if(answer.equals("approve")) {
             Friendship friendship = new Friendship(request.getId().getLeft(), request.getId().getRight());
             this.addFriendship(friendship);
@@ -437,7 +436,7 @@ public class ControllerClass implements Controller{
         Request re = requestService.delete(request);
         if(re == null)
             throw new RepositoryException("Request doesn't exist!\n");
-        this.notifyObservers(UpdateType.REQUESTS);
+        this.notifyObservers(UpdateType.REQUESTS, OperationType.DELETE);
         return re;
     }
 
@@ -458,19 +457,19 @@ public class ControllerClass implements Controller{
     public void notifyObservers(UpdateType updateType, OperationType operationType) {
         for (Observer observer : this.observers) {
             if(updateType == UpdateType.USERS){
-                observer.updateUsers();
+                observer.updateUsers(operationType);
             }
             if(updateType == UpdateType.FRIENDS){
-                observer.updateFriends();
+                observer.updateFriends(operationType);
             }
             if(updateType == UpdateType.REQUESTS){
-                observer.updateRequests();
+                observer.updateRequests(operationType);
             }
             if(updateType == UpdateType.MESSAGES){
-                observer.updateMessages();
+                observer.updateMessages(operationType);
             }
             if(updateType == UpdateType.SOLVEDREQUESTS){
-                observer.updateSolvedRequests();
+                observer.updateSolvedRequests(operationType);
             }
         }
     }

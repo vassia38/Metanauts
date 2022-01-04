@@ -2,9 +2,9 @@ package com.main.utils.observer;
 
 public interface Observer{
 
-    void updateFriends();
-    void updateRequests();
-    void updateSolvedRequests();
-    void updateUsers();
-    void updateMessages();
+    void updateFriends(OperationType operationType);
+    void updateRequests(OperationType operationType);
+    void updateSolvedRequests(OperationType operationType);
+    void updateUsers(OperationType operationType);
+    void updateMessages(OperationType operationType);
 }

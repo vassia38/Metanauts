@@ -4,6 +4,7 @@ import com.main.controller.Controller;
 import com.main.model.Message;
 import com.main.model.User;
 import com.main.utils.observer.Observer;
+import com.main.utils.observer.OperationType;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -47,11 +48,11 @@ public class ChatController implements Observer {
         this.serviceController.addObserver(this);
 
         this.destinationLabel.setText(destination.getFirstName() + " " + destination.getLastName());
-        this.updateMessages();
+        this.updateMessages(null);
     }
 
     @Override
-    public void updateMessages() {
+    public void updateMessages(OperationType operationType) {
         this.messages.clear();
         this.serviceController.
                 getConversation(currentUser.getUsername(), destination.getUsername()).
@@ -166,22 +167,22 @@ public class ChatController implements Observer {
         }
     }
     @Override
-    public void updateFriends() {
+    public void updateFriends(OperationType operationType) {
         //nothing
     }
 
     @Override
-    public void updateRequests() {
+    public void updateRequests(OperationType operationType) {
         //nothing
     }
 
     @Override
-    public void updateSolvedRequests() {
+    public void updateSolvedRequests(OperationType operationType) {
         //nothing
     }
 
     @Override
-    public void updateUsers() {
+    public void updateUsers(OperationType operationType) {
         //nothing
     }
 }
