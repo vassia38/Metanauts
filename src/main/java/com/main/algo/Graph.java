@@ -18,12 +18,12 @@ public class Graph {
      * @param controller a FriendshipService
      */
     public Graph(ControllerClass controller){
-        V = controller.userService.size();
-        for(User user : controller.userService.getAllEntities()){
+        V = controller.getUserService().size();
+        for(User user : controller.getUserService().getAllEntities()){
             userIDs.add(user.getId());
             adj.add(new ArrayList<>());
         }
-        for(Friendship fr : controller.friendshipService.getAllEntities()){
+        for(Friendship fr : controller.getFriendshipService().getAllEntities()){
             this.addEdge(fr.getId().getLeft(), fr.getId().getRight());
         }
     }

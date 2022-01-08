@@ -6,11 +6,8 @@ import com.main.model.FriendshipDTO;
 import com.main.model.Message;
 import com.main.model.User;
 import com.main.repository.RepositoryException;
-import com.main.service.FriendshipService;
-import com.main.service.MessageService;
+import com.main.service.*;
 import com.main.model.*;
-import com.main.service.RequestService;
-import com.main.service.UserService;
 import com.main.utils.events.*;
 import com.main.utils.observer.Observer;
 import com.main.utils.observer.OperationType;
@@ -26,17 +23,20 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public class ControllerClass implements Controller{
-    public final UserService userService;
-    public final  FriendshipService friendshipService;
-    public final MessageService messageService;
-    public final RequestService requestService;
+    private final UserService userService;
+    private final  FriendshipService friendshipService;
+    private final MessageService messageService;
+    private final RequestService requestService;
+    private final GroupService groupService;
     Graph graph;
     public ControllerClass(UserService userService, FriendshipService friendshipService,
-                           MessageService messageService,RequestService requestService){
+                           MessageService messageService, RequestService requestService,
+                           GroupService groupService){
         this.userService = userService;
         this.friendshipService = friendshipService;
         this.messageService = messageService;
         this.requestService = requestService;
+        this.groupService = groupService;
     }
 
     public UserService getUserService(){
@@ -53,6 +53,10 @@ public class ControllerClass implements Controller{
 
     public RequestService getRequestService() {
         return this.requestService;
+    }
+
+    public GroupService getGroupService() {
+        return this.groupService;
     }
 
     /**

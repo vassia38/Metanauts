@@ -4,7 +4,7 @@ import com.main.model.User;
 import com.main.repository.db.UserDbRepository;
 
 public class UserService {
-    public final UserDbRepository userRepo;
+    private final UserDbRepository userRepo;
     public UserService(UserDbRepository userRepo){
         this.userRepo = userRepo;
     }

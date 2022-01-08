@@ -158,11 +158,19 @@ public class MessageDbRepository implements Repository<Long, Message> {
 
     @Override
     public Message save(Message entity) {
+        return this.save(entity, false);
+    }
+
+    public Message save(Message entity, boolean groupMessageBool) {
         this.validator.validate(entity);
-        String insertMsg = "insert into messages (source_id, message_text," +
-                "date, replied_message_id) values (?, ?, ?, ?)";
+        String insertMsg = groupMessageBool
+                        ? "insert into group_messages (source_id, message_text," +
+                        "date, replied_message_id) values (?, ?, ?, ?)"
+                        : "insert into messages (source_id, message_text," +
+                        "date, replied_message_id) values (?, ?, ?, ?)";
         String insertDestination ="insert into source_destination (source_id, destination_id,message_id)" +
                 "values(?,?,?)";
+
         try (Connection connection = DriverManager.getConnection(url, username, password);
              PreparedStatement psMsg = connection.prepareStatement(insertMsg, Statement.RETURN_GENERATED_KEYS);
              PreparedStatement psDest = connection.prepareStatement(insertDestination)) {
@@ -175,13 +183,17 @@ public class MessageDbRepository implements Repository<Long, Message> {
             if(replied != null)
                 psMsg.setLong(4, entity.getRepliedMessage().getId());
             psMsg.executeUpdate();
-            ResultSet rs = psMsg.getGeneratedKeys();
-            rs.next();
-            for(User u : entity.getDestination()){
-                psDest.setLong(1, entity.getSource().getId());
-                psDest.setLong(2, u.getId());
-                psDest.setLong(3, rs.getLong(1));
-                psDest.executeUpdate();
+
+            // normal individual message
+            if(!groupMessageBool) {
+                ResultSet rs = psMsg.getGeneratedKeys();
+                rs.next();
+                for (User u : entity.getDestination()) {
+                    psDest.setLong(1, entity.getSource().getId());
+                    psDest.setLong(2, u.getId());
+                    psDest.setLong(3, rs.getLong(1));
+                    psDest.executeUpdate();
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();

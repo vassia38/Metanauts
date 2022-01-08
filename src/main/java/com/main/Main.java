@@ -5,14 +5,8 @@ import com.main.controller.ControllerClass;
 import com.main.model.validators.FriendshipValidator;
 import com.main.model.validators.MessageValidator;
 import com.main.model.validators.UserValidator;
-import com.main.repository.db.FriendshipDbRepository;
-import com.main.repository.db.MessageDbRepository;
-import com.main.repository.db.RequestDbRepository;
-import com.main.repository.db.UserDbRepository;
-import com.main.service.FriendshipService;
-import com.main.service.MessageService;
-import com.main.service.RequestService;
-import com.main.service.UserService;
+import com.main.repository.db.*;
+import com.main.service.*;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -40,15 +34,21 @@ public class Main extends Application {
         MessageValidator messageValidator = new MessageValidator();
         MessageDbRepository messageRepo = new MessageDbRepository(url,username,password, messageValidator);
 
+        GroupDbRepository groupRepo = new GroupDbRepository(url, username, password);
+        /*for(Group gr : groupRepo.findAll(3L)) {
+            System.out.println(gr);
+        }*/
+
         RequestDbRepository requestRepo =
                 new RequestDbRepository(url, username, password);
 
         UserService userService = new UserService(userRepo);
         FriendshipService friendshipService = new FriendshipService(friendshipRepo);
         MessageService messageService = new MessageService(messageRepo);
+        GroupService groupService = new GroupService(groupRepo);
         RequestService requestService = new RequestService(requestRepo);
-        Controller controller = new ControllerClass(userService,friendshipService,messageService, requestService);
-
+        Controller controller = new ControllerClass(userService,friendshipService,
+                messageService, requestService, groupService);
 
         FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("login-view.fxml"));
         Parent root = fxmlLoader.load();

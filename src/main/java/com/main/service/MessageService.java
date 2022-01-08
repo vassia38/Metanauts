@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Set;
 
 public class MessageService {
-    public final MessageDbRepository messageRepo;
+    private final MessageDbRepository messageRepo;
     public MessageService(MessageDbRepository messageRepo){
         this.messageRepo = messageRepo;
     }
