@@ -420,6 +420,10 @@ public class MainController implements Observer {
         // nothing
     }
 
+    @Override
+    public void updateGroups(Event event) {
+        // TODO
+    }
 
 
     public void searchUser() {

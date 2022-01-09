@@ -60,6 +60,11 @@ public class ChatController implements Observer {
                 forEach(messages::add);
     }
 
+    @Override
+    public void updateGroups(Event event) {
+        // TODO
+    }
+
     @FXML
     void sendMessage() {
         String textMessage = this.textarea.getText();
@@ -95,7 +100,7 @@ public class ChatController implements Observer {
                 if (item.getSource().getId().equals(idCurrentUser)) {
 
                     vBox.setAlignment(Pos.CENTER_RIGHT);
-                    Label label = styleLabel(item.getTextMessage());
+                    Label label = styleLabel(item.getMessageText());
                     label.setAlignment(Pos.CENTER_RIGHT);
                     var reply=item.getRepliedMessage();
                     if(reply==null)
@@ -106,7 +111,7 @@ public class ChatController implements Observer {
                         Label textReply=new Label("You replied to: " + user.getFirstName() + " " +
                                 user.getLastName());
                         textReply.setAlignment(Pos.CENTER_RIGHT);
-                        Label replyLabel=styleReplyLabel(reply.getTextMessage());
+                        Label replyLabel=styleReplyLabel(reply.getMessageText());
                         replyLabel.setAlignment(Pos.CENTER_RIGHT);
                         vBox.getChildren().addAll(textReply,replyLabel,label);
                     }
@@ -114,7 +119,7 @@ public class ChatController implements Observer {
                 //Messages from other user
                 else{
                     vBox.setAlignment(Pos.CENTER_LEFT);
-                    Label label = styleLabel(item.getTextMessage());
+                    Label label = styleLabel(item.getMessageText());
                     label.setAlignment(Pos.CENTER_LEFT);
                     var reply=item.getRepliedMessage();
                     if(reply==null)
@@ -125,7 +130,7 @@ public class ChatController implements Observer {
                         Label textReply= new Label("Reply to: " + user.getFirstName() + " " +
                                 user.getLastName());
                         textReply.setAlignment(Pos.CENTER_LEFT);
-                        Label replyLabel=styleReplyLabel(reply.getTextMessage());
+                        Label replyLabel=styleReplyLabel(reply.getMessageText());
                         replyLabel.setAlignment(Pos.CENTER_LEFT);
                         vBox.getChildren().addAll(textReply,replyLabel,label);
                     }

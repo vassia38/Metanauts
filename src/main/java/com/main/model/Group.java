@@ -19,7 +19,7 @@ public class Group extends Entity<Long> {
 
     public Group(String name, List<Long> idsMembers) {
         this.name = name;
-        this.idsMembers = idsMembers;
+        this.idsMembers = idsMembers == null ? new ArrayList<>() : idsMembers;
     }
 
     public Group(Long id, String name, List<Long> idsMembers) {
@@ -37,6 +37,16 @@ public class Group extends Entity<Long> {
 
     public List<Long> getIdsMembers() {
         return this.idsMembers;
+    }
+
+    public void addMemberId(Long id) {
+        this.idsMembers.add(id);
+    }
+
+    public Long deleteMemberId(Long id) {
+        if(this.idsMembers.remove(id))
+            return id;
+        return null;
     }
 
     public String toString(){

@@ -15,10 +15,7 @@ import com.main.utils.observer.UpdateType;
 
 import java.time.LocalDateTime;
 import java.time.Month;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -39,22 +36,27 @@ public class ControllerClass implements Controller{
         this.groupService = groupService;
     }
 
+    @Override
     public UserService getUserService(){
         return this.userService;
     }
 
+    @Override
     public FriendshipService getFriendshipService() {
         return this.friendshipService;
     }
 
+    @Override
     public MessageService getMessageService() {
         return this.messageService;
     }
 
+    @Override
     public RequestService getRequestService() {
         return this.requestService;
     }
 
+    @Override
     public GroupService getGroupService() {
         return this.groupService;
     }
@@ -308,6 +310,8 @@ public class ControllerClass implements Controller{
                         findUserById(x.getId().getLeft()).getFirstName(), x.getDate()));
     }
 
+
+
     @Override
     public void sendMessage(User source, List<String> destinationUsernames, String message, LocalDateTime date, Long repliedMessageId) {
         List<User> destination = new ArrayList<>();
@@ -343,6 +347,18 @@ public class ControllerClass implements Controller{
         }
     }
 
+    private void setupMessage(GroupMessage msg) {
+        User user = this.findUserById(msg.getSource().getId());
+        msg.setSource(user);
+        GroupMessage repliedMessage = msg.getRepliedMessage();
+        if(repliedMessage != null) {
+            repliedMessage = messageService.findGroupMessageById(repliedMessage.getId());
+            User rUser = this.findUserById(repliedMessage.getSource().getId());
+            repliedMessage.setSource(rUser);
+            msg.setRepliedMessage(repliedMessage);
+        }
+    }
+
     @Override
     public Iterable<Message> getAllMesagesOfUser(String username) {
         User source = this.userService.findOneByUsername(username);
@@ -365,6 +381,69 @@ public class ControllerClass implements Controller{
         }
         return messages;
     }
+
+    @Override
+    public Iterable<GroupMessage> getGroupConversation(User user, String nameGroup) {
+        Group group = this.findGroupByName(nameGroup, user);
+        Set<GroupMessage> messages = this.messageService.findGroupConversation(group.getId());
+        for(GroupMessage m : messages) {
+            setupMessage(m);
+        }
+        return messages;
+    }
+
+    @Override
+    public void sendGroupMessage(User source, Long idGroup, String message, LocalDateTime date) {
+        if(this.groupService.findGroupById(idGroup) == null)
+            throw new RepositoryException("Group not found!");
+        GroupMessage msg = new GroupMessage(source, idGroup, message, date);
+        this.messageService.add(msg);
+        this.notifyObservers(UpdateType.MESSAGES, new GroupMessageEvent(msg, OperationType.ADD));
+    }
+
+    @Override
+    public void sendGroupMessage(User source, Long idGroup, String message, LocalDateTime date, Long repliedMessageId) {
+        if(this.groupService.findGroupById(idGroup) == null)
+            throw new RepositoryException("Group not found!");
+        GroupMessage repliedMsg = messageService.findGroupMessageById(repliedMessageId);
+        GroupMessage msg = new GroupMessage(source, idGroup, message, date, repliedMsg);
+        this.messageService.add(msg);
+        this.notifyObservers(UpdateType.MESSAGES, new GroupMessageEvent(msg, OperationType.ADD));
+    }
+
+    @Override
+    public void createGroup(String nameGroup, List<String> usernames) {
+        if( nameGroup != null && !Objects.equals(nameGroup, "")){
+            Set<Long> idsList = new HashSet<>();
+            for(String u : usernames) {
+                User user = this.userService.findOneByUsername(u);
+                if(user == null) {
+                    throw new RepositoryException("User '" + u + "' not found in repo!\n");
+                }
+                idsList.add(user.getId());
+            }
+            Group entity = new Group(nameGroup, idsList.stream().toList());
+            this.groupService.add(entity);
+            this.notifyObservers(UpdateType.GROUPS,
+                    new GroupEvent(entity, OperationType.ADD));
+        }
+    }
+
+    @Override
+    public void addMemberToGroup(Group group, User user) {
+        this.groupService.addMemberToGroup(group, user);
+        this.notifyObservers(UpdateType.GROUPS, new GroupEvent(group, OperationType.UPDATE));
+    }
+
+    @Override
+    public Group findGroupByName(String name, User user) {
+        Group group = this.groupService.findGroupByName(name, user);
+        if(group == null)
+            throw new RepositoryException("Group not found!");
+        return group;
+    }
+
+
 
     @Override
     public void addRequest(Request request) {
@@ -462,6 +541,8 @@ public class ControllerClass implements Controller{
     public Friendship findFriendshipById(Tuple<Long,Long> id) {
         return friendshipService.findFriendshipById(id);
     }
+
+
 
 
     private final List<Observer> observers = new ArrayList<>();

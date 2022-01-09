@@ -92,14 +92,10 @@ public class Message extends Entity<Long> implements Comparable<Message>{
                 " :\n\t " + repliedMessage.getMessageText() + "}";
     }
 
-    public String getTextMessage() {
-        return this.messageText;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof User that)) return false;
+        if (!(o instanceof Message that)) return false;
         return getId().equals(that.getId());
     }
 

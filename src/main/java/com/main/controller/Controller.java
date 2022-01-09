@@ -2,10 +2,7 @@ package com.main.controller;
 
 
 import com.main.model.*;
-import com.main.service.FriendshipService;
-import com.main.service.MessageService;
-import com.main.service.RequestService;
-import com.main.service.UserService;
+import com.main.service.*;
 import com.main.utils.observer.Observable;
 
 import java.time.LocalDateTime;
@@ -19,13 +16,17 @@ public interface Controller extends Observable {
     FriendshipService getFriendshipService();
     MessageService getMessageService();
     RequestService getRequestService();
+    GroupService getGroupService();
 
+    // USERS
     void addUser(User entity);
     User deleteUser(User entity);
     User updateUser(User entity, String firstName, String lastName);
     User findUserById(Long id);
     User findUserByUsername(String username);
     Iterable<User> getAllUsers();
+
+    // FRIENDS
     void addFriendship(Friendship entity);
     Friendship deleteFriendship(Friendship entity);
     Friendship updateFriendship(Friendship entity);
@@ -37,9 +38,21 @@ public interface Controller extends Observable {
     Stream<FriendshipDTO> getLeftFriends(User user, List<Friendship> friendshipList);
     Stream<FriendshipDTO> getRightFriendsMonth(User user, Month month, List<Friendship> friendshipList);
     Stream<FriendshipDTO> getLeftFriendsMonth(User user, Month month, List<Friendship> friendshipList);
-    void sendMessage(User source, List<String> destinationUsernames, String message, LocalDateTime date, Long repliedMessageId);
+
+    // MESSAGES
     Iterable<Message> getAllMesagesOfUser(String username);
+    void sendMessage(User source, List<String> destinationUsernames, String message, LocalDateTime date, Long repliedMessageId);
     Iterable<Message> getConversation(String username1, String username2);
+
+    // GROUPS & GROUP MESSAGES
+    void createGroup(String nameGroup, List<String> usernames);
+    void sendGroupMessage(User source, Long idGroup, String message, LocalDateTime date, Long repliedMessageId);
+    void sendGroupMessage(User source, Long idGroup, String message, LocalDateTime date);
+    void addMemberToGroup(Group group, User user);
+    Iterable<GroupMessage> getGroupConversation(User user, String nameGroup);
+    Group findGroupByName(String name, User user);
+
+    // REQUESTS
     void addRequest(Request request);
     void answerRequest(Request request, String answer);
     Iterable<Request> showRequests(User user);

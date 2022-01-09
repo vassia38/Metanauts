@@ -9,4 +9,5 @@ public interface Observer{
     void updateSolvedRequests(Event event);
     void updateUsers(Event event);
     void updateMessages(Event event);
+    void updateGroups(Event event);
 }

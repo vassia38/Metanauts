@@ -1,6 +1,7 @@
 package com.main.repository.db;
 
 import com.main.model.Group;
+import com.main.model.GroupMessage;
 import com.main.repository.Repository;
 
 import java.sql.*;
@@ -97,6 +98,9 @@ public class GroupDbRepository implements Repository<Long, Group> {
 
     @Override
     public Group save(Group entity) {
+        if(entity == null) {
+            throw new IllegalArgumentException("entity must not be null");
+        }
         String sqlGroupInsert = "insert into groups (name_group) values (?)";
         String sqlGroupMemberInsert = "insert into group_members (id_group, id_user) values (?, ?)";
         try (Connection connection = DriverManager.getConnection(url, username, password);
@@ -105,7 +109,6 @@ public class GroupDbRepository implements Repository<Long, Group> {
             psGroupInsert.setString(1, entity.getName());
             psGroupInsert.executeUpdate();
             ResultSet rs = psGroupInsert.getGeneratedKeys();
-            System.out.println(entity.getIdsMembers());
             if(entity.getIdsMembers().size() > 0 && rs.next()) {
                 long idGroup = rs.getLong(1);
                 System.out.println(idGroup);
@@ -119,6 +122,22 @@ public class GroupDbRepository implements Repository<Long, Group> {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public void addMember(Long id, Long userId) {
+        if(id == null)
+            throw new IllegalArgumentException("id must not be null");
+        if (userId==null)
+            throw new IllegalArgumentException("User id must not be null");
+        String sqlInsert = "insert into group_members(id_group, id_user) values(?,?)";
+        try(Connection connection = DriverManager.getConnection(url, username, password);
+            PreparedStatement psInsert = connection.prepareStatement(sqlInsert)) {
+            psInsert.setLong(1, id);
+            psInsert.setLong(2, userId);
+            psInsert.executeUpdate();
+        } catch(SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
