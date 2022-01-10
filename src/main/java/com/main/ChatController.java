@@ -1,6 +1,7 @@
 package com.main;
 
 import com.main.controller.Controller;
+import com.main.model.GroupMessage;
 import com.main.model.Message;
 import com.main.model.User;
 import com.main.utils.events.Event;
@@ -16,9 +17,12 @@ import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ChatController implements Observer {
 
@@ -54,12 +58,34 @@ public class ChatController implements Observer {
         this.updateMessages(null);
     }
 
+
+    public void addMessageObserverMethod(Message msg) {
+        this.messages.add(msg);
+    }
+    public final Map<OperationType, Method> mapMessagesOperations = new HashMap<>(){{
+        try {
+            put(OperationType.ADD, ChatController.class.getMethod("addMessageObserverMethod", Message.class));
+            put(OperationType.DELETE, null);
+            put(OperationType.UPDATE, null);
+        } catch(NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+    }};
     @Override
     public void updateMessages(Event event) {
-        this.messages.clear();
-        this.serviceController.
-                getConversation(currentUser.getUsername(), destination.getUsername()).
-                forEach(messages::add);
+        if(event == null) {
+            this.messages.clear();
+            this.serviceController.
+                    getConversation(currentUser.getUsername(), destination.getUsername()).
+                    forEach(messages::add);
+            return;
+        }
+        OperationType operationType = event.getOperationType();
+        try {
+            mapMessagesOperations.get(operationType).invoke(this, event.getObject());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML
@@ -179,6 +205,11 @@ public class ChatController implements Observer {
 
     @Override
     public void updateGroups(Event event) {
+        //nothing
+    }
+
+    @Override
+    public void updateGroupMessages(Event event) {
         //nothing
     }
 

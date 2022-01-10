@@ -48,9 +48,16 @@ public class Request extends Entity<Tuple<Long,Long>> {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Request that)) return false;
-        return this.getId().equals(that.getId());
+        if (this == o)
+        {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass())
+        {
+            return false;
+        }
+        Request other = (Request) o;
+        return Objects.equals(this.id, other.id);
     }
 
     @Override

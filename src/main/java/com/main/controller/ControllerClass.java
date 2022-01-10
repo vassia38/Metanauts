@@ -321,6 +321,8 @@ public class ControllerClass implements Controller{
         }
         Message repliedMsg = messageService.findMessageById(repliedMessageId);
         Message msg = new Message(source,destination, message, date, repliedMsg);
+        if(repliedMsg != null)
+            setupMessage(msg);
         this.messageService.add(msg);
         this.notifyObservers(UpdateType.MESSAGES,
                 new MessageEvent(msg, OperationType.ADD));
@@ -398,7 +400,7 @@ public class ControllerClass implements Controller{
             throw new RepositoryException("Group not found!");
         GroupMessage msg = new GroupMessage(source, idGroup, message, date);
         this.messageService.add(msg);
-        this.notifyObservers(UpdateType.MESSAGES, new GroupMessageEvent(msg, OperationType.ADD));
+        this.notifyObservers(UpdateType.GROUPMESSAGES, new GroupMessageEvent(msg, OperationType.ADD));
     }
 
     @Override
@@ -407,8 +409,9 @@ public class ControllerClass implements Controller{
             throw new RepositoryException("Group not found!");
         GroupMessage repliedMsg = messageService.findGroupMessageById(repliedMessageId);
         GroupMessage msg = new GroupMessage(source, idGroup, message, date, repliedMsg);
+        setupMessage(msg);
         this.messageService.add(msg);
-        this.notifyObservers(UpdateType.MESSAGES, new GroupMessageEvent(msg, OperationType.ADD));
+        this.notifyObservers(UpdateType.GROUPMESSAGES, new GroupMessageEvent(msg, OperationType.ADD));
     }
 
     @Override
@@ -438,7 +441,7 @@ public class ControllerClass implements Controller{
     }
 
     @Override
-    public Iterable<Group> findAllGroups(User user) {
+    public Iterable<Group> getAllGroups(User user) {
         return this.groupService.findAll(user.getId());
     }
 
@@ -487,7 +490,7 @@ public class ControllerClass implements Controller{
     }
 
     @Override
-    public Iterable<Request> showRequests(User user) {
+    public Iterable<Request> getAllRequests(User user) {
         Iterable<Request> requests = requestService.getAllEntities();
         ArrayList<Request> requestsToUser = new ArrayList<>();
         for(Request request : requests) {
@@ -499,7 +502,7 @@ public class ControllerClass implements Controller{
     }
 
     @Override
-    public Iterable<Request> showAnsweredRequests(User user) {
+    public Iterable<Request> getAllAnsweredRequests(User user) {
         Iterable<Request> requests = requestService.getAllEntities();
         ArrayList<Request> requestsToUser = new ArrayList<>();
         for(Request request : requests) {
@@ -560,6 +563,9 @@ public class ControllerClass implements Controller{
             }
             if(updateType == UpdateType.MESSAGES){
                 observer.updateMessages(event);
+            }
+            if(updateType == UpdateType.GROUPMESSAGES){
+                observer.updateGroupMessages(event);
             }
             if(updateType == UpdateType.SOLVEDREQUESTS){
                 observer.updateSolvedRequests(event);

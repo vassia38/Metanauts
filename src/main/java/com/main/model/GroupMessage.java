@@ -2,6 +2,7 @@ package com.main.model;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Objects;
 
 public class GroupMessage extends Entity<Long> implements Comparable<GroupMessage>{
     Message message;
@@ -96,8 +97,15 @@ public class GroupMessage extends Entity<Long> implements Comparable<GroupMessag
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof GroupMessage that)) return false;
-        return getId().equals(that.getId());
+        if (this == o)
+        {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass())
+        {
+            return false;
+        }
+        GroupMessage other = (GroupMessage) o;
+        return Objects.equals(this.id, other.id);
     }
 }

@@ -2,6 +2,7 @@ package com.main.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Group extends Entity<Long> {
     private String name;
@@ -55,5 +56,19 @@ public class Group extends Entity<Long> {
             str.append(" ").append(id);
         }
         return str.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+        {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass())
+        {
+            return false;
+        }
+        Group other = (Group) o;
+        return Objects.equals(this.id, other.id);
     }
 }

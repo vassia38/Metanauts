@@ -52,7 +52,7 @@ public class GroupChatController implements Observer {
         this.currentUser = currentUser;
         this.group = group;
         this.serviceController.addObserver(this);
-        this.updateMessages(null);
+        this.updateGroupMessages(null);
         this.groupLabel.setText(group.getName());
     }
 
@@ -69,35 +69,30 @@ public class GroupChatController implements Observer {
         }
     }};
     @Override
-    public void updateMessages(Event event) {
+    public void updateGroupMessages(Event event) {
         if(event == null) {
             this.messages.clear();
             this.serviceController.
                     getGroupConversation(currentUser, group.getName()).
                     forEach(messages::add);
+            messages.forEach(System.out::println);
             return;
         }
-        this.messages.clear();
-        this.serviceController.
-                getGroupConversation(currentUser, group.getName()).
-                forEach(messages::add);
-        // TODO TODO TODO
-        // TODO TODO TODO
-        // TODO TODO TODO
-        // TODO TODO TODO
-
-        /*OperationType operationType = event.getOperationType();
+        OperationType operationType = event.getOperationType();
         try {
             this.mapMessagesOperations.get(operationType).invoke(this, event.getObject());
         } catch(Exception e) {
+            System.out.println(event.getObject());
+            System.out.println(event.getOperationType());
             e.printStackTrace();
-        }*/
+        }
     }
 
     @FXML
     void sendMessage() {
         String textMessage = this.textarea.getText();
         GroupMessage replied = this.messagesView.getSelectionModel().getSelectedItem();
+        System.out.println(replied);
         if(replied != null)
             this.serviceController.sendGroupMessage(currentUser, group.getId(), textMessage,
                     LocalDateTime.now(), replied.getId());
@@ -237,5 +232,10 @@ public class GroupChatController implements Observer {
     @Override
     public void updateGroups(Event event) {
         //nothing
+    }
+
+    @Override
+    public void updateMessages(Event event) {
+        //
     }
 }

@@ -37,9 +37,16 @@ public class Friendship extends Entity<Tuple<Long,Long>> {
     }
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Friendship that)) return false;
-        return this.getId().equals(that.getId());
+        if (this == o)
+        {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass())
+        {
+            return false;
+        }
+        Friendship other = (Friendship) o;
+        return Objects.equals(this.id, other.id);
     }
 
     @Override

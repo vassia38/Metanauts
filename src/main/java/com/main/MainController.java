@@ -304,7 +304,6 @@ public class MainController implements Observer {
         }
     }
 
-
     /***
      * custom initializer to be explicitly called after the fxml file has been loaded
      * @param serviceController Controller
@@ -317,13 +316,9 @@ public class MainController implements Observer {
         this.serviceController.addObserver(this);
 
         this.updateFriends(null);
-
         this.updateUsers(null);
-
         this.updateRequests(null);
-
         this.updateSolvedRequests(null);
-
         this.updateGroups(null);
     }
 
@@ -417,7 +412,7 @@ public class MainController implements Observer {
         if(event == null) {
             System.out.println("load all data for requests table");
             this.requests.clear();
-            Iterable<Request> requests = this.serviceController.showRequests(this.currentUser);
+            Iterable<Request> requests = this.serviceController.getAllRequests(this.currentUser);
             this.setRequests(requests);
             return;
         }
@@ -449,7 +444,7 @@ public class MainController implements Observer {
         if(event == null) {
             System.out.println("load all data for solved requests table");
             this.solvedRequests.clear();
-            Iterable<Request> requests = this.serviceController.showAnsweredRequests(this.currentUser);
+            Iterable<Request> requests = this.serviceController.getAllAnsweredRequests(this.currentUser);
             this.setSolvedRequests(requests);
             return;
         }
@@ -460,16 +455,6 @@ public class MainController implements Observer {
         } catch( Exception e) {
             e.printStackTrace();
         }
-    }
-
-    @Override
-    public void updateUsers(Event event) {
-        this.updateUsernames();
-    }
-
-    @Override
-    public void updateMessages(Event event) {
-        // nothing
     }
 
     //GROUPS OBSERVER METHODS
@@ -490,7 +475,7 @@ public class MainController implements Observer {
         if(event == null) {
             System.out.println("load all data for requests table");
             this.groups.clear();
-            Iterable<Group> groups = this.serviceController.findAllGroups(this.currentUser);
+            Iterable<Group> groups = this.serviceController.getAllGroups(this.currentUser);
             this.setGroups(groups);
             return;
         }
@@ -646,5 +631,16 @@ public class MainController implements Observer {
         }
     }
 
+    @Override
+    public void updateUsers(Event event) {
+        this.updateUsernames();
+    }
+    @Override
+    public void updateMessages(Event event) {
+        // nothing
+    }
+    @Override
+    public void updateGroupMessages(Event event) {
 
+    }
 }
