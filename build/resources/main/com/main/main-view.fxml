@@ -21,12 +21,16 @@
 
     <HBox prefHeight="500">
         <VBox prefHeight="500">
-            <TextField promptText="Search friend list"/>
             <TableView fx:id="tableViewFriends" styleClass="table">
                 <columns>
                     <TableColumn fx:id="friendUser" minWidth="100" text="Username" />
                     <TableColumn fx:id="first_name" minWidth="100" text="First Name" />
                     <TableColumn fx:id="last_name" minWidth="100" text="Last Name" />
+                </columns>
+            </TableView>
+            <TableView fx:id="tableViewGroups">
+                <columns>
+                    <TableColumn fx:id="groupName" minWidth="300" text="Group name"/>
                 </columns>
             </TableView>
         </VBox>

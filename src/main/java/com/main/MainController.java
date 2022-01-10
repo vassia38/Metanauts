@@ -1,6 +1,7 @@
 package com.main;
 
 import com.main.controller.Controller;
+import com.main.model.Group;
 import com.main.model.Request;
 import com.main.model.User;
 import com.main.utils.events.Event;
@@ -35,6 +36,7 @@ public class MainController implements Observer {
     ObservableList<Request> requests = FXCollections.observableArrayList();
     ObservableList<Request> solvedRequests = FXCollections.observableArrayList();
     ObservableList<User> friends = FXCollections.observableArrayList();
+    ObservableList<Group> groups = FXCollections.observableArrayList();
     FilteredList<String> filteredItems = new FilteredList<>(usernames);
     private User shownUser;
 
@@ -76,6 +78,11 @@ public class MainController implements Observer {
     TableView<User> tableViewFriends;
 
     @FXML
+    TableView<Group> tableViewGroups;
+    @FXML
+    TableColumn<Group, String> groupName;
+
+    @FXML
     TableView<Request> historyTableViewRequests;
     @FXML
     TableColumn<Request, String> historyFromUser;
@@ -102,6 +109,7 @@ public class MainController implements Observer {
                 this.showProfile(user);
             }
         });
+
         this.addFriendButton.setVisible(false);
         this.removeFriendButton.setVisible(false);
         this.cancelRequestButton.setVisible(false);
@@ -115,7 +123,10 @@ public class MainController implements Observer {
         friendUser.setCellValueFactory(new PropertyValueFactory<>("username"));
         first_name.setCellValueFactory(new PropertyValueFactory<>("firstName"));
         last_name.setCellValueFactory(new PropertyValueFactory<>("lastName"));
-        tableViewFriends.setItems(friends);
+        tableViewFriends.setItems(this.friends);
+
+        groupName.setCellValueFactory(new PropertyValueFactory<>("name"));
+        tableViewGroups.setItems(this.groups);
 
         comboBoxSearch.getEditor().textProperty().addListener((obs, oldValue, newValue) -> {
             final TextField editor = comboBoxSearch.getEditor();
@@ -137,60 +148,60 @@ public class MainController implements Observer {
         });
 
         acceptFriendship.setCellValueFactory(
-            param -> new ReadOnlyObjectWrapper<>(param.getValue())
+                param -> new ReadOnlyObjectWrapper<>(param.getValue())
         );
         acceptFriendship.setCellFactory(
-            param -> new TableCell<>() {
-                private final Button addButton = new Button("Accept");
+                param -> new TableCell<>() {
+                    private final Button addButton = new Button("Accept");
 
-                @Override
-                protected void updateItem(Request req, boolean empty) {
-                    super.updateItem(req, empty);
-                    if (req == null) {
-                        setGraphic(null);
-                        return;
+                    @Override
+                    protected void updateItem(Request req, boolean empty) {
+                        super.updateItem(req, empty);
+                        if (req == null) {
+                            setGraphic(null);
+                            return;
+                        }
+                        setGraphic(addButton);
+                        addButton.setOnAction(
+                                event -> {
+                                    serviceController.answerRequest(req,"approve");
+                                    /*updateFriends();*/
+                                    getTableView().getItems().remove(req);
+                                }
+                        );
                     }
-                    setGraphic(addButton);
-                    addButton.setOnAction(
-                            event -> {
-                                serviceController.answerRequest(req,"approve");
-                                /*updateFriends();*/
-                                getTableView().getItems().remove(req);
-                            }
-                    );
-                }
-            });
+                });
 
         rejectFriendship.setCellValueFactory(
-            param -> new ReadOnlyObjectWrapper<>(param.getValue())
+                param -> new ReadOnlyObjectWrapper<>(param.getValue())
         );
         rejectFriendship.setCellFactory(
-            param -> new TableCell<>() {
-                private final Button deleteButton = new Button("Reject");
+                param -> new TableCell<>() {
+                    private final Button deleteButton = new Button("Reject");
 
-                @Override
-                protected void updateItem(Request req, boolean empty) {
-                    super.updateItem(req, empty);
-                    if (req == null) {
-                        setGraphic(null);
-                        return;
+                    @Override
+                    protected void updateItem(Request req, boolean empty) {
+                        super.updateItem(req, empty);
+                        if (req == null) {
+                            setGraphic(null);
+                            return;
+                        }
+                        setGraphic(deleteButton);
+                        deleteButton.setOnAction(
+                                event -> {
+                                    serviceController.answerRequest(req,"reject");
+                                    getTableView().getItems().remove(req);
+                                }
+                        );
                     }
-                    setGraphic(deleteButton);
-                    deleteButton.setOnAction(
-                            event -> {
-                                serviceController.answerRequest(req,"reject");
-                                getTableView().getItems().remove(req);
-                            }
-                    );
-                }
-            });
+                });
 
         tableViewRequests.setItems(this.requests);
 
         historyFromUser.setCellValueFactory(param -> {
             Long id = param.getValue().getId().getLeft().equals(currentUser.getId())
-                        ? param.getValue().getId().getRight()
-                        : param.getValue().getId().getLeft();
+                    ? param.getValue().getId().getRight()
+                    : param.getValue().getId().getLeft();
             User user = this.serviceController.findUserById(id);
             return new ReadOnlyObjectWrapper<>(user.getUsername());
         });
@@ -272,6 +283,8 @@ public class MainController implements Observer {
         this.updateRequests(null);
 
         this.updateSolvedRequests(null);
+
+        this.updateGroups(null);
     }
 
 
@@ -282,6 +295,7 @@ public class MainController implements Observer {
         this.setUsernames(users);
     }
 
+    // FRIENDS OBSERVER METHODS
     private User findUserByFriendship(Friendship friendship) {
         if(friendship == null)
             return null;
@@ -323,7 +337,6 @@ public class MainController implements Observer {
             e.printStackTrace();
         }
     }};
-
     @Override
     public void updateFriends(Event event) {
         if(event == null) {
@@ -343,7 +356,7 @@ public class MainController implements Observer {
         }
     }
 
-
+    //REQUESTS OBSERVER METHODS
     public void addRequestObserverMethod(Request request) {
         this.requests.add(request);
     }
@@ -359,7 +372,6 @@ public class MainController implements Observer {
             e.printStackTrace();
         }
     }};
-
     @Override
     public void updateRequests(Event event) {
         if(event == null) {
@@ -379,6 +391,7 @@ public class MainController implements Observer {
         }
     }
 
+    //SOLVED REQUESTS OBSERVER METHODS
     public void addSolvedRequestObserverMethod(Request request) {
         this.solvedRequests.add(request);
     }
@@ -391,7 +404,6 @@ public class MainController implements Observer {
             e.printStackTrace();
         }
     }};
-
     @Override
     public void updateSolvedRequests(Event event) {
         if(event == null) {
@@ -420,9 +432,35 @@ public class MainController implements Observer {
         // nothing
     }
 
+    //GROUPS OBSERVER METHODS
+    public void addGroupObserverMethod(Group gr) {
+        this.groups.add(gr);
+    }
+    public final Map<OperationType, Method> mapGroupsOperations = new HashMap<>(){{
+        try {
+            put(OperationType.ADD, MainController.class.getMethod("addGroupObserverMethod", Group.class));
+            put(OperationType.DELETE, null);
+            put(OperationType.UPDATE, null);
+        } catch(NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+    }};
     @Override
     public void updateGroups(Event event) {
-        // TODO
+        if(event == null) {
+            System.out.println("load all data for requests table");
+            this.groups.clear();
+            Iterable<Group> groups = this.serviceController.findAllGroups(this.currentUser);
+            this.setGroups(groups);
+            return;
+        }
+        OperationType operationType = event.getOperationType();
+        try {
+            mapGroupsOperations.get(operationType).invoke(this, event.getObject());
+            System.out.println(operationType.toString() + " Group executed succesfully");
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -469,12 +507,12 @@ public class MainController implements Observer {
             this.serviceController.deleteFriendship(friendship);
             Request request1 = this.serviceController.findRequest(new Request(currentUser.getId(), shownUser.getId()));
             if(request1 != null) {
-                    this.serviceController.deleteRequest(request1);
+                this.serviceController.deleteRequest(request1);
             }
             else {
                 Request request2 = this.serviceController.findRequest(new Request(shownUser.getId(), currentUser.getId()));
                 if(request2 != null) {
-                        this.serviceController.deleteRequest(request2);
+                    this.serviceController.deleteRequest(request2);
                 }
             }
             this.showProfile(shownUser);
@@ -484,6 +522,10 @@ public class MainController implements Observer {
             alert.setHeaderText(ex.getMessage());
             alert.showAndWait();
         }
+    }
+
+    public void setGroups(Iterable<Group> groups) {
+        groups.forEach(gr -> this.groups.add(gr));
     }
 
     public void setRequests(Iterable<Request> requests) {

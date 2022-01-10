@@ -437,6 +437,11 @@ public class ControllerClass implements Controller{
         return group;
     }
 
+    @Override
+    public Iterable<Group> findAllGroups(User user) {
+        return this.groupService.findAll(user.getId());
+    }
+
 
 
     @Override

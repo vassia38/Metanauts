@@ -51,6 +51,7 @@ public interface Controller extends Observable {
     void addMemberToGroup(Group group, User user);
     Iterable<GroupMessage> getGroupConversation(User user, String nameGroup);
     Group findGroupByName(String name, User user);
+    Iterable<Group> findAllGroups(User user);
 
     // REQUESTS
     void addRequest(Request request);
