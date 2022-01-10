@@ -11,7 +11,7 @@
     <style>
         <URL value="@style.css"/>
     </style>
-    <TableView fx:id="tableViewFriends" selectionModel="MULTIPLE" styleClass="table">
+    <TableView fx:id="tableViewFriends" styleClass="table">
         <columns>
             <TableColumn fx:id="friendUser" minWidth="100" text="Username" />
             <TableColumn fx:id="first_name" minWidth="100" text="First Name" />
@@ -19,7 +19,7 @@
         </columns>
     </TableView>
     <HBox>
-        <TextArea fx:id="nameTextArea" promptText="Group name"/>
+        <TextArea promptText="Group name"/>
         <Button fx:id="createButton" onAction="#createGroup" text="Create"/>
     </HBox>
 </VBox>

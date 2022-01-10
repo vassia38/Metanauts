@@ -6,12 +6,13 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.Node;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.stage.Stage;
 
 public class CreateGroupController {
+
     private User currentUser;
     private Controller serviceController;
     ObservableList<User> friends = FXCollections.observableArrayList();
@@ -25,6 +26,8 @@ public class CreateGroupController {
     @FXML
     TableView<User> tableViewFriends;
 
+    @FXML
+    TextArea nameTextArea;
     @FXML
     Button createButton;
 
@@ -51,6 +54,27 @@ public class CreateGroupController {
     }
 
     public void createGroup(ActionEvent actionEvent) {
-
+        String groupName = this.nameTextArea.getText();
+        if(groupName == null) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Cannot create group");
+            alert.setHeaderText("Group name is empty!");
+            alert.showAndWait();
+            return;
+        }
+        if(tableViewFriends.getSelectionModel().getSelectedItems() == null) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Cannot create group");
+            alert.setHeaderText("No person selected!");
+            alert.showAndWait();
+            return;
+        }
+        this.serviceController.createGroup(groupName, tableViewFriends.getSelectionModel().getSelectedItems());
+        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmation.setTitle("Group created succesfully!");
+        confirmation.show();
+        Node source = (Node)actionEvent.getSource();
+        Stage stage =(Stage) source.getScene().getWindow();
+        stage.close();
     }
 }
