@@ -45,7 +45,7 @@ public interface Controller extends Observable {
     Iterable<Message> getConversation(String username1, String username2);
 
     // GROUPS & GROUP MESSAGES
-    void createGroup(String nameGroup, List<String> usernames);
+    void createGroup(String nameGroup, List<User> users);
     void sendGroupMessage(User source, Long idGroup, String message, LocalDateTime date, Long repliedMessageId);
     void sendGroupMessage(User source, Long idGroup, String message, LocalDateTime date);
     void addMemberToGroup(Group group, User user);

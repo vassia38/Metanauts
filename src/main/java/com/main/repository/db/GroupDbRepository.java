@@ -1,7 +1,6 @@
 package com.main.repository.db;
 
 import com.main.model.Group;
-import com.main.model.GroupMessage;
 import com.main.repository.Repository;
 
 import java.sql.*;

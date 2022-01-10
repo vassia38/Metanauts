@@ -412,16 +412,10 @@ public class ControllerClass implements Controller{
     }
 
     @Override
-    public void createGroup(String nameGroup, List<String> usernames) {
+    public void createGroup(String nameGroup, List<User> users) {
         if( nameGroup != null && !Objects.equals(nameGroup, "")){
             Set<Long> idsList = new HashSet<>();
-            for(String u : usernames) {
-                User user = this.userService.findOneByUsername(u);
-                if(user == null) {
-                    throw new RepositoryException("User '" + u + "' not found in repo!\n");
-                }
-                idsList.add(user.getId());
-            }
+            users.forEach( u -> idsList.add(u.getId()));
             Group entity = new Group(nameGroup, idsList.stream().toList());
             this.groupService.add(entity);
             this.notifyObservers(UpdateType.GROUPS,
