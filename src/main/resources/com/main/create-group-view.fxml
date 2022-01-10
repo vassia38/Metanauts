@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import java.net.URL?>
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.main.CreateGroupController"
+      prefHeight="400.0" prefWidth="600.0">
+    <style>
+        <URL value="@style.css"/>
+    </style>
+    <TableView fx:id="tableViewFriends" styleClass="table">
+        <columns>
+            <TableColumn fx:id="friendUser" minWidth="100" text="Username" />
+            <TableColumn fx:id="first_name" minWidth="100" text="First Name" />
+            <TableColumn fx:id="last_name" minWidth="100" text="Last Name" />
+        </columns>
+    </TableView>
+    <HBox>
+        <TextArea promptText="Group name"/>
+        <Button fx:id="createButton" onAction="#createGroup" text="Create"/>
+    </HBox>
+</VBox>
