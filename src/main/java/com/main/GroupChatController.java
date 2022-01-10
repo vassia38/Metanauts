@@ -77,12 +77,21 @@ public class GroupChatController implements Observer {
                     forEach(messages::add);
             return;
         }
-        OperationType operationType = event.getOperationType();
+        this.messages.clear();
+        this.serviceController.
+                getGroupConversation(currentUser, group.getName()).
+                forEach(messages::add);
+        // TODO TODO TODO
+        // TODO TODO TODO
+        // TODO TODO TODO
+        // TODO TODO TODO
+
+        /*OperationType operationType = event.getOperationType();
         try {
             this.mapMessagesOperations.get(operationType).invoke(this, event.getObject());
         } catch(Exception e) {
             e.printStackTrace();
-        }
+        }*/
     }
 
     @FXML
