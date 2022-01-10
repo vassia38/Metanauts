@@ -54,9 +54,9 @@ public class Main extends Application {
         Controller controller = new ControllerClass(userService,friendshipService,
                 messageService, requestService, groupService);
 
-        User user = controller.findUserByUsername("vassco");
+        /*User user = controller.findUserByUsername("vassco");
         Iterable<GroupMessage> msgs = controller.getGroupConversation(user, "grupa 224");
-        msgs.forEach(System.out::println);
+        msgs.forEach(System.out::println);*/
 
         FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("login-view.fxml"));
         Parent root = fxmlLoader.load();
