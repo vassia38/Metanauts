@@ -1,7 +1,11 @@
 package com.main;
 
 import com.main.controller.Controller;
+import com.main.model.Group;
 import com.main.model.User;
+import com.main.utils.events.GroupEvent;
+import com.main.utils.observer.OperationType;
+import com.main.utils.observer.UpdateType;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -10,6 +14,9 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class CreateGroupController {
 
@@ -37,12 +44,16 @@ public class CreateGroupController {
         first_name.setCellValueFactory(new PropertyValueFactory<>("firstName"));
         last_name.setCellValueFactory(new PropertyValueFactory<>("lastName"));
         tableViewFriends.setItems(this.friends);
+
+        tableViewFriends.getSelectionModel().setSelectionMode(
+                SelectionMode.MULTIPLE
+        );
     }
 
     public void afterLoad(Controller serviceController, User user) {
         this.setServiceController(serviceController);
         this.setCurrentUser(user);
-        this.friends = (ObservableList<User>)this.serviceController.getAllFriends(this.currentUser);
+        this.friends.addAll(this.serviceController.getAllFriends(this.currentUser));
     }
 
     public void setServiceController(Controller serviceController) {
@@ -69,9 +80,13 @@ public class CreateGroupController {
             alert.showAndWait();
             return;
         }
-        this.serviceController.createGroup(groupName, tableViewFriends.getSelectionModel().getSelectedItems());
+        List<User> members = new ArrayList<>(tableViewFriends.getSelectionModel().getSelectedItems());
+        members.add(currentUser);
+        this.serviceController.createGroup(groupName, members);
         Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmation.setTitle("Group created succesfully!");
+        confirmation.setTitle("Confirmation");
+        confirmation.setHeaderText("Group created succesfully!");
+        confirmation.getButtonTypes().remove(1);
         confirmation.show();
         Node source = (Node)actionEvent.getSource();
         Stage stage =(Stage) source.getScene().getWindow();

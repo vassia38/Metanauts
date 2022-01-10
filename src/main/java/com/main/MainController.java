@@ -57,6 +57,8 @@ public class MainController implements Observer {
     @FXML
     Button removeFriendButton;
     @FXML
+    Button createGroupButton;
+    @FXML
     Label profileTitle;
 
     @FXML
@@ -221,6 +223,7 @@ public class MainController implements Observer {
         if(!user.getUsername().equals(currentUser.getUsername())) {
             this.tableViewRequests.setVisible(false);
             this.historyTableViewRequests.setVisible(false);
+            this.createGroupButton.setVisible(false);
             //friends
             if(this.friends.contains(user)) {
                 this.messageButton.setVisible(true);
@@ -259,6 +262,7 @@ public class MainController implements Observer {
             this.removeFriendButton.setVisible(false);
             this.addFriendButton.setVisible(false);
             this.cancelRequestButton.setVisible(false);
+            this.createGroupButton.setVisible(true);
             this.tableViewRequests.setVisible(true);
             this.historyTableViewRequests.setVisible(true);
         }
@@ -521,6 +525,34 @@ public class MainController implements Observer {
             alert.setTitle("Error!");
             alert.setHeaderText(ex.getMessage());
             alert.showAndWait();
+        }
+    }
+
+    public void createGroup(){
+        try {
+            System.out.println("Opening create group window" + shownUser);
+            Stage groupStage = new Stage();
+            FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("create-group-view.fxml"));
+            Parent root = fxmlLoader.load();
+            Scene scene = new Scene(root, 680, 800);
+            groupStage.setTitle("Metanauts - " + currentUser.getUsername() + " | "
+                    + "create new group");
+            groupStage.setScene(scene);
+            try{
+                groupStage.getIcons().add(new Image(Objects.requireNonNull(Main.class.getResourceAsStream("logo.png"))));
+            } catch(NullPointerException e){
+                System.out.println("icon could not load!");
+            }
+            groupStage.show();
+            CreateGroupController ctrl = fxmlLoader.getController();
+            ctrl.afterLoad(this.serviceController, currentUser);
+        } catch(RepositoryException e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error!");
+            alert.setHeaderText("Can't create a group!\n");
+            alert.showAndWait();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

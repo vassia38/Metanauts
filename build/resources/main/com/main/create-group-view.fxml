@@ -4,13 +4,14 @@
 <?import javafx.scene.layout.*?>
 
 <?import java.net.URL?>
-<VBox xmlns="http://javafx.com/javafx"
+<VBox id="body" alignment="CENTER" spacing="20.0"
+        xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="com.main.CreateGroupController"
       prefHeight="400.0" prefWidth="600.0">
-    <style>
+    <stylesheets>
         <URL value="@style.css"/>
-    </style>
+    </stylesheets>
     <TableView fx:id="tableViewFriends" styleClass="table">
         <columns>
             <TableColumn fx:id="friendUser" minWidth="100" text="Username" />
@@ -19,7 +20,7 @@
         </columns>
     </TableView>
     <HBox>
-        <TextArea promptText="Group name"/>
+        <TextArea fx:id="nameTextArea" promptText="Group name"/>
         <Button fx:id="createButton" onAction="#createGroup" text="Create"/>
     </HBox>
 </VBox>

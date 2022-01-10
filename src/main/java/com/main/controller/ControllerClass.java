@@ -417,9 +417,9 @@ public class ControllerClass implements Controller{
             Set<Long> idsList = new HashSet<>();
             users.forEach( u -> idsList.add(u.getId()));
             Group entity = new Group(nameGroup, idsList.stream().toList());
-            this.groupService.add(entity);
+            Group created = this.groupService.add(entity);
             this.notifyObservers(UpdateType.GROUPS,
-                    new GroupEvent(entity, OperationType.ADD));
+                    new GroupEvent(created, OperationType.ADD));
         }
     }
 
@@ -563,6 +563,9 @@ public class ControllerClass implements Controller{
             }
             if(updateType == UpdateType.SOLVEDREQUESTS){
                 observer.updateSolvedRequests(event);
+            }
+            if(updateType == UpdateType.GROUPS) {
+                observer.updateGroups(event);
             }
         }
     }
