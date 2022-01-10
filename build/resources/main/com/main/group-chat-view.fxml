@@ -6,7 +6,7 @@
 <?import java.net.URL?>
 <?import javafx.geometry.Insets?>
 <BorderPane id="body" xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml" fx:controller="com.main.ChatController"
+            xmlns:fx="http://javafx.com/fxml" fx:controller="com.main.GroupChatController"
             prefHeight="400.0" prefWidth="600.0">
     <stylesheets>
         <URL value="@style.css"/>
@@ -14,7 +14,7 @@
     <top>
         <HBox spacing="400">
             <Button fx:id="back" onAction="#backAction">Back</Button>
-            <Label fx:id="destinationLabel">Destination</Label>
+            <Label fx:id="groupLabel">Destination</Label>
         </HBox>
     </top>
     <center>

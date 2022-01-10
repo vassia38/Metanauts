@@ -112,6 +112,14 @@ public class MainController implements Observer {
             }
         });
 
+        tableViewGroups.setOnMouseClicked(click -> {
+            if (click.getClickCount() == 2) {
+                Group group = tableViewGroups.getSelectionModel().getSelectedItem();
+                System.out.println("Double-clicked on " + group);
+                this.openGroupChat(group);
+            }
+        });
+
         this.addFriendButton.setVisible(false);
         this.removeFriendButton.setVisible(false);
         this.cancelRequestButton.setVisible(false);
@@ -265,6 +273,34 @@ public class MainController implements Observer {
             this.createGroupButton.setVisible(true);
             this.tableViewRequests.setVisible(true);
             this.historyTableViewRequests.setVisible(true);
+        }
+    }
+
+    public void openGroupChat(Group group) {
+        try {
+            System.out.println("Opening group chat window" + currentUser);
+            Stage groupChatStage = new Stage();
+            FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("group-chat-view.fxml"));
+            Parent root = fxmlLoader.load();
+            Scene scene = new Scene(root, 680, 800);
+            groupChatStage.setTitle("Metanauts - " + currentUser.getUsername() + " | "
+                    + group.getName());
+            groupChatStage.setScene(scene);
+            try{
+                groupChatStage.getIcons().add(new Image(Objects.requireNonNull(Main.class.getResourceAsStream("logo.png"))));
+            } catch(NullPointerException e){
+                System.out.println("icon could not load!");
+            }
+            groupChatStage.show();
+            GroupChatController ctrl = fxmlLoader.getController();
+            ctrl.afterLoad(this.serviceController, currentUser, group);
+        } catch(RepositoryException e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error!");
+            alert.setHeaderText("Can't open group chat!\n");
+            alert.showAndWait();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -530,7 +566,7 @@ public class MainController implements Observer {
 
     public void createGroup(){
         try {
-            System.out.println("Opening create group window" + shownUser);
+            System.out.println("Opening create group window" + currentUser);
             Stage groupStage = new Stage();
             FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("create-group-view.fxml"));
             Parent root = fxmlLoader.load();
