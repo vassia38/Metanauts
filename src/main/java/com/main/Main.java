@@ -2,9 +2,6 @@ package com.main;
 
 import com.main.controller.Controller;
 import com.main.controller.ControllerClass;
-import com.main.model.Group;
-import com.main.model.GroupMessage;
-import com.main.model.User;
 import com.main.model.validators.FriendshipValidator;
 import com.main.model.validators.MessageValidator;
 import com.main.model.validators.UserValidator;
@@ -18,11 +15,7 @@ import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 public class Main extends Application {
 
@@ -62,7 +55,6 @@ public class Main extends Application {
         Parent root = fxmlLoader.load();
         LoginController mainController = fxmlLoader.getController();
         mainController.setServiceController(controller);
-        mainController.afterLoad();
 
         Scene scene = new Scene(root, 695, 427);
         primaryStage.setTitle("Metanauts - login");

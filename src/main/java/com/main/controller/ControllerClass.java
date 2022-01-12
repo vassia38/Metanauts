@@ -68,11 +68,16 @@ public class ControllerClass implements Controller{
      */
     @Override
     public void addUser(User entity) {
-        User user = userService.add(entity);
+        if(entity == null || entity.getUsername() == null ||
+           entity.getUsername().equals(""))
+            throw new IllegalArgumentException("Invalid user input info!\n");
+        User user = userService.findOneByUsername(entity.getUsername());
         if(user != null)
             throw new RepositoryException("User already exists!\n");
-        this.notifyObservers(UpdateType.USERS,
-                new UserEvent(entity, OperationType.ADD));
+        userService.add(entity);
+        user = userService.findOneByUsername(entity.getUsername());
+        if(user != null)
+            this.notifyObservers(UpdateType.USERS, new UserEvent(user, OperationType.ADD));
     }
 
     /**
@@ -94,7 +99,7 @@ public class ControllerClass implements Controller{
             }
         }
         this.notifyObservers(UpdateType.USERS,
-                new UserEvent(entity, OperationType.DELETE));
+                new UserEvent(deleted, OperationType.DELETE));
         return deleted;
     }
 
@@ -113,6 +118,7 @@ public class ControllerClass implements Controller{
         User oldState = userService.update(entity);
         if(oldState == null)
             throw new RepositoryException("User doesn't exist!\n");
+        entity.setId(oldState.getId());
         this.notifyObservers(UpdateType.USERS,
                 new UserEvent(entity, OperationType.UPDATE));
         return oldState;

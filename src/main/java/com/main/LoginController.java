@@ -23,17 +23,6 @@ import java.util.List;
 
 public class LoginController{
     private Controller serviceController;
-    ObservableList<User> users = FXCollections.observableArrayList();
-
-    @FXML
-    TableColumn<User, String> username;
-    @FXML
-    TableColumn<User, String> first_name;
-    @FXML
-    TableColumn<User, String> last_name;
-
-    @FXML
-    TableView<User> tableViewUsers;
 
     @FXML
     TextField loginTextField;
@@ -44,37 +33,11 @@ public class LoginController{
 
     @FXML
     public void initialize() {
-        username.setCellValueFactory(new PropertyValueFactory<User, String>("username"));
-        first_name.setCellValueFactory(new PropertyValueFactory<User, String>("firstName"));
-        last_name.setCellValueFactory(new PropertyValueFactory<User, String>("lastName"));
-        tableViewUsers.setItems(users);
-        TextField locvar = loginTextField;
-        tableViewUsers.getSelectionModel().selectedItemProperty().addListener(
-            (observable, oldValue, newValue) -> {
-                if(newValue != null) {
-                    System.out.println("User " + newValue + " was selected");
-                    locvar.textProperty().set(newValue.getUsername());
-                }
-            });
-    }
 
-    public void afterLoad() {
-        users.removeAll();
-        List<User> list = this.getUsersList();
-        users.addAll(list);
     }
 
     public void setServiceController(Controller serviceController) {
         this.serviceController = serviceController;
-    }
-
-    private List<User> getUsersList() {
-        Iterable<User> users = serviceController.getAllUsers();
-        List<User> userList = new ArrayList<>();
-        for( User u : users){
-            userList.add(u);
-        }
-        return userList;
     }
 
     @FXML
@@ -90,11 +53,11 @@ public class LoginController{
             Stage current = (Stage) source.getScene().getWindow();
             FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("main-view.fxml"));
             Parent root = fxmlLoader.load();
+            MainController ctrl = fxmlLoader.getController();
+            ctrl.afterLoad(this.serviceController, user);
             Scene scene = new Scene(root, 1024, 768);
             current.setTitle("Metanauts - " + user.getUsername());
             current.setScene(scene);
-            MainController ctrl = fxmlLoader.getController();
-            ctrl.afterLoad(this.serviceController, user);
         } catch(RepositoryException e) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Error!");
