@@ -42,6 +42,26 @@ public class LoginController{
     Button login_button;
 
 
+    private void login(String username, String userPassword) {
+        String errormsg = "";
+        try {
+            User user = this.serviceController.findUserByUsername(username);
+            String hashcodedPassword = this.serviceController.hashCodePassword(username, userPassword);
+            if(!hashcodedPassword.equals(user.getUserPassword())) {
+                errormsg = "Incorrect password!\n";
+            }
+        } catch (RepositoryException ex) {
+            errormsg = "This user doesn't exist!\n";
+        }
+        if(!errormsg.equals("")){
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error!");
+            alert.setHeaderText(errormsg);
+            alert.showAndWait();
+        }
+    }
+
+
     @FXML
     public void initialize() {
         username.setCellValueFactory(new PropertyValueFactory<User, String>("username"));

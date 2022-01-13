@@ -62,4 +62,7 @@ public interface Controller extends Observable {
     Request findRequest(Request request);
     Request deleteRequest(Request request);
     Iterable<Request> showAnsweredRequests(User user);
+
+    // PASSWORDS
+    String hashCodePassword(String username, String password);
 }
