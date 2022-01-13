@@ -44,6 +44,7 @@ public class MainController implements Observer {
     FilteredList<String> filteredItems = new FilteredList<>(usernames);
     private User shownUser;
 
+
     @FXML
     ImageView menu;
     @FXML

@@ -12,38 +12,64 @@
     <stylesheets>
         <URL value="@style.css" />
     </stylesheets>
-    <HBox id="hbox" alignment="CENTER" cacheShape="false" prefHeight="100.0" prefWidth="200.0" style="-fx-spacing: 5;">
+    <HBox id="hbox" alignment="CENTER" cacheShape="false" prefHeight="160.0" prefWidth="655.0" style="-fx-spacing: 5;">
       <VBox alignment="CENTER" style="-fx-spacing: 5;">
-         <children>
-              <TextField fx:id="loginTextField" alignment="CENTER" prefHeight="43.0" prefWidth="176.0" promptText="username" style="-fx-padding: 0;">
+              <TextField fx:id="usernameTextField" alignment="CENTER" prefHeight="43.0" prefWidth="176.0" promptText="username" style="-fx-padding: 0;">
                <font>
                   <Font name="Roboto" size="14.0" />
                </font>
             </TextField>
-            <TextField fx:id="loginTextField1" alignment="CENTER" prefHeight="43.0" prefWidth="176.0" promptText="password" style="-fx-background-insets: 0;">
+            <TextField fx:id="firstnameTextField" alignment="CENTER" prefHeight="43.0" prefWidth="176.0" promptText="First name" style="-fx-padding: 0;">
                <font>
                   <Font name="Roboto" size="14.0" />
                </font>
             </TextField>
-         </children>
+            <TextField fx:id="lastnameTextField" alignment="CENTER" prefHeight="43.0" prefWidth="176.0" promptText="Last name" style="-fx-padding: 0;">
+               <font>
+                  <Font name="Roboto" size="14.0" />
+               </font>
+            </TextField>
+            <TextField fx:id="passwordTextField" alignment="CENTER" prefHeight="43.0" prefWidth="176.0" promptText="password" style="-fx-padding: 0;">
+               <font>
+                  <Font name="Roboto" size="14.0" />
+               </font>
+            </TextField>
       </VBox>
-        <Button fx:id="login_button" alignment="CENTER" cache="true" cacheHint="SPEED" contentDisplay="CENTER" onAction="#onLoginButtonClick" prefHeight="37.0" prefWidth="92.0" style="-fx-border-insets: 0;" text="Login" textAlignment="CENTER" textFill="WHITE">
+        <Button fx:id="login_button" alignment="CENTER" cache="true"
+                cacheHint="SPEED" contentDisplay="CENTER"
+                onAction="#onLoginButtonClick" prefHeight="37.0" prefWidth="92.0"
+                style="-fx-border-insets: 0;" text="Login"
+                textAlignment="CENTER" textFill="WHITE">
          <font>
             <Font name="Roboto Bold" size="14.0" />
          </font></Button>
+      <Button fx:id="register_button" alignment="CENTER" cache="true"
+              cacheHint="SPEED" contentDisplay="CENTER"
+              onAction="#onRegisterButtonClick" prefHeight="37.0" prefWidth="92.0"
+              style="-fx-border-insets: 0;" text="Register"
+              textAlignment="CENTER" textFill="WHITE">
+         <font>
+            <Font name="Roboto Bold" size="14.0" />
+         </font>
+      </Button>
     </HBox>
-   <HBox id="hbox" alignment="CENTER" cacheShape="false" prefHeight="100.0" prefWidth="200.0" style="-fx-spacing: 5;">
-      <children>
-         <Label alignment="CENTER" prefHeight="45.0" prefWidth="111.0" style="-fx-background-insets: 0;" text="No account?" textFill="WHITE">
+   <HBox id="hbox" alignment="CENTER_LEFT" cacheShape="false" prefHeight="100.0" prefWidth="662.0" style="-fx-spacing: 5;">
+         <Label fx:id="questionLabel" alignment="CENTER_RIGHT" prefHeight="45.0" prefWidth="331.0" style="-fx-background-insets: 0;" text="No account?" textFill="WHITE">
             <font>
                <Font size="14.0" />
             </font>
          </Label>
-         <Button fx:id="login_button1" alignment="CENTER" cache="true" cacheHint="SPEED" contentDisplay="CENTER" onAction="#onLoginButtonClick" prefHeight="37.0" prefWidth="92.0" style="-fx-border-insets: 0;" text="Register" textAlignment="CENTER" textFill="WHITE">
-            <font>
-               <Font name="Roboto Bold" size="14.0" />
-            </font>
-         </Button>
-      </children>
+      <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="331.0" style="-fx-spacing: 5;">
+               <Button fx:id="registerViewButton" alignment="CENTER" cache="true" cacheHint="SPEED" contentDisplay="CENTER" onAction="#switchRegister" prefHeight="37.0" prefWidth="92.0" style="-fx-border-insets: 0;" text="Register" textAlignment="CENTER" textFill="WHITE">
+                  <font>
+                     <Font name="Roboto Bold" size="14.0" />
+                  </font>
+               </Button>
+               <Button fx:id="loginViewButton" alignment="CENTER" cache="true" cacheHint="SPEED" contentDisplay="CENTER" onAction="#switchLogin" prefHeight="37.0" prefWidth="92.0" style="-fx-border-insets: 0;" text="Login" textAlignment="CENTER" textFill="WHITE">
+                  <font>
+                     <Font name="Roboto Bold" size="14.0" />
+                  </font>
+               </Button>
+      </HBox>
    </HBox>
 </VBox>

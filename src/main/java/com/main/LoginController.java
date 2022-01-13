@@ -24,16 +24,32 @@ import java.util.List;
 public class LoginController{
     private Controller serviceController;
 
-    @FXML
-    TextField loginTextField;
+    @FXML TextField usernameTextField;
+    @FXML TextField firstnameTextField;
+    @FXML TextField lastnameTextField;
+    @FXML TextField passwordTextField;
 
-    @FXML
-    Button login_button;
+    @FXML Button login_button;
+    @FXML Button register_button;
 
+    @FXML Label questionLabel;
+    @FXML Button registerViewButton;
+    @FXML Button loginViewButton;
 
     @FXML
     public void initialize() {
+        this.firstnameTextField.setVisible(false);
+        this.firstnameTextField.managedProperty().bind(this.firstnameTextField.visibleProperty());
+        this.lastnameTextField.setVisible(false);
+        this.lastnameTextField.managedProperty().bind(this.lastnameTextField.visibleProperty());
 
+        this.login_button.managedProperty().bind(this.login_button.visibleProperty());
+        this.register_button.setVisible(false);
+        this.register_button.managedProperty().bind(this.register_button.visibleProperty());
+
+        this.registerViewButton.managedProperty().bind(this.registerViewButton.visibleProperty());
+        this.loginViewButton.setVisible(false);
+        this.loginViewButton.managedProperty().bind(this.loginViewButton.visibleProperty());
     }
 
     public void setServiceController(Controller serviceController) {
@@ -42,7 +58,7 @@ public class LoginController{
 
     @FXML
     protected void onLoginButtonClick(ActionEvent event) {
-        String username = loginTextField.getText();
+        String username = usernameTextField.getText();
         if(username.equals("")){
             return;
         }
@@ -66,5 +82,31 @@ public class LoginController{
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void onRegisterButtonClick(ActionEvent actionEvent) {
+        //TODO
+    }
+
+    public void switchRegister() {
+        this.firstnameTextField.setVisible(true);
+        this.lastnameTextField.setVisible(true);
+        this.login_button.setVisible(false);
+        this.register_button.setVisible(true);
+
+        this.questionLabel.setText("Already have an account?");
+        this.registerViewButton.setVisible(false);
+        this.loginViewButton.setVisible(true);
+    }
+
+    public void switchLogin() {
+        this.firstnameTextField.setVisible(false);
+        this.lastnameTextField.setVisible(false);
+        this.login_button.setVisible(true);
+        this.register_button.setVisible(false);
+
+        this.questionLabel.setText("No account?");
+        this.registerViewButton.setVisible(true);
+        this.loginViewButton.setVisible(false);
     }
 }
