@@ -61,9 +61,16 @@ public class User extends Entity<Long> {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof User that)) return false;
-        return getUsername().equals(that.getUsername());
+        if (this == o)
+        {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass())
+        {
+            return false;
+        }
+        User other = (User) o;
+        return Objects.equals(this.id, other.id);
     }
 
     @Override

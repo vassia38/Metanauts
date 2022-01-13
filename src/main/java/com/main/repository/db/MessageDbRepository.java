@@ -40,7 +40,7 @@ public class MessageDbRepository implements Repository<Long, Message> {
             ResultSet resultSet = psSelectMsg.executeQuery();
             if(resultSet.next()) {
                 Long sourceId = resultSet.getLong("source_id");
-                User source = new User(sourceId,null,null,null);
+                User source = new User(sourceId,null,null,null, null);
                 String messageText = resultSet.getString("message_text");
                 LocalDateTime date = LocalDateTime.parse(resultSet.getString("date"));
                 long repliedMessageId = resultSet.getLong("replied_message_id");
@@ -48,7 +48,7 @@ public class MessageDbRepository implements Repository<Long, Message> {
                 resultSet = psSelectDest.executeQuery();
                 while(resultSet.next()){
                     Long destinationId = resultSet.getLong("destination_id");
-                    User destination = new User(destinationId,null,null,null);
+                    User destination = new User(destinationId,null,null,null, null);
                     destinationList.add(destination);
                 }
                 Message replied = null;
@@ -86,7 +86,7 @@ public class MessageDbRepository implements Repository<Long, Message> {
             ResultSet resultSet = psSelectMsg.executeQuery();
             if(resultSet.next()) {
                 Long sourceId = resultSet.getLong("source_id");
-                User source = new User(sourceId,null,null,null);
+                User source = new User(sourceId,null,null,null, null);
                 String messageText = resultSet.getString("message_text");
                 LocalDateTime date = LocalDateTime.parse(resultSet.getString("date"));
                 long repliedMessageId = resultSet.getLong("replied_message_id");
@@ -118,7 +118,7 @@ public class MessageDbRepository implements Repository<Long, Message> {
 
     public Iterable<Message> findAllMessagesBySource(Long sourceId){
         Set<Message> messages = new HashSet<>();
-        User source = new User(sourceId, null, null, null);
+        User source = new User(sourceId, null, null, null, null);
         String sqlSelectMsg = "select * from messages where source_id=? order by id";
         String sqlSelectDest = "select * from source_destination where source_id=? order by message_id";
         try(Connection connection = DriverManager.getConnection(url,username,password);
@@ -137,7 +137,7 @@ public class MessageDbRepository implements Repository<Long, Message> {
                 List<User> destinationList = new ArrayList<>();
                 while(destinationSet.next() && id == destinationSet.getLong("message_id")){
                     Long destinationId = destinationSet.getLong("destination_id");
-                    User destination = new User(destinationId,null,null,null);
+                    User destination = new User(destinationId,null,null,null, null);
                     destinationList.add(destination);
                 }
                 Message replied = null;
@@ -173,9 +173,9 @@ public class MessageDbRepository implements Repository<Long, Message> {
             while(resultSet.next()){
                 Long messageId = resultSet.getLong("id");
                 Long sourceId = resultSet.getLong("source_id");
-                User source = new User(sourceId,null,null,null);
+                User source = new User(sourceId,null,null,null, null);
                 Long destinationId = resultSet.getLong("destination_id");
-                User destination = new User(destinationId,null,null,null);
+                User destination = new User(destinationId,null,null,null, null);
                 String messageText = resultSet.getString("message_text");
                 LocalDateTime date = LocalDateTime.parse(resultSet.getString("date"));
                 long repliedMessageId = resultSet.getLong("replied_message_id");
@@ -206,7 +206,7 @@ public class MessageDbRepository implements Repository<Long, Message> {
             while(resultSet.next()) {
                 Long messageId = resultSet.getLong("id");
                 Long sourceId = resultSet.getLong("source_id");
-                User source = new User(sourceId,null,null,null);
+                User source = new User(sourceId,null,null,null, null);
                 String messageText = resultSet.getString("message_text");
                 LocalDateTime date = LocalDateTime.parse(resultSet.getString("date"));
                 long repliedMessageId = resultSet.getLong("replied_message_id");

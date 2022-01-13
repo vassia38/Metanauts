@@ -1,27 +1,75 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
-<?import java.net.URL?>
-<VBox id="body" alignment="CENTER" prefHeight="427.0" prefWidth="695.0" spacing="20.0"
-      xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.main.LoginController">
+<VBox id="body" alignment="CENTER" prefHeight="427.0" prefWidth="695.0" spacing="20.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.main.LoginController">
     <stylesheets>
-        <URL value="@style.css"/>
+        <URL value="@style.css" />
     </stylesheets>
-    <TableView fx:id="tableViewUsers" styleClass="table" prefHeight="200.0" prefWidth="200.0">
-        <columns>
-            <TableColumn fx:id="username" prefWidth="219.19997787475586" text="Username" />
-            <TableColumn fx:id="first_name" prefWidth="221.6000518798828" text="First Name" />
-            <TableColumn fx:id="last_name" prefWidth="216.7999267578125" text="Last Name" />
-        </columns>
-    </TableView>
-    <HBox id="hbox" alignment="CENTER" cacheShape="false" prefHeight="100.0" prefWidth="200.0">
-        <TextField fx:id="loginTextField" alignment="CENTER" prefHeight="38.0" prefWidth="174.0" promptText="Enter your username" />
-        <Button fx:id="login_button" onAction="#onLoginButtonClick" alignment="CENTER" contentDisplay="CENTER" prefHeight="31.0" prefWidth="77.0" text="Login" textAlignment="CENTER">
-        </Button>
+    <HBox id="hbox" alignment="CENTER" cacheShape="false" prefHeight="160.0" prefWidth="655.0" style="-fx-spacing: 5;">
+      <VBox alignment="CENTER" style="-fx-spacing: 5;">
+              <TextField fx:id="usernameTextField" alignment="CENTER" prefHeight="43.0" prefWidth="176.0" promptText="username" style="-fx-padding: 0;">
+               <font>
+                  <Font name="Roboto" size="14.0" />
+               </font>
+            </TextField>
+            <TextField fx:id="firstnameTextField" alignment="CENTER" prefHeight="43.0" prefWidth="176.0" promptText="First name" style="-fx-padding: 0;">
+               <font>
+                  <Font name="Roboto" size="14.0" />
+               </font>
+            </TextField>
+            <TextField fx:id="lastnameTextField" alignment="CENTER" prefHeight="43.0" prefWidth="176.0" promptText="Last name" style="-fx-padding: 0;">
+               <font>
+                  <Font name="Roboto" size="14.0" />
+               </font>
+            </TextField>
+            <TextField fx:id="passwordTextField" alignment="CENTER" prefHeight="43.0" prefWidth="176.0" promptText="password" style="-fx-padding: 0;">
+               <font>
+                  <Font name="Roboto" size="14.0" />
+               </font>
+            </TextField>
+      </VBox>
+        <Button fx:id="login_button" alignment="CENTER" cache="true"
+                cacheHint="SPEED" contentDisplay="CENTER"
+                onAction="#onLoginButtonClick" prefHeight="37.0" prefWidth="92.0"
+                style="-fx-border-insets: 0;" text="Login"
+                textAlignment="CENTER" textFill="WHITE">
+         <font>
+            <Font name="Roboto Bold" size="14.0" />
+         </font></Button>
+      <Button fx:id="register_button" alignment="CENTER" cache="true"
+              cacheHint="SPEED" contentDisplay="CENTER"
+              onAction="#onRegisterButtonClick" prefHeight="37.0" prefWidth="92.0"
+              style="-fx-border-insets: 0;" text="Register"
+              textAlignment="CENTER" textFill="WHITE">
+         <font>
+            <Font name="Roboto Bold" size="14.0" />
+         </font>
+      </Button>
     </HBox>
+   <HBox id="hbox" alignment="CENTER_LEFT" cacheShape="false" prefHeight="100.0" prefWidth="662.0" style="-fx-spacing: 5;">
+         <Label fx:id="questionLabel" alignment="CENTER_RIGHT" prefHeight="45.0" prefWidth="331.0" style="-fx-background-insets: 0;" text="No account?" textFill="WHITE">
+            <font>
+               <Font size="14.0" />
+            </font>
+         </Label>
+      <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="331.0" style="-fx-spacing: 5;">
+               <Button fx:id="registerViewButton" alignment="CENTER" cache="true" cacheHint="SPEED" contentDisplay="CENTER" onAction="#switchRegister" prefHeight="37.0" prefWidth="92.0" style="-fx-border-insets: 0;" text="Register" textAlignment="CENTER" textFill="WHITE">
+                  <font>
+                     <Font name="Roboto Bold" size="14.0" />
+                  </font>
+               </Button>
+               <Button fx:id="loginViewButton" alignment="CENTER" cache="true" cacheHint="SPEED" contentDisplay="CENTER" onAction="#switchLogin" prefHeight="37.0" prefWidth="92.0" style="-fx-border-insets: 0;" text="Login" textAlignment="CENTER" textFill="WHITE">
+                  <font>
+                     <Font name="Roboto Bold" size="14.0" />
+                  </font>
+               </Button>
+      </HBox>
+   </HBox>
 </VBox>

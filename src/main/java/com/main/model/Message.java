@@ -94,9 +94,16 @@ public class Message extends Entity<Long> implements Comparable<Message>{
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Message that)) return false;
-        return getId().equals(that.getId());
+        if (this == o)
+        {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass())
+        {
+            return false;
+        }
+        Message other = (Message) o;
+        return Objects.equals(this.id, other.id);
     }
 
     @Override

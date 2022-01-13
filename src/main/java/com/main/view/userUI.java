@@ -229,7 +229,7 @@ public class userUI extends Thread{
     }
 
     public void showRequests() {
-        Iterable<Request> requests = controller.showRequests(currentUser);
+        Iterable<Request> requests = controller.getAllRequests(currentUser);
         for (Request request : requests) {
             System.out.println(controller.findUserById(request.getId().getLeft()).getUsername());
         }

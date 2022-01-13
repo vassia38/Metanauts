@@ -51,17 +51,17 @@ public interface Controller extends Observable {
     void addMemberToGroup(Group group, User user);
     Iterable<GroupMessage> getGroupConversation(User user, String nameGroup);
     Group findGroupByName(String name, User user);
-    Iterable<Group> findAllGroups(User user);
+    Iterable<Group> getAllGroups(User user);
 
     // REQUESTS
     void addRequest(Request request);
     void answerRequest(Request request, String answer);
-    Iterable<Request> showRequests(User user);
+    Iterable<Request> getAllRequests(User user);
     Iterable<Request> showAllRequests();
     Friendship findFriendshipById(Tuple<Long,Long> id);
     Request findRequest(Request request);
     Request deleteRequest(Request request);
-    Iterable<Request> showAnsweredRequests(User user);
+    Iterable<Request> getAllAnsweredRequests(User user);
 
     // PASSWORDS
     String hashCodePassword(String username, String password);

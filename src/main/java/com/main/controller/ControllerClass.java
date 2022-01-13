@@ -73,11 +73,16 @@ public class ControllerClass implements Controller{
      */
     @Override
     public void addUser(User entity) {
-        User user = userService.add(entity);
+        if(entity == null || entity.getUsername() == null ||
+           entity.getUsername().equals(""))
+            throw new IllegalArgumentException("Invalid user input info!\n");
+        User user = userService.findOneByUsername(entity.getUsername());
         if(user != null)
             throw new RepositoryException("User already exists!\n");
-        this.notifyObservers(UpdateType.USERS,
-                new UserEvent(entity, OperationType.ADD));
+        userService.add(entity);
+        user = userService.findOneByUsername(entity.getUsername());
+        if(user != null)
+            this.notifyObservers(UpdateType.USERS, new UserEvent(user, OperationType.ADD));
     }
 
     /**
@@ -99,7 +104,7 @@ public class ControllerClass implements Controller{
             }
         }
         this.notifyObservers(UpdateType.USERS,
-                new UserEvent(entity, OperationType.DELETE));
+                new UserEvent(deleted, OperationType.DELETE));
         return deleted;
     }
 
@@ -118,6 +123,7 @@ public class ControllerClass implements Controller{
         User oldState = userService.update(entity);
         if(oldState == null)
             throw new RepositoryException("User doesn't exist!\n");
+        entity.setId(oldState.getId());
         this.notifyObservers(UpdateType.USERS,
                 new UserEvent(entity, OperationType.UPDATE));
         return oldState;
@@ -326,6 +332,8 @@ public class ControllerClass implements Controller{
         }
         Message repliedMsg = messageService.findMessageById(repliedMessageId);
         Message msg = new Message(source,destination, message, date, repliedMsg);
+        if(repliedMsg != null)
+            setupMessage(msg);
         this.messageService.add(msg);
         this.notifyObservers(UpdateType.MESSAGES,
                 new MessageEvent(msg, OperationType.ADD));
@@ -403,7 +411,7 @@ public class ControllerClass implements Controller{
             throw new RepositoryException("Group not found!");
         GroupMessage msg = new GroupMessage(source, idGroup, message, date);
         this.messageService.add(msg);
-        this.notifyObservers(UpdateType.MESSAGES, new GroupMessageEvent(msg, OperationType.ADD));
+        this.notifyObservers(UpdateType.GROUPMESSAGES, new GroupMessageEvent(msg, OperationType.ADD));
     }
 
     @Override
@@ -412,8 +420,9 @@ public class ControllerClass implements Controller{
             throw new RepositoryException("Group not found!");
         GroupMessage repliedMsg = messageService.findGroupMessageById(repliedMessageId);
         GroupMessage msg = new GroupMessage(source, idGroup, message, date, repliedMsg);
+        setupMessage(msg);
         this.messageService.add(msg);
-        this.notifyObservers(UpdateType.MESSAGES, new GroupMessageEvent(msg, OperationType.ADD));
+        this.notifyObservers(UpdateType.GROUPMESSAGES, new GroupMessageEvent(msg, OperationType.ADD));
     }
 
     @Override
@@ -422,9 +431,9 @@ public class ControllerClass implements Controller{
             Set<Long> idsList = new HashSet<>();
             users.forEach( u -> idsList.add(u.getId()));
             Group entity = new Group(nameGroup, idsList.stream().toList());
-            this.groupService.add(entity);
+            Group created = this.groupService.add(entity);
             this.notifyObservers(UpdateType.GROUPS,
-                    new GroupEvent(entity, OperationType.ADD));
+                    new GroupEvent(created, OperationType.ADD));
         }
     }
 
@@ -443,7 +452,7 @@ public class ControllerClass implements Controller{
     }
 
     @Override
-    public Iterable<Group> findAllGroups(User user) {
+    public Iterable<Group> getAllGroups(User user) {
         return this.groupService.findAll(user.getId());
     }
 
@@ -492,7 +501,7 @@ public class ControllerClass implements Controller{
     }
 
     @Override
-    public Iterable<Request> showRequests(User user) {
+    public Iterable<Request> getAllRequests(User user) {
         Iterable<Request> requests = requestService.getAllEntities();
         ArrayList<Request> requestsToUser = new ArrayList<>();
         for(Request request : requests) {
@@ -504,7 +513,7 @@ public class ControllerClass implements Controller{
     }
 
     @Override
-    public Iterable<Request> showAnsweredRequests(User user) {
+    public Iterable<Request> getAllAnsweredRequests(User user) {
         Iterable<Request> requests = requestService.getAllEntities();
         ArrayList<Request> requestsToUser = new ArrayList<>();
         for(Request request : requests) {
@@ -566,8 +575,14 @@ public class ControllerClass implements Controller{
             if(updateType == UpdateType.MESSAGES){
                 observer.updateMessages(event);
             }
+            if(updateType == UpdateType.GROUPMESSAGES){
+                observer.updateGroupMessages(event);
+            }
             if(updateType == UpdateType.SOLVEDREQUESTS){
                 observer.updateSolvedRequests(event);
+            }
+            if(updateType == UpdateType.GROUPS) {
+                observer.updateGroups(event);
             }
         }
     }
@@ -601,9 +616,10 @@ public class ControllerClass implements Controller{
         } catch (NoSuchAlgorithmException e) {
                 e.printStackTrace();
         }
-        //idk inca ce pun
+        return null;
     }
 
+    @Override
     public String hashCodePassword(String username, String password) {
         String userPassword = password;
 

@@ -38,6 +38,7 @@ public class GroupDbRepository implements Repository<Long, Group> {
                     Long idMember = resultSet.getLong("id_user");
                     idsMembers.add(idMember);
                 }
+                System.out.println("[findOneById] " + id + " " +name_group);
                 return new Group(id, name_group, idsMembers);
             }
         }catch(SQLException e){
@@ -116,6 +117,7 @@ public class GroupDbRepository implements Repository<Long, Group> {
                     psGroupMemberInsert.setLong(2, idUser);
                     psGroupMemberInsert.executeUpdate();
                 }
+                return new Group(idGroup, entity.getName(), entity.getIdsMembers());
             }
         } catch (SQLException e) {
             e.printStackTrace();

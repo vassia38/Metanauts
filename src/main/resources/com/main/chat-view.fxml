@@ -13,7 +13,7 @@
     </stylesheets>
     <top>
         <HBox spacing="400">
-            <Button fx:id="back">Back</Button>
+            <Button fx:id="back" onAction="#backAction">Back</Button>
             <Label fx:id="destinationLabel">Destination</Label>
         </HBox>
     </top>

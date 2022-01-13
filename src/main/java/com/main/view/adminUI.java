@@ -76,7 +76,9 @@ public class adminUI extends Thread{
         String firstName = keyboard.nextLine();
         System.out.println("Last name:");
         String lastName = keyboard.nextLine();
-        User user = new User(username, firstName, lastName);
+        System.out.println("Password:");
+        String password = keyboard.nextLine();
+        User user = new User(username, firstName, lastName, password);
         controller.addUser(user);
     }
     public void deleteUser(){

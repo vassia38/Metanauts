@@ -1,11 +1,22 @@
+/*
+#1e1556
+#4E419DFF
+#444288
+#cbc9fa
+#f5f4ff
+*/
+
 .root {
     -fx-padding: 20px;
-    -fx-background-color: #4E419DFF;
+    -fx-background-color: #1e1556;
     -fx-font-family: "Roboto Thin";
     -fx-focus-color: transparent;
     -fx-faint-focus-color: transparent;
 }
 
+* {
+    -fx-font-size: 14;
+}
 
 /*rgb(78,65,157) sau #4E419DFF */
 
@@ -76,7 +87,7 @@
 
 .button {
     -fx-border-width: 0;
-    -fx-background-color: #beb9ff;
+    -fx-background-color: #444288;
 }
 
 #destinationLabel {

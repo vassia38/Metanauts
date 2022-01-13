@@ -1,8 +1,8 @@
 package com.main;
 
 import com.main.controller.Controller;
+import com.main.model.Group;
 import com.main.model.GroupMessage;
-import com.main.model.Message;
 import com.main.model.User;
 import com.main.utils.events.Event;
 import com.main.utils.observer.Observer;
@@ -19,22 +19,21 @@ import javafx.stage.Stage;
 
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-public class ChatController implements Observer {
-
+public class GroupChatController implements Observer {
     private Controller serviceController;
-    private User currentUser, destination;
-    private final ObservableList<Message> messages = FXCollections.observableArrayList();
+    private User currentUser;
+    private Group group;
+    private final ObservableList<GroupMessage> messages = FXCollections.observableArrayList();
+
     @FXML
     Button back;
     @FXML
-    Label destinationLabel;
+    Label groupLabel;
     @FXML
-    ListView<Message> messagesView;
+    ListView<GroupMessage> messagesView;
     @FXML
     TextArea textarea;
     @FXML
@@ -46,25 +45,23 @@ public class ChatController implements Observer {
     public void initialize() {
         this.messagesView.setCellFactory(param -> new ListViewCell(currentUser.getId()) );
         this.messagesView.setItems(messages);
-
     }
 
-    public void afterLoad(Controller serviceController, User currentUser, User destination) {
+    public void afterLoad(Controller serviceController, User currentUser, Group group) {
         this.serviceController = serviceController;
         this.currentUser = currentUser;
-        this.destination = destination;
+        this.group = group;
         this.serviceController.addObserver(this);
-        this.destinationLabel.setText(destination.getFirstName() + " " + destination.getLastName());
-        this.updateMessages(null);
+        this.updateGroupMessages(null);
+        this.groupLabel.setText(group.getName());
     }
 
-
-    public void addMessageObserverMethod(Message msg) {
+    public void addGroupMessageObserverMethod(GroupMessage msg) {
         this.messages.add(msg);
     }
     public final Map<OperationType, Method> mapMessagesOperations = new HashMap<>(){{
         try {
-            put(OperationType.ADD, ChatController.class.getMethod("addMessageObserverMethod", Message.class));
+            put(OperationType.ADD, GroupChatController.class.getMethod("addGroupMessageObserverMethod", GroupMessage.class));
             put(OperationType.DELETE, null);
             put(OperationType.UPDATE, null);
         } catch(NoSuchMethodException e) {
@@ -72,37 +69,36 @@ public class ChatController implements Observer {
         }
     }};
     @Override
-    public void updateMessages(Event event) {
+    public void updateGroupMessages(Event event) {
         if(event == null) {
             this.messages.clear();
             this.serviceController.
-                    getConversation(currentUser.getUsername(), destination.getUsername()).
+                    getGroupConversation(currentUser, group.getName()).
                     forEach(messages::add);
+            messages.forEach(System.out::println);
             return;
         }
         OperationType operationType = event.getOperationType();
         try {
-            mapMessagesOperations.get(operationType).invoke(this, event.getObject());
-        } catch (Exception e) {
+            this.mapMessagesOperations.get(operationType).invoke(this, event.getObject());
+        } catch(Exception e) {
+            System.out.println(event.getObject());
+            System.out.println(event.getOperationType());
             e.printStackTrace();
         }
     }
 
     @FXML
-    void backAction(ActionEvent actionEvent) {
-        Node source = (Node) actionEvent.getSource();
-        Stage stage = (Stage) source.getScene().getWindow();
-        stage.close();
-    }
-
-    @FXML
     void sendMessage() {
         String textMessage = this.textarea.getText();
-        List<String> destinationUsername = new ArrayList<>();
-        destinationUsername.add(destination.getUsername());
-        Message replied = this.messagesView.getSelectionModel().getSelectedItem();
-        this.serviceController.sendMessage(currentUser, destinationUsername, textMessage,
-                LocalDateTime.now(), replied == null ? 0L : replied.getId());
+        GroupMessage replied = this.messagesView.getSelectionModel().getSelectedItem();
+        System.out.println(replied);
+        if(replied != null)
+            this.serviceController.sendGroupMessage(currentUser, group.getId(), textMessage,
+                    LocalDateTime.now(), replied.getId());
+        else
+            this.serviceController.sendGroupMessage(currentUser, group.getId(),textMessage,
+                    LocalDateTime.now());
         this.textarea.clear();
         this.resetReply();
     }
@@ -112,7 +108,14 @@ public class ChatController implements Observer {
         this.messagesView.getSelectionModel().clearSelection();
     }
 
-    static final class ListViewCell extends ListCell<Message> {
+    @FXML
+    void backAction(ActionEvent actionEvent) {
+        Node source = (Node) actionEvent.getSource();
+        Stage stage = (Stage) source.getScene().getWindow();
+        stage.close();
+    }
+
+    static final class ListViewCell extends ListCell<GroupMessage> {
         private final Long idCurrentUser;
 
         public ListViewCell(Long userId) {
@@ -120,7 +123,7 @@ public class ChatController implements Observer {
         }
 
         @Override
-        protected void updateItem(Message item, boolean empty) {
+        protected void updateItem(GroupMessage item, boolean empty) {
             super.updateItem(item, empty);
             if (empty) {
                 setGraphic(null);
@@ -148,6 +151,10 @@ public class ChatController implements Observer {
                 }
                 //Messages from other user
                 else{
+                    User user = item.getSource();
+                    vBox.getChildren().add(
+                            new Label(user.getFirstName() + " " + user.getLastName())
+                    );
                     vBox.setAlignment(Pos.CENTER_LEFT);
                     Label label = styleLabel(item.getMessageText());
                     label.setAlignment(Pos.CENTER_LEFT);
@@ -156,7 +163,7 @@ public class ChatController implements Observer {
                         vBox.getChildren().add(label);
                     else
                     {
-                        var user=reply.getSource();
+                        user=reply.getSource();
                         Label textReply= new Label("Reply to: " + user.getFirstName() + " " +
                                 user.getLastName());
                         textReply.setAlignment(Pos.CENTER_LEFT);
@@ -184,7 +191,6 @@ public class ChatController implements Observer {
                     "-fx-text-fill: white;");
             return label;
         }
-
         private Label styleReplyLabel(String msg){
             var label=new Label(msg);
             label.setMinWidth(50);
@@ -201,16 +207,6 @@ public class ChatController implements Observer {
                     "-fx-text-fill: white;");
             return label;
         }
-    }
-
-    @Override
-    public void updateGroups(Event event) {
-        //nothing
-    }
-
-    @Override
-    public void updateGroupMessages(Event event) {
-        //nothing
     }
 
     @Override
@@ -231,5 +227,15 @@ public class ChatController implements Observer {
     @Override
     public void updateUsers(Event event) {
         //nothing
+    }
+
+    @Override
+    public void updateGroups(Event event) {
+        //nothing
+    }
+
+    @Override
+    public void updateMessages(Event event) {
+        //
     }
 }

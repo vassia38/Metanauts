@@ -23,24 +23,18 @@ import java.util.List;
 
 public class LoginController{
     private Controller serviceController;
-    ObservableList<User> users = FXCollections.observableArrayList();
 
-    @FXML
-    TableColumn<User, String> username;
-    @FXML
-    TableColumn<User, String> first_name;
-    @FXML
-    TableColumn<User, String> last_name;
+    @FXML TextField usernameTextField;
+    @FXML TextField firstnameTextField;
+    @FXML TextField lastnameTextField;
+    @FXML TextField passwordTextField;
 
-    @FXML
-    TableView<User> tableViewUsers;
+    @FXML Button login_button;
+    @FXML Button register_button;
 
-    @FXML
-    TextField loginTextField;
-
-    @FXML
-    Button login_button;
-
+    @FXML Label questionLabel;
+    @FXML Button registerViewButton;
+    @FXML Button loginViewButton;
 
     private void login(String username, String userPassword) {
         String errormsg = "";
@@ -64,42 +58,27 @@ public class LoginController{
 
     @FXML
     public void initialize() {
-        username.setCellValueFactory(new PropertyValueFactory<User, String>("username"));
-        first_name.setCellValueFactory(new PropertyValueFactory<User, String>("firstName"));
-        last_name.setCellValueFactory(new PropertyValueFactory<User, String>("lastName"));
-        tableViewUsers.setItems(users);
-        TextField locvar = loginTextField;
-        tableViewUsers.getSelectionModel().selectedItemProperty().addListener(
-            (observable, oldValue, newValue) -> {
-                if(newValue != null) {
-                    System.out.println("User " + newValue + " was selected");
-                    locvar.textProperty().set(newValue.getUsername());
-                }
-            });
-    }
+        this.firstnameTextField.setVisible(false);
+        this.firstnameTextField.managedProperty().bind(this.firstnameTextField.visibleProperty());
+        this.lastnameTextField.setVisible(false);
+        this.lastnameTextField.managedProperty().bind(this.lastnameTextField.visibleProperty());
 
-    public void afterLoad() {
-        users.removeAll();
-        List<User> list = this.getUsersList();
-        users.addAll(list);
+        this.login_button.managedProperty().bind(this.login_button.visibleProperty());
+        this.register_button.setVisible(false);
+        this.register_button.managedProperty().bind(this.register_button.visibleProperty());
+
+        this.registerViewButton.managedProperty().bind(this.registerViewButton.visibleProperty());
+        this.loginViewButton.setVisible(false);
+        this.loginViewButton.managedProperty().bind(this.loginViewButton.visibleProperty());
     }
 
     public void setServiceController(Controller serviceController) {
         this.serviceController = serviceController;
     }
 
-    private List<User> getUsersList() {
-        Iterable<User> users = serviceController.getAllUsers();
-        List<User> userList = new ArrayList<>();
-        for( User u : users){
-            userList.add(u);
-        }
-        return userList;
-    }
-
     @FXML
     protected void onLoginButtonClick(ActionEvent event) {
-        String username = loginTextField.getText();
+        String username = usernameTextField.getText();
         if(username.equals("")){
             return;
         }
@@ -110,11 +89,11 @@ public class LoginController{
             Stage current = (Stage) source.getScene().getWindow();
             FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("main-view.fxml"));
             Parent root = fxmlLoader.load();
+            MainController ctrl = fxmlLoader.getController();
+            ctrl.afterLoad(this.serviceController, user);
             Scene scene = new Scene(root, 1024, 768);
             current.setTitle("Metanauts - " + user.getUsername());
             current.setScene(scene);
-            MainController ctrl = fxmlLoader.getController();
-            ctrl.afterLoad(this.serviceController, user);
         } catch(RepositoryException e) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Error!");
@@ -123,5 +102,31 @@ public class LoginController{
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void onRegisterButtonClick(ActionEvent actionEvent) {
+        //TODO
+    }
+
+    public void switchRegister() {
+        this.firstnameTextField.setVisible(true);
+        this.lastnameTextField.setVisible(true);
+        this.login_button.setVisible(false);
+        this.register_button.setVisible(true);
+
+        this.questionLabel.setText("Already have an account?");
+        this.registerViewButton.setVisible(false);
+        this.loginViewButton.setVisible(true);
+    }
+
+    public void switchLogin() {
+        this.firstnameTextField.setVisible(false);
+        this.lastnameTextField.setVisible(false);
+        this.login_button.setVisible(true);
+        this.register_button.setVisible(false);
+
+        this.questionLabel.setText("No account?");
+        this.registerViewButton.setVisible(true);
+        this.loginViewButton.setVisible(false);
     }
 }

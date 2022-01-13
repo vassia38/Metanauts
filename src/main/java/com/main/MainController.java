@@ -9,6 +9,7 @@ import com.main.utils.observer.Observer;
 import com.main.model.Friendship;
 import com.main.repository.RepositoryException;
 import com.main.utils.observer.OperationType;
+import javafx.animation.FadeTransition;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
@@ -23,13 +24,16 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.*;
 
 public class MainController implements Observer {
+
     private User currentUser;
     private Controller serviceController;
     ObservableList<String> usernames = FXCollections.observableArrayList();
@@ -40,8 +44,13 @@ public class MainController implements Observer {
     FilteredList<String> filteredItems = new FilteredList<>(usernames);
     private User shownUser;
 
+
+    @FXML
+    ImageView menu;
     @FXML
     ImageView homeLogo;
+    @FXML
+    VBox menuBar;
 
     @FXML
     ComboBox<String> comboBoxSearch;
@@ -93,9 +102,23 @@ public class MainController implements Observer {
     @FXML
     TableColumn<Request, String> dateSent;
 
-
     @FXML
     public void initialize() {
+        menu.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
+            if(this.menuBar.isVisible()) {
+                FadeTransition hideEditorRootTransition = new FadeTransition(Duration.millis(500), menuBar);
+                hideEditorRootTransition.setFromValue(1.0);
+                hideEditorRootTransition.setToValue(0.0);
+                hideEditorRootTransition.play();
+                this.menuBar.setVisible(false);
+                return;
+            }
+            FadeTransition showFileRootTransition = new FadeTransition(Duration.millis(500), menuBar);
+            showFileRootTransition.setFromValue(0.0);
+            showFileRootTransition.setToValue(1.0);
+            showFileRootTransition.play();
+            this.menuBar.setVisible(true);
+        });
         homeLogo.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
             showProfile(currentUser);
             updateFriends(null);
@@ -120,10 +143,12 @@ public class MainController implements Observer {
             }
         });
 
+        this.menuBar.setVisible(false);
         this.addFriendButton.setVisible(false);
         this.removeFriendButton.setVisible(false);
         this.cancelRequestButton.setVisible(false);
         this.messageButton.setVisible(false);
+        this.menuBar.managedProperty().bind(this.menuBar.visibleProperty());
         this.addFriendButton.managedProperty().bind(this.addFriendButton.visibleProperty());
         this.removeFriendButton.managedProperty().bind(this.removeFriendButton.visibleProperty());
         this.messageButton.managedProperty().bind(this.removeFriendButton.visibleProperty());
@@ -276,35 +301,6 @@ public class MainController implements Observer {
         }
     }
 
-    public void openGroupChat(Group group) {
-        try {
-            System.out.println("Opening group chat window" + currentUser);
-            Stage groupChatStage = new Stage();
-            FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("group-chat-view.fxml"));
-            Parent root = fxmlLoader.load();
-            Scene scene = new Scene(root, 680, 800);
-            groupChatStage.setTitle("Metanauts - " + currentUser.getUsername() + " | "
-                    + group.getName());
-            groupChatStage.setScene(scene);
-            try{
-                groupChatStage.getIcons().add(new Image(Objects.requireNonNull(Main.class.getResourceAsStream("logo.png"))));
-            } catch(NullPointerException e){
-                System.out.println("icon could not load!");
-            }
-            groupChatStage.show();
-            CreateGroupController ctrl = fxmlLoader.getController();
-            ctrl.afterLoad(this.serviceController, currentUser);
-        } catch(RepositoryException e) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error!");
-            alert.setHeaderText("Can't open group chat!\n");
-            alert.showAndWait();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-
     /***
      * custom initializer to be explicitly called after the fxml file has been loaded
      * @param serviceController Controller
@@ -317,17 +313,11 @@ public class MainController implements Observer {
         this.serviceController.addObserver(this);
 
         this.updateFriends(null);
-
         this.updateUsers(null);
-
         this.updateRequests(null);
-
         this.updateSolvedRequests(null);
-
         this.updateGroups(null);
     }
-
-
 
     void updateUsernames() {
         this.usernames.clear();
@@ -417,7 +407,7 @@ public class MainController implements Observer {
         if(event == null) {
             System.out.println("load all data for requests table");
             this.requests.clear();
-            Iterable<Request> requests = this.serviceController.showRequests(this.currentUser);
+            Iterable<Request> requests = this.serviceController.getAllRequests(this.currentUser);
             this.setRequests(requests);
             return;
         }
@@ -449,7 +439,7 @@ public class MainController implements Observer {
         if(event == null) {
             System.out.println("load all data for solved requests table");
             this.solvedRequests.clear();
-            Iterable<Request> requests = this.serviceController.showAnsweredRequests(this.currentUser);
+            Iterable<Request> requests = this.serviceController.getAllAnsweredRequests(this.currentUser);
             this.setSolvedRequests(requests);
             return;
         }
@@ -460,16 +450,6 @@ public class MainController implements Observer {
         } catch( Exception e) {
             e.printStackTrace();
         }
-    }
-
-    @Override
-    public void updateUsers(Event event) {
-        this.updateUsernames();
-    }
-
-    @Override
-    public void updateMessages(Event event) {
-        // nothing
     }
 
     //GROUPS OBSERVER METHODS
@@ -490,7 +470,7 @@ public class MainController implements Observer {
         if(event == null) {
             System.out.println("load all data for requests table");
             this.groups.clear();
-            Iterable<Group> groups = this.serviceController.findAllGroups(this.currentUser);
+            Iterable<Group> groups = this.serviceController.getAllGroups(this.currentUser);
             this.setGroups(groups);
             return;
         }
@@ -528,6 +508,7 @@ public class MainController implements Observer {
     public void setUsernames(Iterable<User> users) {
         users.forEach( u -> this.usernames.add(u.getUsername()));
     }
+
     public void addFriend() {
         try {
             Request request = new Request(currentUser.getId(), shownUser.getId());
@@ -540,7 +521,6 @@ public class MainController implements Observer {
             alert.showAndWait();
         }
     }
-
     public void removeFriend() {
         try {
             Friendship friendship = new Friendship(currentUser.getId(), shownUser.getId());
@@ -617,6 +597,34 @@ public class MainController implements Observer {
         }
     }
 
+    public void openGroupChat(Group group) {
+        try {
+            System.out.println("Opening group chat window" + currentUser);
+            Stage groupChatStage = new Stage();
+            FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("group-chat-view.fxml"));
+            Parent root = fxmlLoader.load();
+            Scene scene = new Scene(root, 680, 800);
+            groupChatStage.setTitle("Metanauts - " + currentUser.getUsername() + " | "
+                    + group.getName());
+            groupChatStage.setScene(scene);
+            try{
+                groupChatStage.getIcons().add(new Image(Objects.requireNonNull(Main.class.getResourceAsStream("logo.png"))));
+            } catch(NullPointerException e){
+                System.out.println("icon could not load!");
+            }
+            GroupChatController ctrl = fxmlLoader.getController();
+            ctrl.afterLoad(this.serviceController, currentUser, group);
+            groupChatStage.show();
+        } catch(RepositoryException e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error!");
+            alert.setHeaderText("Can't open group chat!\n");
+            alert.showAndWait();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     @FXML
     protected void messageFriend() {
         try {
@@ -633,9 +641,9 @@ public class MainController implements Observer {
             } catch(NullPointerException e){
                 System.out.println("icon could not load!");
             }
-            chatStage.show();
             ChatController ctrl = fxmlLoader.getController();
             ctrl.afterLoad(this.serviceController, currentUser, shownUser);
+            chatStage.show();
         } catch(RepositoryException e) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Error!");
@@ -646,5 +654,16 @@ public class MainController implements Observer {
         }
     }
 
+    @Override
+    public void updateUsers(Event event) {
+        this.updateUsernames();
+    }
+    @Override
+    public void updateMessages(Event event) {
+        // nothing
+    }
+    @Override
+    public void updateGroupMessages(Event event) {
 
+    }
 }

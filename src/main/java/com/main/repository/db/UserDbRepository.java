@@ -166,6 +166,20 @@ public class UserDbRepository implements Repository<Long, User> {
     }
 
     public String getSalt(User user) {
-        return "";
+        if(user.getUsername() == null)
+            throw new IllegalArgumentException("entity must not be null");
+        String sqlSelect = "select * from users where username=?";
+        try(Connection connection = DriverManager.getConnection(url,username,password);
+            PreparedStatement psSelect = connection.prepareStatement(sqlSelect)){
+            psSelect.setString(1,user.getUsername());
+            ResultSet resultSet = psSelect.executeQuery();
+            if(resultSet.next()) {
+                String salt = resultSet.getString("salt");
+                return salt;
+            }
+        }catch(SQLException e){
+            e.printStackTrace();
+        }
+        return null;
     }
 }
