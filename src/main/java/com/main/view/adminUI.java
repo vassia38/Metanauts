@@ -79,7 +79,7 @@ public class adminUI extends Thread{
         System.out.println("Password:");
         String password = keyboard.nextLine();
         User user = new User(username, firstName, lastName, password);
-        controller.addUser(user);
+        controller.addUser(user, password);
     }
     public void deleteUser(){
         if(this.currentUser == null){

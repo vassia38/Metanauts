@@ -112,6 +112,23 @@ public class UserDbRepository implements Repository<Long, User> {
         return null;
     }
 
+    public User saveWithSalt(User entity, String salt) {
+        this.validator.validate(entity);
+        String sql = "insert into users (username, first_name, last_name, user_password, salt) values (?, ?, ?, ?, ?)";
+        try (Connection connection = DriverManager.getConnection(url, username, password);
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, entity.getUsername());
+            ps.setString(2, entity.getFirstName());
+            ps.setString(3, entity.getLastName());
+            ps.setString(4, entity.getUserPassword());
+            ps.setString(5, salt);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     @Override
     public User delete(Long id) {
         if (id==null)
@@ -165,13 +182,13 @@ public class UserDbRepository implements Repository<Long, User> {
         return oldState;
     }
 
-    public String getSalt(User user) {
-        if(user.getUsername() == null)
+    public String getSalt(String username1) {
+        if(username1 == null)
             throw new IllegalArgumentException("entity must not be null");
-        String sqlSelect = "select * from users where username=?";
+        String sqlSelect = "select salt from users where username=?";
         try(Connection connection = DriverManager.getConnection(url,username,password);
             PreparedStatement psSelect = connection.prepareStatement(sqlSelect)){
-            psSelect.setString(1,user.getUsername());
+            psSelect.setString(1,username1);
             ResultSet resultSet = psSelect.executeQuery();
             if(resultSet.next()) {
                 String salt = resultSet.getString("salt");

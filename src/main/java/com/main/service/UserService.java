@@ -9,8 +9,8 @@ public class UserService {
         this.userRepo = userRepo;
     }
 
-    public User add(User entity){
-        return userRepo.save(entity);
+    public User add(User entity, String salt){
+        return userRepo.saveWithSalt(entity, salt);
     }
     public User delete(User entity){
         return userRepo.delete(entity.getId());
@@ -29,5 +29,8 @@ public class UserService {
     }
     public Integer size(){
         return userRepo.size();
+    }
+    public String getSalt(String username) {
+        return userRepo.getSalt(username);
     }
 }

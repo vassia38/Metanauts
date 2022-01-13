@@ -72,14 +72,14 @@ public class ControllerClass implements Controller{
      * @throws RepositoryException if user with same (id and ) username already exists
      */
     @Override
-    public void addUser(User entity) {
+    public void addUser(User entity, String salt) {
         if(entity == null || entity.getUsername() == null ||
            entity.getUsername().equals(""))
             throw new IllegalArgumentException("Invalid user input info!\n");
         User user = userService.findOneByUsername(entity.getUsername());
         if(user != null)
             throw new RepositoryException("User already exists!\n");
-        userService.add(entity);
+        userService.add(entity, salt);
         user = userService.findOneByUsername(entity.getUsername());
         if(user != null)
             this.notifyObservers(UpdateType.USERS, new UserEvent(user, OperationType.ADD));
@@ -597,7 +597,8 @@ public class ControllerClass implements Controller{
         this.observers.remove(obs);
     }
 
-    private String generatePassword(String password) {
+    @Override
+    public Tuple<String,String> generatePassword(String password) {
         try{
             SecureRandom random = new SecureRandom();
 
@@ -612,7 +613,7 @@ public class ControllerClass implements Controller{
             BigInteger no = new BigInteger(1, hash);
             String hashtext = no.toString(16);
 
-            return hashtext;
+            return new Tuple<>(hashtext, salt);
         } catch (NoSuchAlgorithmException e) {
                 e.printStackTrace();
         }
@@ -621,8 +622,21 @@ public class ControllerClass implements Controller{
 
     @Override
     public String hashCodePassword(String username, String password) {
-        String userPassword = password;
+        try{
+            String salt = this.userService.getSalt(username);
+            String p = password + salt;
 
-        return userPassword;
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+
+
+            byte[] hash = digest.digest(p.getBytes(StandardCharsets.UTF_8));
+            BigInteger no = new BigInteger(1, hash);
+            String hashtext = no.toString(16);
+
+            return hashtext;
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
