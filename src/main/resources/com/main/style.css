@@ -103,3 +103,7 @@
 .profile-page {
     -fx-background-color: #f5f4ff;
 }
+
+.label {
+    -fx-label-padding: 0;
+}

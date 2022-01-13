@@ -15,6 +15,7 @@ import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -75,6 +76,7 @@ public class MainController implements Observer {
     @FXML Button cancelRequestButton;
     @FXML Button removeFriendButton;
     @FXML Button createGroupButton;
+    @FXML Button createEventButton;
     @FXML Label profileTitle;
 
     @FXML TableColumn<User, String> name_friend;
@@ -167,6 +169,7 @@ public class MainController implements Observer {
         this.messageButton.setVisible(false);
         this.messageButton.managedProperty().bind(this.removeFriendButton.visibleProperty());
         this.createGroupButton.managedProperty().bind(this.createGroupButton.visibleProperty());
+        this.createEventButton.managedProperty().bind(this.createEventButton.visibleProperty());
 
         name_friend.setCellValueFactory( param ->
                 new ReadOnlyStringWrapper ( param.getValue().getFirstName() + " " + param.getValue().getLastName()));
@@ -200,6 +203,7 @@ public class MainController implements Observer {
         this.shownUser = user;
         if(!user.getUsername().equals(currentUser.getUsername())) {
             this.createGroupButton.setVisible(false);
+            this.createEventButton.setVisible(false);
             //friends
             if(this.friends.contains(user)) {
                 this.messageButton.setVisible(true);
@@ -239,7 +243,15 @@ public class MainController implements Observer {
             this.addFriendButton.setVisible(false);
             this.cancelRequestButton.setVisible(false);
             this.createGroupButton.setVisible(true);
+            this.createEventButton.setVisible(true);
         }
+    }
+
+    private void showPage(MouseEvent event, Node root, User user) {
+        this.body.getChildren().remove(0);
+        this.body.getChildren().add(0, root);
+        if(root == userPage)
+            showProfileContent(user);
     }
 
     /***
@@ -614,10 +626,7 @@ public class MainController implements Observer {
 
     }
 
-    private void showPage(MouseEvent event, Node root, User user) {
-        this.body.getChildren().remove(0);
-        this.body.getChildren().add(0, root);
-        if(root == userPage)
-            showProfileContent(user);
+    public void createEvent(ActionEvent actionEvent) {
+        //TODO
     }
 }

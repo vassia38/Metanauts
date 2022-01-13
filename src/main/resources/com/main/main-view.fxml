@@ -44,6 +44,7 @@
                     <Button fx:id="removeFriendButton" onAction="#removeFriend" textFill="WHITE">Remove friend</Button>
                     <Button fx:id="cancelRequestButton" onAction="#cancelRequest" textFill="WHITE">Cancel Request</Button>
                     <Button fx:id="createGroupButton" onAction="#createGroup" textFill="WHITE">Create group</Button>
+                    <Button fx:id="createEventButton" onAction="#createEvent" textFill="WHITE">Create event</Button>
                 </HBox>
             </VBox>
         </VBox>
