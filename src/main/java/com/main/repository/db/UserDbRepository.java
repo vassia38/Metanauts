@@ -35,7 +35,8 @@ public class UserDbRepository implements Repository<Long, User> {
                 String userName = resultSet.getString("username");
                 String firstName = resultSet.getString("first_name");
                 String lastName = resultSet.getString("last_name");
-                return new User(id, userName,firstName, lastName);
+                String userPassword = resultSet.getString("user_password");
+                return new User(id, userName,firstName, lastName, userPassword);
             }
         }catch(SQLException e){
             e.printStackTrace();
@@ -56,7 +57,8 @@ public class UserDbRepository implements Repository<Long, User> {
                 String userName = resultSet.getString("username");
                 String firstName = resultSet.getString("first_name");
                 String lastName = resultSet.getString("last_name");
-                User user = new User(userName,firstName, lastName);
+                String userPassword = resultSet.getString("user_password");
+                User user = new User(userName,firstName, lastName, userPassword);
                 user.setId(id);
                 return user;
             }
@@ -78,8 +80,8 @@ public class UserDbRepository implements Repository<Long, User> {
                 String userName = resultSet.getString("username");
                 String firstName = resultSet.getString("first_name");
                 String lastName = resultSet.getString("last_name");
-
-                User utilizator = new User(id, userName, firstName, lastName);
+                String userPassword = resultSet.getString("user_password");
+                User utilizator = new User(id, userName, firstName, lastName, userPassword);
                 users.add(utilizator);
             }
         } catch (SQLException e) {
@@ -96,12 +98,30 @@ public class UserDbRepository implements Repository<Long, User> {
     @Override
     public User save(User entity) {
         this.validator.validate(entity);
-        String sql = "insert into users (username, first_name, last_name ) values (?, ?, ?)";
+        String sql = "insert into users (username, first_name, last_name, user_password) values (?, ?, ?, ?)";
         try (Connection connection = DriverManager.getConnection(url, username, password);
              PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, entity.getUsername());
             ps.setString(2, entity.getFirstName());
             ps.setString(3, entity.getLastName());
+            ps.setString(4, entity.getUserPassword());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public User saveWithSalt(User entity, String salt) {
+        this.validator.validate(entity);
+        String sql = "insert into users (username, first_name, last_name, user_password, salt) values (?, ?, ?, ?, ?)";
+        try (Connection connection = DriverManager.getConnection(url, username, password);
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, entity.getUsername());
+            ps.setString(2, entity.getFirstName());
+            ps.setString(3, entity.getLastName());
+            ps.setString(4, entity.getUserPassword());
+            ps.setString(5, salt);
             ps.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -160,5 +180,23 @@ public class UserDbRepository implements Repository<Long, User> {
             e.printStackTrace();
         }
         return oldState;
+    }
+
+    public String getSalt(String username1) {
+        if(username1 == null)
+            throw new IllegalArgumentException("entity must not be null");
+        String sqlSelect = "select salt from users where username=?";
+        try(Connection connection = DriverManager.getConnection(url,username,password);
+            PreparedStatement psSelect = connection.prepareStatement(sqlSelect)){
+            psSelect.setString(1,username1);
+            ResultSet resultSet = psSelect.executeQuery();
+            if(resultSet.next()) {
+                String salt = resultSet.getString("salt");
+                return salt;
+            }
+        }catch(SQLException e){
+            e.printStackTrace();
+        }
+        return null;
     }
 }

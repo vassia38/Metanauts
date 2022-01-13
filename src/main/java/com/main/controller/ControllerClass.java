@@ -13,6 +13,11 @@ import com.main.utils.observer.Observer;
 import com.main.utils.observer.OperationType;
 import com.main.utils.observer.UpdateType;
 
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.*;
@@ -67,14 +72,14 @@ public class ControllerClass implements Controller{
      * @throws RepositoryException if user with same (id and ) username already exists
      */
     @Override
-    public void addUser(User entity) {
+    public void addUser(User entity, String salt) {
         if(entity == null || entity.getUsername() == null ||
            entity.getUsername().equals(""))
             throw new IllegalArgumentException("Invalid user input info!\n");
         User user = userService.findOneByUsername(entity.getUsername());
         if(user != null)
             throw new RepositoryException("User already exists!\n");
-        userService.add(entity);
+        userService.add(entity, salt);
         user = userService.findOneByUsername(entity.getUsername());
         if(user != null)
             this.notifyObservers(UpdateType.USERS, new UserEvent(user, OperationType.ADD));
@@ -590,5 +595,48 @@ public class ControllerClass implements Controller{
     @Override
     public void removeObserver(Observer obs) {
         this.observers.remove(obs);
+    }
+
+    @Override
+    public Tuple<String,String> generatePassword(String password) {
+        try{
+            SecureRandom random = new SecureRandom();
+
+            Integer randomInt = random.nextInt();
+            String salt = randomInt.toString();
+            String p = password + salt;
+
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+
+
+            byte[] hash = digest.digest(p.getBytes(StandardCharsets.UTF_8));
+            BigInteger no = new BigInteger(1, hash);
+            String hashtext = no.toString(16);
+
+            return new Tuple<>(hashtext, salt);
+        } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public String hashCodePassword(String username, String password) {
+        try{
+            String salt = this.userService.getSalt(username);
+            String p = password + salt;
+
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+
+
+            byte[] hash = digest.digest(p.getBytes(StandardCharsets.UTF_8));
+            BigInteger no = new BigInteger(1, hash);
+            String hashtext = no.toString(16);
+
+            return hashtext;
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
