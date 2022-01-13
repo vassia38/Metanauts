@@ -11,12 +11,12 @@ import com.main.repository.RepositoryException;
 import com.main.utils.observer.OperationType;
 import javafx.animation.FadeTransition;
 import javafx.application.Platform;
-import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -24,6 +24,8 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -36,102 +38,102 @@ public class MainController implements Observer {
 
     private User currentUser;
     private Controller serviceController;
+    private User shownUser;
     ObservableList<String> usernames = FXCollections.observableArrayList();
     ObservableList<Request> requests = FXCollections.observableArrayList();
     ObservableList<Request> solvedRequests = FXCollections.observableArrayList();
     ObservableList<User> friends = FXCollections.observableArrayList();
     ObservableList<Group> groups = FXCollections.observableArrayList();
     FilteredList<String> filteredItems = new FilteredList<>(usernames);
-    private User shownUser;
+    Node requestsPage;
+    RequestsController requestsController;
+    FXMLLoader friendsLoader;
+    FXMLLoader groupsLoader;
+
+    @FXML VBox document;
+    @FXML StackPane body;
+    @FXML VBox userPage;
+    @FXML VBox friendliestBar;
+
+    @FXML BorderPane menuBarShadow;
+    @FXML VBox menuBar;
 
 
-    @FXML
-    ImageView menu;
-    @FXML
-    ImageView homeLogo;
-    @FXML
-    VBox menuBar;
+    @FXML Button homeButton;
+    @FXML Button friendlistButton;
+    @FXML Button requestsButton;
+    @FXML Button eventsButton;
 
-    @FXML
-    ComboBox<String> comboBoxSearch;
-    @FXML
-    Button searchButton;
+    @FXML ImageView menu;
+    @FXML ImageView homeLogo;
 
-    @FXML
-    Button messageButton;
-    @FXML
-    Button addFriendButton;
-    @FXML
-    Button cancelRequestButton;
-    @FXML
-    Button removeFriendButton;
-    @FXML
-    Button createGroupButton;
-    @FXML
-    Label profileTitle;
 
-    @FXML
-    TableView<Request> tableViewRequests;
-    @FXML
-    TableColumn<Request, String> fromUser;
-    @FXML
-    TableColumn<Request, Request> acceptFriendship;
-    @FXML
-    TableColumn<Request, Request> rejectFriendship;
+    @FXML ComboBox<String> comboBoxSearch;
+    @FXML Button searchButton;
 
-    @FXML
-    TableColumn<User, String> friendUser;
-    @FXML
-    TableColumn<User, String> first_name;
-    @FXML
-    TableColumn<User, String> last_name;
-    @FXML
-    TableView<User> tableViewFriends;
+    @FXML Button messageButton;
+    @FXML Button addFriendButton;
+    @FXML Button cancelRequestButton;
+    @FXML Button removeFriendButton;
+    @FXML Button createGroupButton;
+    @FXML Label profileTitle;
 
-    @FXML
-    TableView<Group> tableViewGroups;
-    @FXML
-    TableColumn<Group, String> groupName;
+    @FXML TableColumn<User, String> first_name;
+    @FXML TableColumn<User, String> last_name;
+    @FXML TableView<User> tableViewFriends;
 
-    @FXML
-    TableView<Request> historyTableViewRequests;
-    @FXML
-    TableColumn<Request, String> historyFromUser;
-    @FXML
-    TableColumn<Request, String> status;
-    @FXML
-    TableColumn<Request, String> dateSent;
+    @FXML TableView<Group> tableViewGroups;
+    @FXML TableColumn<Group, String> groupName;
 
+
+    private void animateSideBar(Node bar, Boolean visible) {
+        FadeTransition transition = new FadeTransition(Duration.millis(500), bar);
+        double fromValue = 1.0, toValue = 0.0;
+        if(visible) {
+            fromValue = 0; toValue = 1.0;
+        }
+        transition.setFromValue(fromValue);
+        transition.setToValue(toValue);
+        transition.play();
+        bar.setVisible(visible);
+    }
     @FXML
     public void initialize() {
-        menu.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
-            if(this.menuBar.isVisible()) {
-                FadeTransition hideEditorRootTransition = new FadeTransition(Duration.millis(500), menuBar);
-                hideEditorRootTransition.setFromValue(1.0);
-                hideEditorRootTransition.setToValue(0.0);
-                hideEditorRootTransition.play();
-                this.menuBar.setVisible(false);
-                return;
+        document.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
+            System.out.println(event.getTarget());
+            if(menuBar.isVisible()) {
+                this.animateSideBar(menuBar, !menuBar.isVisible());
+                this.menuBarShadow.setVisible(menuBar.isVisible());
             }
-            FadeTransition showFileRootTransition = new FadeTransition(Duration.millis(500), menuBar);
-            showFileRootTransition.setFromValue(0.0);
-            showFileRootTransition.setToValue(1.0);
-            showFileRootTransition.play();
-            this.menuBar.setVisible(true);
+        });
+        menu.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
+            this.animateSideBar(menuBar, !menuBar.isVisible());
+            this.menuBarShadow.setVisible(menuBar.isVisible());
+            event.consume();
         });
         homeLogo.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
-            showProfile(currentUser);
-            updateFriends(null);
-            updateRequests(null);
-            updateSolvedRequests(null);
+            this.showPage(event, userPage, currentUser);
+            event.consume();
+        });
+        homeButton.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
+            this.showPage(event, userPage, currentUser);
+            event.consume();
+        });
+        requestsButton.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
+                this.showPage(event, requestsPage, currentUser);
+                event.consume();
+        });
+        friendlistButton.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
+            this.animateSideBar(friendliestBar, !friendliestBar.isVisible());
             event.consume();
         });
 
-        tableViewFriends.setOnMouseClicked(click -> {
-            if (click.getClickCount() == 2) {
+        tableViewFriends.setOnMouseClicked(event -> {
+            if (event.getClickCount() == 2) {
                 User user = tableViewFriends.getSelectionModel().getSelectedItem();
                 System.out.println("Double-clicked on " + user);
-                this.showProfile(user);
+                this.showPage(event, userPage, user);
+                event.consume();
             }
         });
 
@@ -143,19 +145,22 @@ public class MainController implements Observer {
             }
         });
 
+        this.menuBarShadow.setVisible(false);
+        this.menuBarShadow.managedProperty().bind(this.menuBarShadow.visibleProperty());
         this.menuBar.setVisible(false);
-        this.addFriendButton.setVisible(false);
-        this.removeFriendButton.setVisible(false);
-        this.cancelRequestButton.setVisible(false);
-        this.messageButton.setVisible(false);
         this.menuBar.managedProperty().bind(this.menuBar.visibleProperty());
+        this.friendliestBar.setVisible(false);
+        this.friendliestBar.managedProperty().bind(this.friendliestBar.visibleProperty());
+        this.addFriendButton.setVisible(false);
         this.addFriendButton.managedProperty().bind(this.addFriendButton.visibleProperty());
+        this.removeFriendButton.setVisible(false);
         this.removeFriendButton.managedProperty().bind(this.removeFriendButton.visibleProperty());
+        this.cancelRequestButton.setVisible(false);
+        this.cancelRequestButton.managedProperty().bind(this.cancelRequestButton.visibleProperty());
+        this.messageButton.setVisible(false);
         this.messageButton.managedProperty().bind(this.removeFriendButton.visibleProperty());
-        this.tableViewRequests.managedProperty().bind(this.tableViewRequests.visibleProperty());
-        this.historyTableViewRequests.managedProperty().bind(this.tableViewRequests.visibleProperty());
+        this.createGroupButton.managedProperty().bind(this.createGroupButton.visibleProperty());
 
-        friendUser.setCellValueFactory(new PropertyValueFactory<>("username"));
         first_name.setCellValueFactory(new PropertyValueFactory<>("firstName"));
         last_name.setCellValueFactory(new PropertyValueFactory<>("lastName"));
         tableViewFriends.setItems(this.friends);
@@ -176,86 +181,17 @@ public class MainController implements Observer {
             });
         });
         comboBoxSearch.setItems(filteredItems);
-
-        fromUser.setCellValueFactory(param -> {
-            User user = this.serviceController.findUserById(param.getValue().getId().getLeft());
-            return new ReadOnlyObjectWrapper<>(user.getUsername());
-        });
-
-        acceptFriendship.setCellValueFactory(
-                param -> new ReadOnlyObjectWrapper<>(param.getValue())
-        );
-        acceptFriendship.setCellFactory(
-                param -> new TableCell<>() {
-                    private final Button addButton = new Button("Accept");
-
-                    @Override
-                    protected void updateItem(Request req, boolean empty) {
-                        super.updateItem(req, empty);
-                        if (req == null) {
-                            setGraphic(null);
-                            return;
-                        }
-                        setGraphic(addButton);
-                        addButton.setOnAction(
-                                event -> {
-                                    serviceController.answerRequest(req,"approve");
-                                    /*updateFriends();*/
-                                    getTableView().getItems().remove(req);
-                                }
-                        );
-                    }
-                });
-
-        rejectFriendship.setCellValueFactory(
-                param -> new ReadOnlyObjectWrapper<>(param.getValue())
-        );
-        rejectFriendship.setCellFactory(
-                param -> new TableCell<>() {
-                    private final Button deleteButton = new Button("Reject");
-
-                    @Override
-                    protected void updateItem(Request req, boolean empty) {
-                        super.updateItem(req, empty);
-                        if (req == null) {
-                            setGraphic(null);
-                            return;
-                        }
-                        setGraphic(deleteButton);
-                        deleteButton.setOnAction(
-                                event -> {
-                                    serviceController.answerRequest(req,"reject");
-                                    getTableView().getItems().remove(req);
-                                }
-                        );
-                    }
-                });
-
-        tableViewRequests.setItems(this.requests);
-
-        historyFromUser.setCellValueFactory(param -> {
-            Long id = param.getValue().getId().getLeft().equals(currentUser.getId())
-                    ? param.getValue().getId().getRight()
-                    : param.getValue().getId().getLeft();
-            User user = this.serviceController.findUserById(id);
-            return new ReadOnlyObjectWrapper<>(user.getUsername());
-        });
-        status.setCellValueFactory(new PropertyValueFactory<>("status"));
-        dateSent.setCellValueFactory(new PropertyValueFactory<>("date"));
-        historyTableViewRequests.setItems(this.solvedRequests);
     }
 
     /***
      * load profile page of a certain user
      * @param user User
      */
-    private void showProfile(User user) {
+    private void showProfileContent(User user) {
         this.profileTitle.textProperty().set(user.getFirstName() + " " +user.getLastName() +
                 "\n" + user.getUsername());
         this.shownUser = user;
         if(!user.getUsername().equals(currentUser.getUsername())) {
-            this.tableViewRequests.setVisible(false);
-            this.historyTableViewRequests.setVisible(false);
             this.createGroupButton.setVisible(false);
             //friends
             if(this.friends.contains(user)) {
@@ -296,8 +232,6 @@ public class MainController implements Observer {
             this.addFriendButton.setVisible(false);
             this.cancelRequestButton.setVisible(false);
             this.createGroupButton.setVisible(true);
-            this.tableViewRequests.setVisible(true);
-            this.historyTableViewRequests.setVisible(true);
         }
     }
 
@@ -309,14 +243,20 @@ public class MainController implements Observer {
     public void afterLoad(Controller serviceController, User user) {
         this.setServiceController(serviceController);
         this.setCurrentUser(user);
-        this.showProfile(user);
+        this.showProfileContent(user);
         this.serviceController.addObserver(this);
 
         this.updateFriends(null);
         this.updateUsers(null);
-        this.updateRequests(null);
-        this.updateSolvedRequests(null);
         this.updateGroups(null);
+        FXMLLoader requestsLoader = new FXMLLoader(this.getClass().getResource("requests-view.fxml"));
+        try{
+            requestsPage = requestsLoader.load();
+            requestsController = requestsLoader.getController();
+            requestsController.afterLoad(this.serviceController, this.currentUser);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     void updateUsernames() {
@@ -488,7 +428,7 @@ public class MainController implements Observer {
         System.out.println("Searching for " + this.comboBoxSearch.getEditor().getText());
         try {
             User user = this.serviceController.findUserByUsername(this.comboBoxSearch.getEditor().getText());
-            this.showProfile(user);
+            this.showProfileContent(user);
         } catch (RepositoryException ex) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Error!");
@@ -497,15 +437,15 @@ public class MainController implements Observer {
         }
     }
 
-    public void setServiceController(Controller serviceController) {
+    private void setServiceController(Controller serviceController) {
         this.serviceController = serviceController;
     }
 
-    public void setCurrentUser(User user) {
+    private void setCurrentUser(User user) {
         this.currentUser = user;
     }
 
-    public void setUsernames(Iterable<User> users) {
+    private void setUsernames(Iterable<User> users) {
         users.forEach( u -> this.usernames.add(u.getUsername()));
     }
 
@@ -513,7 +453,7 @@ public class MainController implements Observer {
         try {
             Request request = new Request(currentUser.getId(), shownUser.getId());
             this.serviceController.addRequest(request);
-            this.showProfile(shownUser);
+            this.showProfileContent(shownUser);
         } catch (RepositoryException ex) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Error!");
@@ -535,7 +475,7 @@ public class MainController implements Observer {
                     this.serviceController.deleteRequest(request2);
                 }
             }
-            this.showProfile(shownUser);
+            this.showProfileContent(shownUser);
         } catch (RepositoryException ex) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Error!");
@@ -572,15 +512,15 @@ public class MainController implements Observer {
         }
     }
 
-    public void setGroups(Iterable<Group> groups) {
+    private void setGroups(Iterable<Group> groups) {
         groups.forEach(gr -> this.groups.add(gr));
     }
 
-    public void setRequests(Iterable<Request> requests) {
+    private void setRequests(Iterable<Request> requests) {
         requests.forEach( req -> this.requests.add(req));
     }
 
-    public void setSolvedRequests(Iterable<Request> requests) {
+    private void setSolvedRequests(Iterable<Request> requests) {
         requests.forEach( req -> this.solvedRequests.add(req));
     }
 
@@ -588,7 +528,7 @@ public class MainController implements Observer {
         try {
             Request request = new Request(currentUser.getId(),shownUser.getId());
             this.serviceController.deleteRequest(request);
-            this.showProfile(shownUser);
+            this.showProfileContent(shownUser);
         } catch (RepositoryException ex) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Error!");
@@ -654,6 +594,8 @@ public class MainController implements Observer {
         }
     }
 
+
+
     @Override
     public void updateUsers(Event event) {
         this.updateUsernames();
@@ -665,5 +607,12 @@ public class MainController implements Observer {
     @Override
     public void updateGroupMessages(Event event) {
 
+    }
+
+    private void showPage(MouseEvent event, Node root, User user) {
+        this.body.getChildren().remove(0);
+        this.body.getChildren().add(0, root);
+        if(root == userPage)
+            showProfileContent(user);
     }
 }
