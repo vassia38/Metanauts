@@ -48,7 +48,9 @@ public class MainController implements Observer {
     ObservableList<Group> groups = FXCollections.observableArrayList();
     FilteredList<String> filteredItems = new FilteredList<>(usernames);
     Node requestsPage;
+    Node eventsPage;
     RequestsController requestsController;
+    EventsController eventsController;
 
     @FXML VBox document;
     @FXML StackPane body;
@@ -134,6 +136,10 @@ public class MainController implements Observer {
         });
         friendlistButton.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
             this.animateSideBar(friendliestBar, !friendliestBar.isVisible());
+            event.consume();
+        });
+        eventsButton.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
+            this.showPage(event, eventsPage, currentUser);
             event.consume();
         });
 
@@ -269,10 +275,14 @@ public class MainController implements Observer {
         this.updateUsers(null);
         this.updateGroups(null);
         FXMLLoader requestsLoader = new FXMLLoader(this.getClass().getResource("requests-view.fxml"));
+        FXMLLoader eventsLoader = new FXMLLoader(this.getClass().getResource("event-view.fxml"));
         try{
             requestsPage = requestsLoader.load();
             requestsController = requestsLoader.getController();
             requestsController.afterLoad(this.serviceController, this.currentUser);
+            eventsPage = eventsLoader.load();
+            eventsController = eventsLoader.getController();
+            eventsController.afterLoad(this.serviceController, this.currentUser);
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -52,8 +52,7 @@
               maxHeight="-Infinity" maxWidth="-Infinity"
               minHeight="-Infinity" minWidth="-Infinity"
               prefHeight="680.0" prefWidth="300"
-              style="-fx-spacing: 10; -fx-padding: 5; -fx-background-color:
-              linear-gradient(to bottom, rgba(6,31,62,0.95), rgba(6,31,62,0.7))">
+              style="-fx-spacing: 10; -fx-padding: 5; -fx-background-color: transparent">
             <TableView fx:id="tableViewFriends" prefHeight="340.0" prefWidth="290.0">
                 <columns>
                     <TableColumn fx:id="name_friend" minWidth="280" maxWidth="290" text="Friends" />
@@ -65,9 +64,10 @@
                 </columns>
             </TableView>
         </VBox>
-        <BorderPane fx:id="menuBarShadow" style="-fx-background-color: rgba(0,0,0,0.3)">
+        <BorderPane fx:id="menuBarShadow" style="-fx-background-color: rgba(0,0,0,0.4)">
             <left>
-            <VBox fx:id="menuBar" alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="680" prefWidth="200" style="-fx-spacing: 10; -fx-padding: 5;                           -fx-background-color:                           linear-gradient(to bottom, rgba(6,31,62,0.95), rgba(6,31,62,0.7))">
+            <VBox fx:id="menuBar" alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="680" prefWidth="200" style="-fx-spacing: 10; -fx-padding: 5;
+                -fx-background-color: transparent">
                 <Button fx:id="homeButton" alignment="CENTER_RIGHT" contentDisplay="CENTER" mnemonicParsing="false" prefHeight="30.0" prefWidth="190.0" text="Home" textFill="WHITE">
                     <font>
                         <Font name="Roboto" size="14.0" />
