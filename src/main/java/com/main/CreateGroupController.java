@@ -34,7 +34,7 @@ public class CreateGroupController {
     TableView<User> tableViewFriends;
 
     @FXML
-    TextArea nameTextArea;
+    TextField nameTextField;
     @FXML
     Button createButton;
 
@@ -65,7 +65,7 @@ public class CreateGroupController {
     }
 
     public void createGroup(ActionEvent actionEvent) {
-        String groupName = this.nameTextArea.getText();
+        String groupName = this.nameTextField.getText();
         if(groupName == null) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Cannot create group");

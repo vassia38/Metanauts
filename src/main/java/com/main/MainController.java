@@ -11,6 +11,7 @@ import com.main.repository.RepositoryException;
 import com.main.utils.observer.OperationType;
 import javafx.animation.FadeTransition;
 import javafx.application.Platform;
+import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -47,8 +48,6 @@ public class MainController implements Observer {
     FilteredList<String> filteredItems = new FilteredList<>(usernames);
     Node requestsPage;
     RequestsController requestsController;
-    FXMLLoader friendsLoader;
-    FXMLLoader groupsLoader;
 
     @FXML VBox document;
     @FXML StackPane body;
@@ -78,8 +77,7 @@ public class MainController implements Observer {
     @FXML Button createGroupButton;
     @FXML Label profileTitle;
 
-    @FXML TableColumn<User, String> first_name;
-    @FXML TableColumn<User, String> last_name;
+    @FXML TableColumn<User, String> name_friend;
     @FXML TableView<User> tableViewFriends;
 
     @FXML TableView<Group> tableViewGroups;
@@ -99,8 +97,17 @@ public class MainController implements Observer {
     }
     @FXML
     public void initialize() {
-        document.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
+        body.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
             System.out.println(event.getTarget());
+            if(event.getTarget() != menuBarShadow && friendliestBar.isVisible()) {
+                this.animateSideBar(friendliestBar, !friendliestBar.isVisible());
+            }
+            if(comboBoxSearch.isFocused()) {
+                document.requestFocus();
+                event.consume();
+            }
+        });
+        menuBarShadow.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
             if(menuBar.isVisible()) {
                 this.animateSideBar(menuBar, !menuBar.isVisible());
                 this.menuBarShadow.setVisible(menuBar.isVisible());
@@ -161,8 +168,8 @@ public class MainController implements Observer {
         this.messageButton.managedProperty().bind(this.removeFriendButton.visibleProperty());
         this.createGroupButton.managedProperty().bind(this.createGroupButton.visibleProperty());
 
-        first_name.setCellValueFactory(new PropertyValueFactory<>("firstName"));
-        last_name.setCellValueFactory(new PropertyValueFactory<>("lastName"));
+        name_friend.setCellValueFactory( param ->
+                new ReadOnlyStringWrapper ( param.getValue().getFirstName() + " " + param.getValue().getLastName()));
         tableViewFriends.setItems(this.friends);
 
         groupName.setCellValueFactory(new PropertyValueFactory<>("name"));
@@ -593,8 +600,6 @@ public class MainController implements Observer {
             e.printStackTrace();
         }
     }
-
-
 
     @Override
     public void updateUsers(Event event) {

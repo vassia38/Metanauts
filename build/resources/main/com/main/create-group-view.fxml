@@ -8,11 +8,12 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
+<?import javafx.scene.control.TextField?>
 <VBox id="body" alignment="CENTER" prefHeight="400.0" prefWidth="600.0" spacing="20.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.main.CreateGroupController">
     <stylesheets>
         <URL value="@style.css" />
     </stylesheets>
-    <TableView fx:id="tableViewFriends" styleClass="table">
+    <TableView fx:id="tableViewFriends">
         <columns>
             <TableColumn fx:id="friendUser" minWidth="100" text="Username" />
             <TableColumn fx:id="first_name" minWidth="100" text="First Name" />
@@ -20,7 +21,7 @@
         </columns>
     </TableView>
     <HBox alignment="CENTER" prefHeight="50.0" prefWidth="560.0" style="-fx-spacing: 5;">
-        <TextArea fx:id="nameTextArea" prefHeight="45.0" prefWidth="484.0" promptText="Group name" />
+        <TextField fx:id="nameTextField" prefHeight="45.0" prefWidth="484.0" promptText="Group name" />
         <Button fx:id="createButton" onAction="#createGroup" prefHeight="45.0" prefWidth="67.0" text="Create" textFill="WHITE" />
     </HBox>
 </VBox>
