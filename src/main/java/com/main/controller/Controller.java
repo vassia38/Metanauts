@@ -19,7 +19,7 @@ public interface Controller extends Observable {
     GroupService getGroupService();
 
     // USERS
-    void addUser(User entity);
+    void addUser(User entity, String salt);
     User deleteUser(User entity);
     User updateUser(User entity, String firstName, String lastName);
     User findUserById(Long id);
@@ -62,4 +62,8 @@ public interface Controller extends Observable {
     Request findRequest(Request request);
     Request deleteRequest(Request request);
     Iterable<Request> getAllAnsweredRequests(User user);
+
+    // PASSWORDS
+    String hashCodePassword(String username, String password);
+    Tuple<String,String> generatePassword(String password);
 }
