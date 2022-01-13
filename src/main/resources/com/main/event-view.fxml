@@ -37,37 +37,29 @@
             <Font size="14.0" />
          </font></Button>
       <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
-         <image>
-            <Image url="@notification-off.png" />
-         </image>
+         <Image url="@notification-off.png"/>
       </ImageView>
       <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
-         <image>
-            <Image url="@notification-on.png" />
-         </image>
+         <Image url="@notification-on.png"/>
       </ImageView>
    </HBox>
    <HBox alignment="BOTTOM_RIGHT" prefHeight="86.0" prefWidth="560.0">
-      <children>
-         <Label alignment="CENTER_RIGHT" prefHeight="20.0" prefWidth="98.0" text="HH:MM" textFill="WHITE">
-            <font>
-               <Font size="14.0" />
-            </font>
-         </Label>
-         <Label alignment="CENTER_RIGHT" prefHeight="20.0" prefWidth="98.0" text="DD/MM/YYYY" textFill="WHITE">
-            <font>
-               <Font size="14.0" />
-            </font>
-         </Label>
-      </children>
+      <Label alignment="CENTER_RIGHT" prefHeight="20.0" prefWidth="98.0" text="HH:MM" textFill="WHITE">
+         <font>
+            <Font size="14.0"/>
+         </font>
+      </Label>
+      <Label alignment="CENTER_RIGHT" prefHeight="20.0" prefWidth="98.0" text="DD/MM/YYYY" textFill="WHITE">
+         <font>
+            <Font size="14.0"/>
+         </font>
+      </Label>
    </HBox>
    <HBox alignment="TOP_RIGHT" prefHeight="86.0" prefWidth="560.0">
-      <children>
-         <Label alignment="CENTER_RIGHT" prefHeight="20.0" prefWidth="98.0" text="Location" textFill="WHITE">
-            <font>
-               <Font size="14.0" />
-            </font>
-         </Label>
-      </children>
+      <Label alignment="CENTER_RIGHT" prefHeight="20.0" prefWidth="98.0" text="Location" textFill="WHITE">
+         <font>
+            <Font size="14.0"/>
+         </font>
+      </Label>
    </HBox>
 </VBox>
