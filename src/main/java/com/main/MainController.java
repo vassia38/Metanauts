@@ -567,6 +567,8 @@ public class MainController implements Observer {
     }
 
     public void openGroupChat(Group group) {
+        if(group == null)
+            return;
         try {
             System.out.println("Opening group chat window" + currentUser);
             Stage groupChatStage = new Stage();
