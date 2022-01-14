@@ -44,7 +44,7 @@ public class ChatController implements Observer {
 
     @FXML
     public void initialize() {
-        this.messagesView.setCellFactory(param -> new ListViewCell(currentUser.getId(), this) );
+        this.messagesView.setCellFactory(param -> new ListViewCell(currentUser.getId()) );
         this.messagesView.setItems(messages);
         textarea.setWrapText(true);
     }
@@ -120,11 +120,9 @@ public class ChatController implements Observer {
 
     static final class ListViewCell extends ListCell<Message> {
         private final Long idCurrentUser;
-        private final ChatController controller;
 
-        public ListViewCell(Long userId, ChatController controller) {
+        public ListViewCell(Long userId) {
             this.idCurrentUser = userId;
-            this.controller = controller;
         }
 
         @Override

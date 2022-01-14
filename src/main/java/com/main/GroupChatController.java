@@ -43,7 +43,7 @@ public class GroupChatController implements Observer {
 
     @FXML
     public void initialize() {
-        this.messagesView.setCellFactory(param -> new ListViewCell(currentUser.getId(), this) );
+        this.messagesView.setCellFactory(param -> new ListViewCell(currentUser.getId()) );
         this.messagesView.setItems(messages);
         textarea.setWrapText(true);
     }
@@ -76,15 +76,14 @@ public class GroupChatController implements Observer {
             this.serviceController.
                     getGroupConversation(currentUser, group.getName()).
                     forEach(messages::add);
-            messages.forEach(System.out::println);
+            this.scrollDown();
             return;
         }
         OperationType operationType = event.getOperationType();
         try {
             this.mapMessagesOperations.get(operationType).invoke(this, event.getObject());
+            this.scrollDown();
         } catch(Exception e) {
-            System.out.println(event.getObject());
-            System.out.println(event.getOperationType());
             e.printStackTrace();
         }
     }
@@ -93,7 +92,6 @@ public class GroupChatController implements Observer {
     void sendMessage() {
         String textMessage = this.textarea.getText();
         GroupMessage replied = this.messagesView.getSelectionModel().getSelectedItem();
-        System.out.println(replied);
         if(replied != null)
             this.serviceController.sendGroupMessage(currentUser, group.getId(), textMessage,
                     LocalDateTime.now(), replied.getId());
@@ -122,17 +120,14 @@ public class GroupChatController implements Observer {
 
     static final class ListViewCell extends ListCell<GroupMessage> {
         private final Long idCurrentUser;
-        private final GroupChatController controller;
 
-        public ListViewCell(Long userId, GroupChatController controller) {
+        public ListViewCell(Long userId) {
             this.idCurrentUser = userId;
-            this.controller = controller;
         }
 
         @Override
         protected void updateItem(GroupMessage item, boolean empty) {
             super.updateItem(item, empty);
-            controller.scrollDown();
             if (empty) {
                 setGraphic(null);
             } else {
