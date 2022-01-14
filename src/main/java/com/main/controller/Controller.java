@@ -69,5 +69,5 @@ public interface Controller extends Observable {
     Tuple<String,String> generatePassword(String password);
 
     // PDF REPORT
-    void saveMessageReportToPDF(String path, String fileName, LocalDate startDate, LocalDate endDate, String username);
+    void saveMessageReportToPDF(String path, String fileName, LocalDate startDate, LocalDate endDate, User user);
 }
