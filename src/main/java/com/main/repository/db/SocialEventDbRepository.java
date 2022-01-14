@@ -99,7 +99,8 @@ public class SocialEventDbRepository implements Repository<Long, SocialEvent> {
         if (name==null)
             throw new IllegalArgumentException("Event name must not be null");
         Set<SocialEvent> events = new HashSet<>();
-        String sqlEventsIdsSelect = "select * from socialevents_participants where name=?";
+
+        String sqlEventsIdsSelect = "select * from socialevents where name=?";
         try(Connection connection = DriverManager.getConnection(url, username, password);
             PreparedStatement psEventsIdsSelect = connection.prepareStatement(sqlEventsIdsSelect)) {
             psEventsIdsSelect.setString(1, name);
@@ -162,7 +163,7 @@ public class SocialEventDbRepository implements Repository<Long, SocialEvent> {
         SocialEvent found = this.findOneById(id);
         if(found == null)
             return null;
-        String sqlDelete = "delete from socialevent where (id=?)";
+        String sqlDelete = "delete from socialevents where (id=?)";
         try (Connection connection = DriverManager.getConnection(url, username, password);
              PreparedStatement psDelete = connection.prepareStatement(sqlDelete)){
             psDelete.setLong(1, id);
@@ -181,7 +182,7 @@ public class SocialEventDbRepository implements Repository<Long, SocialEvent> {
             return null;
         if (idUser==null)
             throw new IllegalArgumentException("User id must be not null");
-        String sqlDelete = "delete from socialevent_participants where (id=?) and (id_user=?)";
+        String sqlDelete = "delete from socialevents_participants where (id=?) and (id_user=?)";
         try (Connection connection = DriverManager.getConnection(url, username, password);
              PreparedStatement psDelete = connection.prepareStatement(sqlDelete)){
             psDelete.setLong(1, idEvent);
@@ -219,6 +220,7 @@ public class SocialEventDbRepository implements Repository<Long, SocialEvent> {
         try(Connection connection = DriverManager.getConnection(url,username,password);
             PreparedStatement psParticipantsSelect = connection.prepareStatement(sqlParticipantsSelect)){
             psParticipantsSelect.setLong(1, idEvent);
+            psParticipantsSelect.setLong(2, idUser);
             ResultSet resultSet = psParticipantsSelect.executeQuery();
             if(resultSet.next()) {
                 return true;

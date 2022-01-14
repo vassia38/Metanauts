@@ -66,14 +66,15 @@ public class CreateGroupController {
 
     public void createGroup(ActionEvent actionEvent) {
         String groupName = this.nameTextField.getText();
-        if(groupName == null) {
+        if(groupName == null || groupName.equals("")) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Cannot create group");
             alert.setHeaderText("Group name is empty!");
             alert.showAndWait();
             return;
         }
-        if(tableViewFriends.getSelectionModel().getSelectedItems() == null) {
+        if(tableViewFriends.getSelectionModel().getSelectedItems() == null ||
+                tableViewFriends.getSelectionModel().getSelectedItems().size() == 0) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Cannot create group");
             alert.setHeaderText("No person selected!");

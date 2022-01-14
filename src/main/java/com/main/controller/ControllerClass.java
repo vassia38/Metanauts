@@ -12,12 +12,21 @@ import com.main.utils.events.*;
 import com.main.utils.observer.Observer;
 import com.main.utils.observer.OperationType;
 import com.main.utils.observer.UpdateType;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.pdmodel.font.PDFont;
+import org.apache.pdfbox.pdmodel.font.PDType1Font;
 
+import java.io.File;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.*;
@@ -336,7 +345,7 @@ public class ControllerClass implements Controller{
         Message msg = new Message(source,destination, message, date, repliedMsg);
         if(repliedMsg != null)
             setupMessage(msg);
-        this.messageService.add(msg);
+        msg = this.messageService.add(msg);
         this.notifyObservers(UpdateType.MESSAGES,
                 new MessageEvent(msg, OperationType.ADD));
     }
@@ -412,7 +421,7 @@ public class ControllerClass implements Controller{
         if(this.groupService.findGroupById(idGroup) == null)
             throw new RepositoryException("Group not found!");
         GroupMessage msg = new GroupMessage(source, idGroup, message, date);
-        this.messageService.add(msg);
+        msg = this.messageService.add(msg);
         this.notifyObservers(UpdateType.GROUPMESSAGES, new GroupMessageEvent(msg, OperationType.ADD));
     }
 
@@ -423,7 +432,7 @@ public class ControllerClass implements Controller{
         GroupMessage repliedMsg = messageService.findGroupMessageById(repliedMessageId);
         GroupMessage msg = new GroupMessage(source, idGroup, message, date, repliedMsg);
         setupMessage(msg);
-        this.messageService.add(msg);
+        msg = this.messageService.add(msg);
         this.notifyObservers(UpdateType.GROUPMESSAGES, new GroupMessageEvent(msg, OperationType.ADD));
     }
 
@@ -655,8 +664,8 @@ public class ControllerClass implements Controller{
         try{
             SecureRandom random = new SecureRandom();
 
-            Integer randomInt = random.nextInt();
-            String salt = randomInt.toString();
+            int randomInt = random.nextInt();
+            String salt = Integer.toString(randomInt);
             String p = password + salt;
 
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -678,18 +687,111 @@ public class ControllerClass implements Controller{
         try{
             String salt = this.userService.getSalt(username);
             String p = password + salt;
-
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
-
-
             byte[] hash = digest.digest(p.getBytes(StandardCharsets.UTF_8));
             BigInteger no = new BigInteger(1, hash);
-            String hashtext = no.toString(16);
-
-            return hashtext;
+            return no.toString(16);
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public void saveMessageReportToPDF(String path, String fileName, LocalDate startDate, LocalDate endDate, User user) {
+        if ( fileName.equals("") || path.equals(""))
+            return;
+        messageService.setPageSize(10);
+        PDDocument doc = null;
+        try {
+            doc = new PDDocument();
+            PDFont pdfFont = PDType1Font.TIMES_ROMAN;
+            float fontSize = 12;
+            float leading = 1.5f * fontSize;
+            Set<Message> msgs = messageService.getNextMessages(user.getId());
+            int i = 0;
+            while(msgs.size() != 0) {
+                PDPage page = new PDPage();
+                doc.addPage(page);
+                PDPageContentStream contentStream = new PDPageContentStream(doc, page);
+                PDRectangle mediabox = page.getMediaBox();
+                float margin = 16;
+                float width = mediabox.getWidth() - 2*margin;
+                float startX = mediabox.getLowerLeftX() + margin;
+                float startY = mediabox.getUpperRightY() - margin;
+                contentStream.beginText();
+                contentStream.setFont(pdfFont, fontSize);
+                contentStream.newLineAtOffset(startX, startY);
+                System.out.println("contentStream start");
+                System.out.println("printing page " + i);
+                i++;
+                for(Message m : msgs) {
+                    setupMessage(m);
+                    System.out.println(m);
+                    LocalDate date = m.getDate().toLocalDate();
+                    if( !(date.isAfter(startDate) && date.isBefore(endDate)) )
+                        continue;
+                    List<String> strs = Arrays.stream(
+                            m.toString().replace("\t", "").split("\n"))
+                            .toList();
+                    for(String text : strs) {
+                        List<String> lines = new ArrayList<>();
+                        int lastSpace = -1;
+                        while (text.length() > 0)
+                        {
+                            int spaceIndex = text.indexOf(' ', lastSpace + 1);
+                            if (spaceIndex < 0)
+                                spaceIndex = text.length();
+                            String subString = text.substring(0, spaceIndex);
+                            float size = fontSize * pdfFont.getStringWidth(subString) / 1000;
+                            System.out.printf("'%s' - %f of %f\n", subString, size, width);
+                            if (size > width)
+                            {
+                                if (lastSpace < 0)
+                                    lastSpace = spaceIndex;
+                                subString = text.substring(0, lastSpace);
+                                lines.add(subString);
+                                text = text.substring(lastSpace).trim();
+                                System.out.printf("'%s' is line\n", subString);
+                                lastSpace = -1;
+                            }
+                            else if (spaceIndex == text.length())
+                            {
+                                lines.add(text);
+                                System.out.printf("'%s' is line\n", text);
+                                text = "";
+                            }
+                            else
+                            {
+                                lastSpace = spaceIndex;
+                            }
+                        }
+                        for (String line: lines)
+                        {
+                            System.out.println(line);
+                            contentStream.showText(line);
+                            contentStream.newLineAtOffset(0, -leading);
+                        }
+                    }
+                }
+                contentStream.endText();
+                contentStream.close();
+                System.out.println("contentStream closed");
+                msgs = messageService.getNextMessages(user.getId());
+            }
+            System.out.println("saving");
+            doc.save(new File(path, fileName));
+        } catch(IOException e) {
+            e.printStackTrace();
+        } finally {
+            messageService.setPage(-1);
+            messageService.setPageSize(1);
+            if (doc != null) {
+                try {
+                    doc.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 }

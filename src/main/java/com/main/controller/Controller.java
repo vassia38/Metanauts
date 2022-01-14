@@ -5,6 +5,7 @@ import com.main.model.*;
 import com.main.service.*;
 import com.main.utils.observer.Observable;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.ArrayList;
@@ -77,4 +78,6 @@ public interface Controller extends Observable {
     void removeParticipantFromEvent(SocialEvent event, User user);
     void addNotification(SocialEvent event, User user);
     void removeNotification(SocialEvent event, User user);
+    // PDF REPORT
+    void saveMessageReportToPDF(String path, String fileName, LocalDate startDate, LocalDate endDate, User user);
 }

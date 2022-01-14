@@ -1,5 +1,6 @@
 package com.main;
 
+
 import com.main.controller.Controller;
 import com.main.controller.ControllerClass;
 import com.main.model.validators.FriendshipValidator;
@@ -15,6 +16,9 @@ import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 public class Main extends Application {
@@ -53,7 +57,13 @@ public class Main extends Application {
         /*User user = controller.findUserByUsername("vassco");
         Iterable<GroupMessage> msgs = controller.getGroupConversation(user, "grupa 224");
         msgs.forEach(System.out::println);*/
-
+        /*DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        controller.saveMessageReportToPDF(
+                "D:\\FACULTATE\\Semestru 3\\MAP\\LAB\\metanauts\\",
+                "rapport1.pdf",
+                LocalDate.parse("2021-09-10 13:00", formatter),
+                LocalDate.parse("2022-09-10 13:00", formatter),
+                userService.findOneByUsername("vassco"));*/
         FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("login-view.fxml"));
         Parent root = fxmlLoader.load();
         LoginController mainController = fxmlLoader.getController();

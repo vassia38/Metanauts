@@ -5,6 +5,10 @@ import com.main.model.Message;
 import com.main.model.User;
 import com.main.model.validators.Validator;
 import com.main.repository.Repository;
+import com.main.repository.paging.Page;
+import com.main.repository.paging.Pageable;
+import com.main.repository.paging.Paginator;
+import com.main.repository.paging.PagingRepository;
 
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -12,7 +16,7 @@ import java.util.*;
 
 import static java.sql.Types.INTEGER;
 
-public class MessageDbRepository implements Repository<Long, Message> {
+public class MessageDbRepository implements PagingRepository<Long, Message> {
     private final String url;
     private final String username;
     private final String password;
@@ -229,7 +233,7 @@ public class MessageDbRepository implements Repository<Long, Message> {
         String sqlInsert = "insert into group_messages (source_id, message_text," +
                 "date, replied_message_id, id_group) values (?,?,?,?,?)";
         try(Connection connection = DriverManager.getConnection(url, username, password);
-            PreparedStatement psInsert = connection.prepareStatement(sqlInsert)){
+            PreparedStatement psInsert = connection.prepareStatement(sqlInsert, Statement.RETURN_GENERATED_KEYS)){
             psInsert.setLong(1, entity.getSource().getId());
             psInsert.setString(2, entity.getMessageText());
             psInsert.setString(3, entity.getDate().toString());
@@ -239,6 +243,10 @@ public class MessageDbRepository implements Repository<Long, Message> {
                 psInsert.setLong(4, entity.getRepliedMessage().getId());
             psInsert.setLong(5, entity.getIdGroup());
             psInsert.executeUpdate();
+            ResultSet rs = psInsert.getGeneratedKeys();
+            rs.next();
+            entity.setId(rs.getLong(1));
+            return entity;
         } catch(SQLException e) {
             e.printStackTrace();
         }
@@ -272,6 +280,8 @@ public class MessageDbRepository implements Repository<Long, Message> {
                 psDest.setLong(3, rs.getLong(1));
                 psDest.executeUpdate();
             }
+            entity.setId(rs.getLong(1));
+            return entity;
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -339,4 +349,19 @@ public class MessageDbRepository implements Repository<Long, Message> {
         return findAllMessagesBySource(source);
     }
 
+
+    public Page<Message> findAll(Pageable pageable, Long sourceId) {
+        Iterable<Message> iterable = this.findAllMessagesBySource(sourceId);
+        Set<Message> msgs = new TreeSet<>();
+        for( Message m : iterable) {
+            msgs.add(m);
+        }
+        Paginator<Message> paginator = new Paginator<Message>(pageable, msgs);
+        return paginator.paginate();
+    }
+
+    @Override
+    public Page<Message> findAll(Pageable pageable) {
+        return null;
+    }
 }
