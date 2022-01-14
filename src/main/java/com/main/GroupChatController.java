@@ -43,8 +43,9 @@ public class GroupChatController implements Observer {
 
     @FXML
     public void initialize() {
-        this.messagesView.setCellFactory(param -> new ListViewCell(currentUser.getId()) );
+        this.messagesView.setCellFactory(param -> new ListViewCell(currentUser.getId(), this) );
         this.messagesView.setItems(messages);
+        textarea.setWrapText(true);
     }
 
     public void afterLoad(Controller serviceController, User currentUser, Group group) {
@@ -115,16 +116,23 @@ public class GroupChatController implements Observer {
         stage.close();
     }
 
+    public void scrollDown() {
+        messagesView.scrollTo(messages.size() - 1);
+    }
+
     static final class ListViewCell extends ListCell<GroupMessage> {
         private final Long idCurrentUser;
+        private final GroupChatController controller;
 
-        public ListViewCell(Long userId) {
+        public ListViewCell(Long userId, GroupChatController controller) {
             this.idCurrentUser = userId;
+            this.controller = controller;
         }
 
         @Override
         protected void updateItem(GroupMessage item, boolean empty) {
             super.updateItem(item, empty);
+            controller.scrollDown();
             if (empty) {
                 setGraphic(null);
             } else {
@@ -179,6 +187,8 @@ public class GroupChatController implements Observer {
             var label=new Label(msg);
             label.setMinWidth(50);
             label.setMinHeight(50);
+            label.setMaxWidth(280);
+            label.setWrapText(true);
             label.setStyle("-fx-hgap: 10px;" +
                     "    -fx-padding: 20px;" +
                     "" +
@@ -195,6 +205,7 @@ public class GroupChatController implements Observer {
             var label=new Label(msg);
             label.setMinWidth(50);
             label.setMinHeight(50);
+            label.setMaxWidth(240);
             label.setStyle("-fx-hgap: 5px;" +
                     "    -fx-padding: 5px;" +
                     "" +

@@ -56,6 +56,8 @@ public class LoginController{
         try {
             User user = this.serviceController.findUserByUsername(username);
             String hashcodedPassword = this.serviceController.hashCodePassword(username, userPassword);
+            System.out.println(hashcodedPassword);
+            System.out.println(user.getUserPassword());
             if(!hashcodedPassword.equals(user.getUserPassword())) {
                 msg = "Incorrect password!\n";
             }

@@ -1,12 +1,9 @@
 package com.main;
 
 import com.main.controller.Controller;
-import com.main.model.Group;
-import com.main.model.Request;
-import com.main.model.User;
+import com.main.model.*;
 import com.main.utils.events.Event;
 import com.main.utils.observer.Observer;
-import com.main.model.Friendship;
 import com.main.repository.RepositoryException;
 import com.main.utils.observer.OperationType;
 import javafx.animation.FadeTransition;
@@ -37,13 +34,10 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 public class MainController implements Observer {
-
     private User currentUser;
     private Controller serviceController;
     private User shownUser;
     ObservableList<String> usernames = FXCollections.observableArrayList();
-    ObservableList<Request> requests = FXCollections.observableArrayList();
-    ObservableList<Request> solvedRequests = FXCollections.observableArrayList();
     ObservableList<User> friends = FXCollections.observableArrayList();
     ObservableList<Group> groups = FXCollections.observableArrayList();
     FilteredList<String> filteredItems = new FilteredList<>(usernames);
@@ -77,6 +71,7 @@ public class MainController implements Observer {
     @FXML Button addFriendButton;
     @FXML Button cancelRequestButton;
     @FXML Button removeFriendButton;
+    @FXML Label requestHint;
     @FXML Button createGroupButton;
     @FXML Button createEventButton;
     @FXML Label profileTitle;
@@ -146,17 +141,21 @@ public class MainController implements Observer {
         tableViewFriends.setOnMouseClicked(event -> {
             if (event.getClickCount() == 2) {
                 User user = tableViewFriends.getSelectionModel().getSelectedItem();
-                System.out.println("Double-clicked on " + user);
-                this.showPage(event, userPage, user);
-                event.consume();
+                if(user != null) {
+                    System.out.println("Double-clicked on " + user);
+                    this.showPage(event, userPage, user);
+                    event.consume();
+                }
             }
         });
 
         tableViewGroups.setOnMouseClicked(click -> {
             if (click.getClickCount() == 2) {
                 Group group = tableViewGroups.getSelectionModel().getSelectedItem();
-                System.out.println("Double-clicked on " + group);
-                this.openGroupChat(group);
+                if(group != null) {
+                    System.out.println("Double-clicked on " + group);
+                    this.openGroupChat(group);
+                }
             }
         });
 
@@ -170,6 +169,8 @@ public class MainController implements Observer {
         this.addFriendButton.managedProperty().bind(this.addFriendButton.visibleProperty());
         this.removeFriendButton.setVisible(false);
         this.removeFriendButton.managedProperty().bind(this.removeFriendButton.visibleProperty());
+        this.requestHint.setVisible(false);
+        this.requestHint.managedProperty().bind(this.requestHint.visibleProperty());
         this.cancelRequestButton.setVisible(false);
         this.cancelRequestButton.managedProperty().bind(this.cancelRequestButton.visibleProperty());
         this.messageButton.setVisible(false);
@@ -355,71 +356,7 @@ public class MainController implements Observer {
         }
     }
 
-    //REQUESTS OBSERVER METHODS
-    public void addRequestObserverMethod(Request request) {
-        this.requests.add(request);
-    }
-    public void deleteRequestObserverMethod(Request request) {
-        this.requests.remove(request);
-    }
-    public final Map<OperationType, Method> mapRequestsOperations = new HashMap<>(){{
-        try {
-            put(OperationType.ADD, MainController.class.getMethod("addRequestObserverMethod", Request.class));
-            put(OperationType.DELETE, MainController.class.getMethod("deleteRequestObserverMethod", Request.class));
-            put(OperationType.UPDATE, null);
-        } catch(NoSuchMethodException e) {
-            e.printStackTrace();
-        }
-    }};
-    @Override
-    public void updateRequests(Event event) {
-        if(event == null) {
-            System.out.println("load all data for requests table");
-            this.requests.clear();
-            Iterable<Request> requests = this.serviceController.getAllRequests(this.currentUser);
-            this.setRequests(requests);
-            return;
-        }
-        OperationType operationType = event.getOperationType();
-        try {
-            System.out.println(operationType.toString() + " Request executed successfully");
-            this.mapRequestsOperations.get(operationType).invoke(this, event.getObject());
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
-    //SOLVED REQUESTS OBSERVER METHODS
-    public void addSolvedRequestObserverMethod(Request request) {
-        this.solvedRequests.add(request);
-    }
-    public final Map<OperationType, Method> mapSolvedRequestsOperations = new HashMap<>(){{
-        try {
-            put(OperationType.ADD, MainController.class.getMethod("addSolvedRequestObserverMethod", Request.class));
-            put(OperationType.DELETE, null);
-            put(OperationType.UPDATE, null);
-        } catch(NoSuchMethodException e) {
-            e.printStackTrace();
-        }
-    }};
-    @Override
-    public void updateSolvedRequests(Event event) {
-        if(event == null) {
-            System.out.println("load all data for solved requests table");
-            this.solvedRequests.clear();
-            Iterable<Request> requests = this.serviceController.getAllAnsweredRequests(this.currentUser);
-            this.setSolvedRequests(requests);
-            return;
-        }
-        OperationType operationType = event.getOperationType();
-        try {
-            mapSolvedRequestsOperations.get(operationType).invoke(this, event.getObject());
-            System.out.println(operationType.toString() + " Solved request executed successfully");
-        } catch( Exception e) {
-            e.printStackTrace();
-        }
-    }
 
     //GROUPS OBSERVER METHODS
     public void addGroupObserverMethod(Group gr) {
@@ -457,7 +394,7 @@ public class MainController implements Observer {
         System.out.println("Searching for " + this.comboBoxSearch.getEditor().getText());
         try {
             User user = this.serviceController.findUserByUsername(this.comboBoxSearch.getEditor().getText());
-            this.showProfileContent(user);
+            this.showPage(null, userPage, user);
         } catch (RepositoryException ex) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Error!");
@@ -545,14 +482,6 @@ public class MainController implements Observer {
         groups.forEach(gr -> this.groups.add(gr));
     }
 
-    private void setRequests(Iterable<Request> requests) {
-        requests.forEach( req -> this.requests.add(req));
-    }
-
-    private void setSolvedRequests(Iterable<Request> requests) {
-        requests.forEach( req -> this.solvedRequests.add(req));
-    }
-
     public void cancelRequest() {
         try {
             Request request = new Request(currentUser.getId(),shownUser.getId());
@@ -603,7 +532,7 @@ public class MainController implements Observer {
             Stage chatStage = new Stage();
             FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("chat-view.fxml"));
             Parent root = fxmlLoader.load();
-            Scene scene = new Scene(root, 680, 800);
+            Scene scene = new Scene(root, 600, 800);
             chatStage.setTitle("Metanauts - " + currentUser.getUsername() + " | "
                     + shownUser.getUsername());
             chatStage.setScene(scene);
@@ -624,7 +553,12 @@ public class MainController implements Observer {
             e.printStackTrace();
         }
     }
-
+    @Override
+    public void updateRequests(Event event) {
+    }
+    @Override
+    public void updateSolvedRequests(Event event) {
+    }
     @Override
     public void updateUsers(Event event) {
         this.updateUsernames();
