@@ -5,6 +5,7 @@ import com.main.model.*;
 import com.main.service.*;
 import com.main.utils.observer.Observable;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.ArrayList;
@@ -66,4 +67,7 @@ public interface Controller extends Observable {
     // PASSWORDS
     String hashCodePassword(String username, String password);
     Tuple<String,String> generatePassword(String password);
+
+    // PDF REPORT
+    void saveMessageReportToPDF(String path, String fileName, LocalDate startDate, LocalDate endDate, String username);
 }

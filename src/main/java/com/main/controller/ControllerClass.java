@@ -12,12 +12,21 @@ import com.main.utils.events.*;
 import com.main.utils.observer.Observer;
 import com.main.utils.observer.OperationType;
 import com.main.utils.observer.UpdateType;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.pdmodel.font.PDFont;
+import org.apache.pdfbox.pdmodel.font.PDType1Font;
 
+import java.io.File;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.*;
@@ -646,8 +655,8 @@ public class ControllerClass implements Controller{
         try{
             SecureRandom random = new SecureRandom();
 
-            Integer randomInt = random.nextInt();
-            String salt = randomInt.toString();
+            int randomInt = random.nextInt();
+            String salt = Integer.toString(randomInt);
             String p = password + salt;
 
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -669,18 +678,104 @@ public class ControllerClass implements Controller{
         try{
             String salt = this.userService.getSalt(username);
             String p = password + salt;
-
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
-
-
             byte[] hash = digest.digest(p.getBytes(StandardCharsets.UTF_8));
             BigInteger no = new BigInteger(1, hash);
-            String hashtext = no.toString(16);
-
-            return hashtext;
+            return no.toString(16);
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public void saveMessageReportToPDF(String path, String fileName, LocalDate startDate, LocalDate endDate, String username) {
+        if ( fileName.equals("") || path.equals(""))
+            return;
+        PDDocument doc = null;
+        try {
+            doc = new PDDocument();
+            PDPage page = new PDPage();
+            doc.addPage(page);
+            PDPageContentStream contentStream = new PDPageContentStream(doc, page);
+
+            PDFont pdfFont = PDType1Font.TIMES_ROMAN;
+            float fontSize = 12;
+            float leading = 1.5f * fontSize;
+
+            PDRectangle mediabox = page.getMediaBox();
+            float margin = 16;
+            float width = mediabox.getWidth() - 2*margin;
+            float startX = mediabox.getLowerLeftX() + margin;
+            float startY = mediabox.getUpperRightY() - margin;
+            List<Message> msgs = new ArrayList<>();
+            //filter
+            for(Message m : this.getAllMesagesOfUser(username)) {
+                LocalDate date = m.getDate().toLocalDate();
+                if(date.isAfter(startDate) && date.isBefore(endDate)) {
+                    msgs.add(m);
+                }
+            }
+
+            contentStream.beginText();
+            contentStream.setFont(pdfFont, fontSize);
+            contentStream.newLineAtOffset(startX, startY);
+            for(Message m : msgs) {
+                List<String> strs = Arrays.stream(
+                        m.toString().replace("\t", "").split("\n"))
+                        .toList();
+                for(String text : strs) {
+                    List<String> lines = new ArrayList<>();
+                    int lastSpace = -1;
+                    while (text.length() > 0)
+                    {
+                        int spaceIndex = text.indexOf(' ', lastSpace + 1);
+                        if (spaceIndex < 0)
+                            spaceIndex = text.length();
+                        String subString = text.substring(0, spaceIndex);
+                        float size = fontSize * pdfFont.getStringWidth(subString) / 1000;
+                        System.out.printf("'%s' - %f of %f\n", subString, size, width);
+                        if (size > width)
+                        {
+                            if (lastSpace < 0)
+                                lastSpace = spaceIndex;
+                            subString = text.substring(0, lastSpace);
+                            lines.add(subString);
+                            text = text.substring(lastSpace).trim();
+                            System.out.printf("'%s' is line\n", subString);
+                            lastSpace = -1;
+                        }
+                        else if (spaceIndex == text.length())
+                        {
+                            lines.add(text);
+                            System.out.printf("'%s' is line\n", text);
+                            text = "";
+                        }
+                        else
+                        {
+                            lastSpace = spaceIndex;
+                        }
+                    }
+                    for (String line: lines)
+                    {
+                        contentStream.showText(line);
+                        contentStream.newLineAtOffset(0, -leading);
+                    }
+                }
+            }
+            contentStream.endText();
+            contentStream.close();
+            System.out.println("saving");
+            doc.save(new File(path, fileName));
+        } catch(IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (doc != null) {
+                try {
+                    doc.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 }

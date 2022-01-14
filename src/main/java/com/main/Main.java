@@ -1,5 +1,6 @@
 package com.main;
 
+
 import com.main.controller.Controller;
 import com.main.controller.ControllerClass;
 import com.main.model.validators.FriendshipValidator;
@@ -15,6 +16,7 @@ import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.Objects;
 
 public class Main extends Application {
@@ -49,10 +51,6 @@ public class Main extends Application {
         SocialEventService eventService = new SocialEventService(eventRepo);
         Controller controller = new ControllerClass(userService,friendshipService,
                 messageService, requestService, groupService, eventService);
-
-        /*User user = controller.findUserByUsername("vassco");
-        Iterable<GroupMessage> msgs = controller.getGroupConversation(user, "grupa 224");
-        msgs.forEach(System.out::println);*/
 
         FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("login-view.fxml"));
         Parent root = fxmlLoader.load();

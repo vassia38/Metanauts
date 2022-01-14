@@ -6,6 +6,7 @@ module com.main {
     requires com.dlsc.formsfx;
     requires org.kordamp.bootstrapfx.core;
     requires java.sql;
+    requires org.apache.pdfbox;
 
     opens com.main to javafx.fxml, javafx.base, javafx.graphics, javafx.controls;
     opens com.main.model to javafx.base;
