@@ -556,44 +556,53 @@ public class ControllerClass implements Controller{
         return friendshipService.findFriendshipById(id);
     }
 
+    @Override
     public Iterable<SocialEvent> showAllEvents() {
         return eventService.findAll();
     }
 
+    @Override
     public Iterable<SocialEvent> showAllEventsOfUser(User user) {
         return eventService.findAll(user.getId());
     }
 
+    @Override
     public Iterable<SocialEvent> showAllEventsByName(String name) {
         return eventService.findAll(name);
     }
 
+    @Override
     public SocialEvent createEvent(SocialEvent event) {
         return eventService.save(event);
     }
 
-    public SocialEvent delete(SocialEvent event){
+    @Override
+    public SocialEvent delete(SocialEvent event) {
         return eventService.delete(event.getId());
     }
 
+    @Override
     public void addParticipantToEvent(SocialEvent event, User user) {
         if(eventService.findParticipantInEvent(event.getId(), user.getId()))
             throw new RepositoryException("User is already participating in this event");
         eventService.addParticipant(event.getId(), user.getId(), 1);
     }
 
+    @Override
     public void removeParticipantFromEvent(SocialEvent event, User user) {
         if(!eventService.findParticipantInEvent(event.getId(), user.getId()))
             throw new RepositoryException("User is not participating in this event");
         eventService.removeParticipant(event.getId(), user.getId());
     }
 
+    @Override
     public void addNotification(SocialEvent event, User user) {
         if(!eventService.findParticipantInEvent(event.getId(), user.getId()))
             throw new RepositoryException("User is not participating in this event");
         eventService.addNotification(event.getId(), user.getId());
     }
 
+    @Override
     public void removeNotification(SocialEvent event, User user) {
         if(!eventService.findParticipantInEvent(event.getId(), user.getId()))
             throw new RepositoryException("User is not participating in this event");

@@ -588,7 +588,7 @@ public class MainController implements Observer {
                 System.out.println("icon could not load!");
             }
             eventStage.show();
-            CreateGroupController ctrl = fxmlLoader.getController();
+            CreateEventController ctrl = fxmlLoader.getController();
             ctrl.afterLoad(this.serviceController, currentUser);
         } catch(RepositoryException e) {
             Alert alert = new Alert(Alert.AlertType.ERROR);

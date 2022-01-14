@@ -66,4 +66,15 @@ public interface Controller extends Observable {
     // PASSWORDS
     String hashCodePassword(String username, String password);
     Tuple<String,String> generatePassword(String password);
+
+    //EVENTS
+    Iterable<SocialEvent> showAllEvents();
+    Iterable<SocialEvent> showAllEventsOfUser(User user);
+    Iterable<SocialEvent> showAllEventsByName(String name);
+    SocialEvent createEvent(SocialEvent event);
+    SocialEvent delete(SocialEvent event);
+    void addParticipantToEvent(SocialEvent event, User user);
+    void removeParticipantFromEvent(SocialEvent event, User user);
+    void addNotification(SocialEvent event, User user);
+    void removeNotification(SocialEvent event, User user);
 }

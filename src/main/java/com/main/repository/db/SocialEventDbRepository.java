@@ -122,25 +122,16 @@ public class SocialEventDbRepository implements Repository<Long, SocialEvent> {
             throw new IllegalArgumentException("entity must not be null");
         }
         String sqlEventInsert = "insert into socialevents (name, date, coverphoto) values (?, ?, ?)";
-        String sqlEventParticipantInsert = "insert into socialevents_participants (id, id_user, notification) values (?, ?, ?)";
         try (Connection connection = DriverManager.getConnection(url, username, password);
-             PreparedStatement psEventInsert = connection.prepareStatement(sqlEventInsert, Statement.RETURN_GENERATED_KEYS);
-             PreparedStatement psEventParticipantInsert = connection.prepareStatement(sqlEventParticipantInsert)) {
+             PreparedStatement psEventInsert = connection.prepareStatement(sqlEventInsert, Statement.RETURN_GENERATED_KEYS)) {
             psEventInsert.setString(1, event.getName());
             psEventInsert.setString(2, event.getDate().toString());
             psEventInsert.setString(3, event.getCoverphoto());
             psEventInsert.executeUpdate();
             ResultSet rs = psEventInsert.getGeneratedKeys();
-            if(event.getIdsParticipants().size() > 0 && rs.next()) {
-                long idEvent = rs.getLong(1);
-                System.out.println(idEvent);
-                psEventParticipantInsert.setLong(1, idEvent);
-                for(Long idUser : event.getIdsParticipants()) {
-                    psEventParticipantInsert.setLong(2, idUser);
-                    psEventParticipantInsert.executeUpdate();
-                }
-                return new SocialEvent(idEvent, event.getName(), event.getDate(), event.getIdsParticipants(), event.getCoverphoto());
-            }
+            rs.next();
+            event.setId(rs.getLong(1));
+            return event;
         } catch (SQLException e) {
             e.printStackTrace();
         }
