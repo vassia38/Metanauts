@@ -6,7 +6,7 @@
 <?import javafx.scene.control.TableView?>
 <VBox alignment="TOP_CENTER" prefHeight="681.0" prefWidth="700.0"
       style="-fx-padding: 10 0 0 0; -fx-spacing: 10" stylesheets="@style.css"
-      xmlns="http://javafx.com/javafx/17"
+      xmlns="http://javafx.com/javafx/16"
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.main.RequestsController">
     <TableView fx:id="tableViewRequests" prefHeight="200.0" prefWidth="578.0">
