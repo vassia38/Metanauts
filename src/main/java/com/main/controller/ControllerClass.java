@@ -467,8 +467,6 @@ public class ControllerClass implements Controller{
                 throw new RepositoryException("Friendship request already sent!");
         }
         requestService.add(request);
-        this.notifyObservers(UpdateType.REQUESTS,
-                new RequestEvent(request, OperationType.ADD));
     }
 
     private void validateAnswer(String answer) {
@@ -484,22 +482,23 @@ public class ControllerClass implements Controller{
         if(found == null) {
             throw new RepositoryException("Request does not exist!");
         }
-        if(found.getStatus().equals("approved")) {
+        if(found.getStatus().equals("approve")) {
             throw new RepositoryException("Request already approved!");
         }
-        if(found.getStatus().equals("rejected")) {
+        if(found.getStatus().equals("reject")) {
             throw new RepositoryException("Request already rejected!");
         }
         Request newRequest = new Request(found.getId().getLeft(), found.getId().getRight(), answer, found.getDate());
         requestService.update(newRequest);
+        System.out.println(newRequest);
         if(answer.equals("approve")) {
             Friendship friendship = new Friendship(request.getId().getLeft(), request.getId().getRight());
             this.addFriendship(friendship);
+        }
         this.notifyObservers(UpdateType.REQUESTS,
                 new RequestEvent(newRequest, OperationType.DELETE));
         this.notifyObservers(UpdateType.SOLVEDREQUESTS,
                 new RequestEvent(newRequest, OperationType.ADD));
-        }
     }
 
     @Override
@@ -606,6 +605,7 @@ public class ControllerClass implements Controller{
 
     @Override
     public void notifyObservers(UpdateType updateType, Event event) {
+        System.out.println("Observable notifying " + updateType + " for " +event.getOperationType());
         for (Observer observer : this.observers) {
             if(updateType == UpdateType.USERS){
                 observer.updateUsers(event);

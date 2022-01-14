@@ -123,15 +123,12 @@ public class RequestsController implements Observer {
     }
 
     //REQUESTS OBSERVER METHODS
-    public void addRequestObserverMethod(Request request) {
-        this.requests.add(request);
-    }
     public void deleteRequestObserverMethod(Request request) {
         this.requests.remove(request);
     }
     public final Map<OperationType, Method> mapRequestsOperations = new HashMap<>(){{
         try {
-            put(OperationType.ADD, RequestsController.class.getMethod("addRequestObserverMethod", Request.class));
+            put(OperationType.ADD, null);
             put(OperationType.DELETE, RequestsController.class.getMethod("deleteRequestObserverMethod", Request.class));
             put(OperationType.UPDATE, null);
         } catch(NoSuchMethodException e) {

@@ -11,7 +11,7 @@
 <VBox alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity"
       minHeight="-Infinity" minWidth="-Infinity"
       prefHeight="400.0" prefWidth="600.0" stylesheets="@style.css"
-      xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.main.EventsController">
    <ImageView fitHeight="150.0" fitWidth="559.0" pickOnBounds="true" preserveRatio="true">
       <Image url="@eventbg-placeholder.jpg" />

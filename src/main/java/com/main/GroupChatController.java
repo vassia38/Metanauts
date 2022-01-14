@@ -45,6 +45,7 @@ public class GroupChatController implements Observer {
     public void initialize() {
         this.messagesView.setCellFactory(param -> new ListViewCell(currentUser.getId()) );
         this.messagesView.setItems(messages);
+        textarea.setWrapText(true);
     }
 
     public void afterLoad(Controller serviceController, User currentUser, Group group) {
@@ -75,15 +76,14 @@ public class GroupChatController implements Observer {
             this.serviceController.
                     getGroupConversation(currentUser, group.getName()).
                     forEach(messages::add);
-            messages.forEach(System.out::println);
+            this.scrollDown();
             return;
         }
         OperationType operationType = event.getOperationType();
         try {
             this.mapMessagesOperations.get(operationType).invoke(this, event.getObject());
+            this.scrollDown();
         } catch(Exception e) {
-            System.out.println(event.getObject());
-            System.out.println(event.getOperationType());
             e.printStackTrace();
         }
     }
@@ -92,7 +92,6 @@ public class GroupChatController implements Observer {
     void sendMessage() {
         String textMessage = this.textarea.getText();
         GroupMessage replied = this.messagesView.getSelectionModel().getSelectedItem();
-        System.out.println(replied);
         if(replied != null)
             this.serviceController.sendGroupMessage(currentUser, group.getId(), textMessage,
                     LocalDateTime.now(), replied.getId());
@@ -113,6 +112,10 @@ public class GroupChatController implements Observer {
         Node source = (Node) actionEvent.getSource();
         Stage stage = (Stage) source.getScene().getWindow();
         stage.close();
+    }
+
+    public void scrollDown() {
+        messagesView.scrollTo(messages.size() - 1);
     }
 
     static final class ListViewCell extends ListCell<GroupMessage> {
@@ -179,6 +182,8 @@ public class GroupChatController implements Observer {
             var label=new Label(msg);
             label.setMinWidth(50);
             label.setMinHeight(50);
+            label.setMaxWidth(280);
+            label.setWrapText(true);
             label.setStyle("-fx-hgap: 10px;" +
                     "    -fx-padding: 20px;" +
                     "" +
@@ -195,6 +200,7 @@ public class GroupChatController implements Observer {
             var label=new Label(msg);
             label.setMinWidth(50);
             label.setMinHeight(50);
+            label.setMaxWidth(240);
             label.setStyle("-fx-hgap: 5px;" +
                     "    -fx-padding: 5px;" +
                     "" +

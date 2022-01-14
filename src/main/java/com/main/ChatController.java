@@ -1,7 +1,6 @@
 package com.main;
 
 import com.main.controller.Controller;
-import com.main.model.GroupMessage;
 import com.main.model.Message;
 import com.main.model.User;
 import com.main.utils.events.Event;
@@ -14,6 +13,7 @@ import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.control.skin.VirtualFlow;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -46,7 +46,7 @@ public class ChatController implements Observer {
     public void initialize() {
         this.messagesView.setCellFactory(param -> new ListViewCell(currentUser.getId()) );
         this.messagesView.setItems(messages);
-
+        textarea.setWrapText(true);
     }
 
     public void afterLoad(Controller serviceController, User currentUser, User destination) {
@@ -78,11 +78,13 @@ public class ChatController implements Observer {
             this.serviceController.
                     getConversation(currentUser.getUsername(), destination.getUsername()).
                     forEach(messages::add);
+            this.scrollDown();
             return;
         }
         OperationType operationType = event.getOperationType();
         try {
             mapMessagesOperations.get(operationType).invoke(this, event.getObject());
+            this.scrollDown();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -110,6 +112,10 @@ public class ChatController implements Observer {
     @FXML
     void resetReply() {
         this.messagesView.getSelectionModel().clearSelection();
+    }
+
+    public void scrollDown() {
+        messagesView.scrollTo(messages.size() - 1);
     }
 
     static final class ListViewCell extends ListCell<Message> {
@@ -172,6 +178,8 @@ public class ChatController implements Observer {
             var label=new Label(msg);
             label.setMinWidth(50);
             label.setMinHeight(50);
+            label.setMaxWidth(280);
+            label.setWrapText(true);
             label.setStyle("-fx-hgap: 10px;" +
                     "    -fx-padding: 20px;" +
                     "" +
@@ -189,6 +197,7 @@ public class ChatController implements Observer {
             var label=new Label(msg);
             label.setMinWidth(50);
             label.setMinHeight(50);
+            label.setMaxWidth(240);
             label.setStyle("-fx-hgap: 5px;" +
                     "    -fx-padding: 5px;" +
                     "" +

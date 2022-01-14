@@ -14,7 +14,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox fx:id="document" alignment="TOP_CENTER" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.main.MainController">
+<VBox fx:id="document" alignment="TOP_CENTER" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.main.MainController">
     <stylesheets>
         <URL value="@style.css" />
     </stylesheets>
@@ -42,6 +42,7 @@
                     <Button fx:id="messageButton" onAction="#messageFriend" text="Message" textFill="WHITE">Message</Button>
                     <Button fx:id="addFriendButton" onAction="#addFriend" textFill="WHITE">Add friend</Button>
                     <Button fx:id="removeFriendButton" onAction="#removeFriend" textFill="WHITE">Remove friend</Button>
+                    <Label fx:id="requestHint">Check requests</Label>
                     <Button fx:id="cancelRequestButton" onAction="#cancelRequest" textFill="WHITE">Cancel Request</Button>
                     <Button fx:id="createGroupButton" onAction="#createGroup" textFill="WHITE">Create group</Button>
                     <Button fx:id="createEventButton" onAction="#createEvent" textFill="WHITE">Create event</Button>
