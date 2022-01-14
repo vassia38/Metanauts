@@ -8,6 +8,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
+<?import javafx.scene.control.PasswordField?>
 <VBox id="body" alignment="CENTER" prefHeight="427.0" prefWidth="695.0" spacing="20.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.main.LoginController">
     <stylesheets>
         <URL value="@style.css" />
@@ -29,11 +30,11 @@
                   <Font name="Roboto" size="14.0" />
                </font>
             </TextField>
-            <TextField fx:id="passwordTextField" alignment="CENTER" prefHeight="43.0" prefWidth="176.0" promptText="password" style="-fx-padding: 0;">
+            <PasswordField fx:id="passwordTextField" alignment="CENTER" prefHeight="43.0" prefWidth="176.0" promptText="password" style="-fx-padding: 0;">
                <font>
                   <Font name="Roboto" size="14.0" />
                </font>
-            </TextField>
+            </PasswordField>
       </VBox>
         <Button fx:id="login_button" alignment="CENTER" cache="true"
                 cacheHint="SPEED" contentDisplay="CENTER"

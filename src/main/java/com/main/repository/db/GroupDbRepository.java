@@ -154,7 +154,6 @@ public class GroupDbRepository implements Repository<Long, Group> {
 
     @Override
     public Group update(Group entity) {
-        // TODO
         return null;
     }
 }

@@ -39,13 +39,16 @@ public class Main extends Application {
         RequestDbRepository requestRepo =
                 new RequestDbRepository(url, username, password);
 
+        SocialEventDbRepository eventRepo = new SocialEventDbRepository(url, username, password);
+
         UserService userService = new UserService(userRepo);
         FriendshipService friendshipService = new FriendshipService(friendshipRepo);
         MessageService messageService = new MessageService(messageRepo);
         GroupService groupService = new GroupService(groupRepo);
         RequestService requestService = new RequestService(requestRepo);
+        SocialEventService eventService = new SocialEventService(eventRepo);
         Controller controller = new ControllerClass(userService,friendshipService,
-                messageService, requestService, groupService);
+                messageService, requestService, groupService, eventService);
 
         /*User user = controller.findUserByUsername("vassco");
         Iterable<GroupMessage> msgs = controller.getGroupConversation(user, "grupa 224");

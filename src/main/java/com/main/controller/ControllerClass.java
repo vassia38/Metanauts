@@ -30,15 +30,17 @@ public class ControllerClass implements Controller{
     private final MessageService messageService;
     private final RequestService requestService;
     private final GroupService groupService;
+    private final SocialEventService eventService;
     Graph graph;
     public ControllerClass(UserService userService, FriendshipService friendshipService,
                            MessageService messageService, RequestService requestService,
-                           GroupService groupService){
+                           GroupService groupService, SocialEventService eventService){
         this.userService = userService;
         this.friendshipService = friendshipService;
         this.messageService = messageService;
         this.requestService = requestService;
         this.groupService = groupService;
+        this.eventService = eventService;
     }
 
     @Override
@@ -555,7 +557,49 @@ public class ControllerClass implements Controller{
         return friendshipService.findFriendshipById(id);
     }
 
+    public Iterable<SocialEvent> showAllEvents() {
+        return eventService.findAll();
+    }
 
+    public Iterable<SocialEvent> showAllEventsOfUser(User user) {
+        return eventService.findAll(user.getId());
+    }
+
+    public Iterable<SocialEvent> showAllEventsByName(String name) {
+        return eventService.findAll(name);
+    }
+
+    public SocialEvent createEvent(SocialEvent event) {
+        return eventService.save(event);
+    }
+
+    public SocialEvent delete(SocialEvent event){
+        return eventService.delete(event.getId());
+    }
+
+    public void addParticipantToEvent(SocialEvent event, User user) {
+        if(eventService.findParticipantInEvent(event.getId(), user.getId()))
+            throw new RepositoryException("User is already participating in this event");
+        eventService.addParticipant(event.getId(), user.getId(), 1);
+    }
+
+    public void removeParticipantFromEvent(SocialEvent event, User user) {
+        if(!eventService.findParticipantInEvent(event.getId(), user.getId()))
+            throw new RepositoryException("User is not participating in this event");
+        eventService.removeParticipant(event.getId(), user.getId());
+    }
+
+    public void addNotification(SocialEvent event, User user) {
+        if(!eventService.findParticipantInEvent(event.getId(), user.getId()))
+            throw new RepositoryException("User is not participating in this event");
+        eventService.addNotification(event.getId(), user.getId());
+    }
+
+    public void removeNotification(SocialEvent event, User user) {
+        if(!eventService.findParticipantInEvent(event.getId(), user.getId()))
+            throw new RepositoryException("User is not participating in this event");
+        eventService.removeNotification(event.getId(), user.getId());
+    }
 
 
     private final List<Observer> observers = new ArrayList<>();

@@ -20,7 +20,7 @@ public class LoginController{
     @FXML TextField usernameTextField;
     @FXML TextField firstnameTextField;
     @FXML TextField lastnameTextField;
-    @FXML TextField passwordTextField;
+    @FXML PasswordField passwordTextField;
 
     @FXML Button login_button;
     @FXML Button register_button;

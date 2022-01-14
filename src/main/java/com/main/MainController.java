@@ -631,7 +631,7 @@ public class MainController implements Observer {
     }
     @Override
     public void updateMessages(Event event) {
-        // nothing
+        //nothing
     }
     @Override
     public void updateGroupMessages(Event event) {
@@ -639,6 +639,30 @@ public class MainController implements Observer {
     }
 
     public void createEvent(ActionEvent actionEvent) {
-        //TODO
+        try {
+            System.out.println("Opening create event window" + currentUser);
+            Stage eventStage = new Stage();
+            FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("create-event-view.fxml"));
+            Parent root = fxmlLoader.load();
+            Scene scene = new Scene(root, 680, 680);
+            eventStage.setTitle("Metanauts - " + currentUser.getUsername() + " | "
+                    + "create new event");
+            eventStage.setScene(scene);
+            try{
+                eventStage.getIcons().add(new Image(Objects.requireNonNull(Main.class.getResourceAsStream("logo.png"))));
+            } catch(NullPointerException e){
+                System.out.println("icon could not load!");
+            }
+            eventStage.show();
+            CreateGroupController ctrl = fxmlLoader.getController();
+            ctrl.afterLoad(this.serviceController, currentUser);
+        } catch(RepositoryException e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error!");
+            alert.setHeaderText("Can't create an event!\n");
+            alert.showAndWait();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
