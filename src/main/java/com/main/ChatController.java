@@ -223,6 +223,11 @@ public class ChatController implements Observer {
     }
 
     @Override
+    public void updateEvents(Event event) {
+
+    }
+
+    @Override
     public void updateFriends(Event event) {
         //nothing
     }

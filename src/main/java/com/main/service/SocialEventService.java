@@ -43,4 +43,7 @@ public class SocialEventService {
     public boolean findParticipantInEvent(Long idEvent, Long idUser) {
         return this.repo.findParticipantInEvent(idEvent, idUser);
     }
+    public boolean findNotificationOfParticipant(Long idEvent, Long idUser) {
+        return this.repo.findNotificationOfParticipant(idEvent, idUser);
+    }
 }

@@ -92,4 +92,9 @@ public class SocialEvent extends Entity<Long> {
     public int size() {
         return this.idsParticipants.size();
     }
+
+    @Override
+    public String toString() {
+        return this.getId() + " " + this.getName() + " " + this.getIdsParticipants();
+    }
 }

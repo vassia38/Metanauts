@@ -213,4 +213,9 @@ public class RequestsController implements Observer {
     @Override
     public void updateGroupMessages(Event event) {
     }
+
+    @Override
+    public void updateEvents(Event event) {
+
+    }
 }

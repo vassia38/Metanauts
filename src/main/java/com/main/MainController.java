@@ -388,7 +388,9 @@ public class MainController implements Observer {
             e.printStackTrace();
         }
     }
-
+    private void setGroups(Iterable<Group> groups) {
+        groups.forEach(gr -> this.groups.add(gr));
+    }
 
     public void searchUser() {
         System.out.println("Searching for " + this.comboBoxSearch.getEditor().getText());
@@ -449,7 +451,6 @@ public class MainController implements Observer {
             alert.showAndWait();
         }
     }
-
     public void createGroup(){
         try {
             System.out.println("Opening create group window" + currentUser);
@@ -477,11 +478,6 @@ public class MainController implements Observer {
             e.printStackTrace();
         }
     }
-
-    private void setGroups(Iterable<Group> groups) {
-        groups.forEach(gr -> this.groups.add(gr));
-    }
-
     public void cancelRequest() {
         try {
             Request request = new Request(currentUser.getId(),shownUser.getId());
@@ -492,6 +488,33 @@ public class MainController implements Observer {
             alert.setTitle("Error!");
             alert.setHeaderText(ex.getMessage());
             alert.showAndWait();
+        }
+    }
+    public void createEvent(ActionEvent actionEvent) {
+        try {
+            System.out.println("Opening create event window" + currentUser);
+            Stage eventStage = new Stage();
+            FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("create-event-view.fxml"));
+            Parent root = fxmlLoader.load();
+            Scene scene = new Scene(root, 680, 680);
+            eventStage.setTitle("Metanauts - " + currentUser.getUsername() + " | "
+                    + "create new event");
+            eventStage.setScene(scene);
+            try{
+                eventStage.getIcons().add(new Image(Objects.requireNonNull(Main.class.getResourceAsStream("logo.png"))));
+            } catch(NullPointerException e){
+                System.out.println("icon could not load!");
+            }
+            eventStage.show();
+            CreateEventController ctrl = fxmlLoader.getController();
+            ctrl.afterLoad(this.serviceController, currentUser);
+        } catch(RepositoryException e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error!");
+            alert.setHeaderText("Can't create an event!\n");
+            alert.showAndWait();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -571,32 +594,8 @@ public class MainController implements Observer {
     public void updateGroupMessages(Event event) {
 
     }
+    @Override
+    public void updateEvents(Event event) {
 
-    public void createEvent(ActionEvent actionEvent) {
-        try {
-            System.out.println("Opening create event window" + currentUser);
-            Stage eventStage = new Stage();
-            FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("create-event-view.fxml"));
-            Parent root = fxmlLoader.load();
-            Scene scene = new Scene(root, 680, 680);
-            eventStage.setTitle("Metanauts - " + currentUser.getUsername() + " | "
-                    + "create new event");
-            eventStage.setScene(scene);
-            try{
-                eventStage.getIcons().add(new Image(Objects.requireNonNull(Main.class.getResourceAsStream("logo.png"))));
-            } catch(NullPointerException e){
-                System.out.println("icon could not load!");
-            }
-            eventStage.show();
-            CreateEventController ctrl = fxmlLoader.getController();
-            ctrl.afterLoad(this.serviceController, currentUser);
-        } catch(RepositoryException e) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error!");
-            alert.setHeaderText("Can't create an event!\n");
-            alert.showAndWait();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 }

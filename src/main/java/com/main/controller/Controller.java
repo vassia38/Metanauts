@@ -78,6 +78,7 @@ public interface Controller extends Observable {
     void removeParticipantFromEvent(SocialEvent event, User user);
     void addNotification(SocialEvent event, User user);
     void removeNotification(SocialEvent event, User user);
+    boolean findNotificationOfParticipant(SocialEvent event, User user);
     // PDF REPORT
     void saveMessageReportToPDF(String path, String fileName, LocalDate startDate, LocalDate endDate, User user);
 }

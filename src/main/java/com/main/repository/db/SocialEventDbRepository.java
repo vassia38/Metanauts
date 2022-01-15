@@ -122,16 +122,19 @@ public class SocialEventDbRepository implements Repository<Long, SocialEvent> {
         if(event == null) {
             throw new IllegalArgumentException("entity must not be null");
         }
-        String sqlEventInsert = "insert into socialevents (name, date, coverphoto) values (?, ?, ?)";
+        String sqlEventInsert = "insert into socialevents (name, date, coverphoto, id_host) values (?, ?, ?, ?)";
         try (Connection connection = DriverManager.getConnection(url, username, password);
              PreparedStatement psEventInsert = connection.prepareStatement(sqlEventInsert, Statement.RETURN_GENERATED_KEYS)) {
             psEventInsert.setString(1, event.getName());
             psEventInsert.setString(2, event.getDate().toString());
             psEventInsert.setString(3, event.getCoverphoto());
+            Long idUser = event.getIdsParticipants().get(0);
+            psEventInsert.setLong(4, idUser);
             psEventInsert.executeUpdate();
             ResultSet rs = psEventInsert.getGeneratedKeys();
             rs.next();
             event.setId(rs.getLong(1));
+            this.addParticipant(event.getId(), idUser, 1);
             return event;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -209,6 +212,27 @@ public class SocialEventDbRepository implements Repository<Long, SocialEvent> {
         }catch(SQLException e){
             e.printStackTrace();
         }
+    }
+
+    public boolean findNotificationOfParticipant(Long idEvent, Long idUser) {
+        if (idEvent==null)
+            throw new IllegalArgumentException("Event id must not be null");
+        if (idUser==null)
+            throw new IllegalArgumentException("User id must not be null");
+        String sqlParticipantsSelect = "select notification from socialevents_participants where (id=?) and (id_user=?)";
+        try(Connection connection = DriverManager.getConnection(url,username,password);
+            PreparedStatement psParticipantsSelect = connection.prepareStatement(sqlParticipantsSelect)){
+            psParticipantsSelect.setLong(1, idEvent);
+            psParticipantsSelect.setLong(2, idUser);
+            ResultSet resultSet = psParticipantsSelect.executeQuery();
+            if(resultSet.next()) {
+                int val = resultSet.getInt(1);
+                return val == 1;
+            }
+        }catch(SQLException e){
+            e.printStackTrace();
+        }
+        return false;
     }
 
     public boolean findParticipantInEvent (Long idEvent, Long idUser) {

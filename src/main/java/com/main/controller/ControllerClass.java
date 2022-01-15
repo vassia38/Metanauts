@@ -582,7 +582,10 @@ public class ControllerClass implements Controller{
 
     @Override
     public SocialEvent createEvent(SocialEvent event) {
-        return eventService.save(event);
+        event = eventService.save(event);
+        SocialEventEvent ev = new SocialEventEvent(event,OperationType.ADD);
+        this.notifyObservers(UpdateType.SOCIALEVENTS, ev);
+        return event;
     }
 
     @Override
@@ -593,15 +596,23 @@ public class ControllerClass implements Controller{
     @Override
     public void addParticipantToEvent(SocialEvent event, User user) {
         if(eventService.findParticipantInEvent(event.getId(), user.getId()))
-            throw new RepositoryException("User is already participating in this event");
+            //throw new RepositoryException("User is already participating in this event");
+            return;
         eventService.addParticipant(event.getId(), user.getId(), 1);
+        event = eventService.findOneById(event.getId());
+        this.notifyObservers(UpdateType.SOCIALEVENTS,
+                new SocialEventEvent(event, OperationType.UPDATE));
     }
 
     @Override
     public void removeParticipantFromEvent(SocialEvent event, User user) {
         if(!eventService.findParticipantInEvent(event.getId(), user.getId()))
-            throw new RepositoryException("User is not participating in this event");
+           // throw new RepositoryException("User is not participating in this event");
+            return;
         eventService.removeParticipant(event.getId(), user.getId());
+        event = eventService.findOneById(event.getId());
+        this.notifyObservers(UpdateType.SOCIALEVENTS,
+                new SocialEventEvent(event, OperationType.UPDATE));
     }
 
     @Override
@@ -616,6 +627,11 @@ public class ControllerClass implements Controller{
         if(!eventService.findParticipantInEvent(event.getId(), user.getId()))
             throw new RepositoryException("User is not participating in this event");
         eventService.removeNotification(event.getId(), user.getId());
+    }
+
+    @Override
+    public boolean findNotificationOfParticipant(SocialEvent event, User user) {
+        return eventService.findNotificationOfParticipant(event.getId(), user.getId());
     }
 
 
@@ -645,6 +661,9 @@ public class ControllerClass implements Controller{
             }
             if(updateType == UpdateType.GROUPS) {
                 observer.updateGroups(event);
+            }
+            if(updateType == UpdateType.SOCIALEVENTS) {
+                observer.updateEvents(event);
             }
         }
     }

@@ -71,9 +71,9 @@ public class CreateEventController {
             alert.showAndWait();
             return;
         }
-
-        SocialEvent newEvent = this.serviceController.createEvent(new SocialEvent(eventName,eventDate));
-        this.serviceController.addParticipantToEvent(newEvent, currentUser);
+        List<Long> ids = new ArrayList<>();
+        ids.add(currentUser.getId());
+        this.serviceController.createEvent(new SocialEvent(eventName,eventDate, ids));
         Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
         confirmation.setTitle("Confirmation");
         confirmation.setHeaderText("Event created succesfully!");

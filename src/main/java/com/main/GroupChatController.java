@@ -88,6 +88,11 @@ public class GroupChatController implements Observer {
         }
     }
 
+    @Override
+    public void updateEvents(Event event) {
+
+    }
+
     @FXML
     void sendMessage() {
         String textMessage = this.textarea.getText();

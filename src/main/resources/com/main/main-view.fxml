@@ -14,7 +14,9 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox fx:id="document" alignment="TOP_CENTER" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.main.MainController">
+<VBox fx:id="document" alignment="TOP_CENTER"
+      xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.main.MainController">
     <stylesheets>
         <URL value="@style.css" />
     </stylesheets>
