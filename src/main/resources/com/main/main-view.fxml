@@ -2,10 +2,10 @@
 
 <?import java.net.URL?>
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
@@ -14,7 +14,6 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<?import javafx.scene.control.TextField?>
 <VBox fx:id="document" alignment="TOP_CENTER" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.main.MainController">
     <stylesheets>
         <URL value="@style.css" />
@@ -44,11 +43,16 @@
                     <Button fx:id="messageButton" onAction="#messageFriend" text="Message" textFill="WHITE">Message</Button>
                     <Button fx:id="addFriendButton" onAction="#addFriend" textFill="WHITE">Add friend</Button>
                     <Button fx:id="removeFriendButton" onAction="#removeFriend" textFill="WHITE">Remove friend</Button>
-                    <Label fx:id="requestHint" textFill="WHITE">Check requests</Label>
                     <Button fx:id="cancelRequestButton" onAction="#cancelRequest" textFill="WHITE">Cancel Request</Button>
                     <Button fx:id="createGroupButton" onAction="#createGroup" textFill="WHITE">Create group</Button>
                     <Button fx:id="createEventButton" onAction="#createEvent" textFill="WHITE">Create event</Button>
                 </HBox>
+                <VBox prefHeight="575.0" prefWidth="1000.0" style="-fx-padding: 20;">
+                    <Label fx:id="motdLabel" alignment="TOP_CENTER" prefHeight="323.0" prefWidth="706.0" style="-fx-font-size: 32;" textFill="WHITE">
+                    </Label>
+                    <Label fx:id="todayDateLabel" alignment="BOTTOM_RIGHT" prefHeight="221.0" prefWidth="960.0" style="-fx-font-size: 14;" textFill="WHITE">
+                    </Label>
+                </VBox>
             </VBox>
         </VBox>
         <VBox fx:id="friendliestBar" alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="680.0" prefWidth="300" style="-fx-spacing: 10; -fx-padding: 5; -fx-background-color: transparent">

@@ -29,9 +29,13 @@ import javafx.util.Duration;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.time.LocalDate;
 import java.util.*;
 
 public class MainController implements Observer {
+
+
+
     private User currentUser;
     private Controller serviceController;
     private User shownUser;
@@ -68,10 +72,11 @@ public class MainController implements Observer {
     @FXML Button addFriendButton;
     @FXML Button cancelRequestButton;
     @FXML Button removeFriendButton;
-    @FXML Label requestHint;
     @FXML Button createGroupButton;
     @FXML Button createEventButton;
     @FXML Label profileTitle;
+    @FXML Label motdLabel;
+    @FXML Label todayDateLabel;
 
     @FXML TableColumn<User, String> name_friend;
     @FXML TableView<User> tableViewFriends;
@@ -166,14 +171,14 @@ public class MainController implements Observer {
         this.addFriendButton.managedProperty().bind(this.addFriendButton.visibleProperty());
         this.removeFriendButton.setVisible(false);
         this.removeFriendButton.managedProperty().bind(this.removeFriendButton.visibleProperty());
-        this.requestHint.setVisible(false);
-        this.requestHint.managedProperty().bind(this.requestHint.visibleProperty());
         this.cancelRequestButton.setVisible(false);
         this.cancelRequestButton.managedProperty().bind(this.cancelRequestButton.visibleProperty());
         this.messageButton.setVisible(false);
         this.messageButton.managedProperty().bind(this.removeFriendButton.visibleProperty());
         this.createGroupButton.managedProperty().bind(this.createGroupButton.visibleProperty());
         this.createEventButton.managedProperty().bind(this.createEventButton.visibleProperty());
+        this.motdLabel.setVisible(false);
+        this.todayDateLabel.setText("Today is " + LocalDate.now());
 
         name_friend.setCellValueFactory( param ->
                 new ReadOnlyStringWrapper ( param.getValue().getFirstName() + " " + param.getValue().getLastName()));
@@ -200,6 +205,8 @@ public class MainController implements Observer {
                 this.addFriendButton.setVisible(false);
                 this.removeFriendButton.setVisible(true);
                 this.cancelRequestButton.setVisible(false);
+                this.motdLabel.setText("You are friends");
+                this.motdLabel.setVisible(true);
             }
             else {
                 Request sentRequest = this.serviceController.findRequest(new Request(currentUser.getId(),shownUser.getId()));
@@ -209,6 +216,8 @@ public class MainController implements Observer {
                     this.addFriendButton.setVisible(false);
                     this.removeFriendButton.setVisible(false);
                     this.cancelRequestButton.setVisible(sentRequest.getStatus().equals("pending"));
+                    this.motdLabel.setText("Friend request sent");
+                    this.motdLabel.setVisible(true);
                 }
                 //request already sent to current user
                 else if(this.serviceController.findRequest(new Request(shownUser.getId(),currentUser.getId())) != null) {
@@ -216,6 +225,11 @@ public class MainController implements Observer {
                     this.addFriendButton.setVisible(false);
                     this.removeFriendButton.setVisible(false);
                     this.cancelRequestButton.setVisible(false);
+                    this.motdLabel.setText("Check friend requests ;)");
+                    if(this.serviceController.findRequest(new Request(shownUser.getId(), currentUser.getId()))
+                            .getStatus().equals("reject"))
+                        this.motdLabel.setText("Rejected.");
+                    this.motdLabel.setVisible(true);
                 }
                 //no connection
                 else {
@@ -223,6 +237,8 @@ public class MainController implements Observer {
                     this.addFriendButton.setVisible(true);
                     this.removeFriendButton.setVisible(false);
                     this.cancelRequestButton.setVisible(false);
+                    this.motdLabel.setText("");
+                    this.motdLabel.setVisible(false);
                 }
             }
         }
@@ -234,6 +250,8 @@ public class MainController implements Observer {
             this.cancelRequestButton.setVisible(false);
             this.createGroupButton.setVisible(true);
             this.createEventButton.setVisible(true);
+            this.motdLabel.setText("Welcome, " + currentUser.getFirstName() + " " + currentUser.getLastName() + "!");
+            this.motdLabel.setVisible(true);
         }
     }
 
@@ -465,7 +483,7 @@ public class MainController implements Observer {
             alert.showAndWait();
         }
     }
-    public void createEvent(ActionEvent actionEvent) {
+    public void createEvent() {
         try {
             System.out.println("Opening create event window" + currentUser);
             Stage eventStage = new Stage();
@@ -573,7 +591,7 @@ public class MainController implements Observer {
 
     }
 
-    public void createReport(ActionEvent actionEvent) {
+    public void createReport() {
         try {
             Stage newstage = new Stage();
             FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("report-view.fxml"));
