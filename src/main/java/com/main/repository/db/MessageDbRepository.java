@@ -159,6 +159,43 @@ public class MessageDbRepository implements PagingRepository<Long, Message> {
         return messages;
     }
 
+    public Set<Message> findAllMessagesByDestination(Long destinationId){
+        Set<Message> messages = new TreeSet<>();
+        String sqlSelectMessage =
+                "select M.id,M.source_id,M.message_text,M.date,M.replied_message_id " +
+                        "from messages M, source_destination SD " +
+                        "where M.id = SD.message_id and SD.destination_id=? " +
+                        "order by id";
+        try(Connection connection = DriverManager.getConnection(url,username,password);
+            PreparedStatement psSelectMessage = connection.prepareStatement(sqlSelectMessage)){
+
+            psSelectMessage.setLong(1,destinationId);
+            ResultSet resultSet = psSelectMessage.executeQuery();
+            while(resultSet.next()){
+                Long messageId = resultSet.getLong("id");
+                Long sourceId = resultSet.getLong("source_id");
+                User source = new User(sourceId,null,null,null, null);
+                User destination = new User(destinationId,null,null,null, null);
+                String messageText = resultSet.getString("message_text");
+                LocalDateTime date = LocalDateTime.parse(resultSet.getString("date"));
+                long repliedMessageId = resultSet.getLong("replied_message_id");
+                Message replied = null;
+                if(repliedMessageId != 0){
+                    replied = new Message(null,null,null,null);
+                    replied.setId(repliedMessageId);
+                }
+                List<User> destinationList= new ArrayList<>();
+                destinationList.add(destination);
+                Message msg = new Message(source,destinationList,messageText,date, replied);
+                msg.setId(messageId);
+                messages.add(msg);
+            }
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+        return messages;
+    }
+
     public Set<Message> findConversation(Long id1, Long id2){
         Set<Message> messages = new TreeSet<>();
         String sqlSelectMessage =
@@ -350,8 +387,8 @@ public class MessageDbRepository implements PagingRepository<Long, Message> {
     }
 
 
-    public Page<Message> findAll(Pageable pageable, Long sourceId) {
-        Iterable<Message> iterable = this.findAllMessagesBySource(sourceId);
+    public Page<Message> findAll(Pageable pageable, Long destinationId) {
+        Iterable<Message> iterable = this.findAllMessagesByDestination(destinationId);
         Set<Message> msgs = new TreeSet<>();
         for( Message m : iterable) {
             msgs.add(m);

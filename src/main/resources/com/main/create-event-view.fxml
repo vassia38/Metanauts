@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox id="body" alignment="CENTER" prefHeight="427.0" prefWidth="695.0" spacing="20.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.main.CreateEventController">
+<VBox id="body" alignment="CENTER" prefHeight="300.0" prefWidth="695.0" spacing="20.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.main.CreateEventController">
     <stylesheets>
         <URL value="@style.css" />
     </stylesheets>

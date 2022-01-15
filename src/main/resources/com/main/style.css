@@ -87,6 +87,7 @@
 .button {
     -fx-border-width: 0;
     -fx-background-color: #444288;
+    -fx-text-fill: white;
 }
 
 #destinationLabel {
@@ -100,7 +101,7 @@
 }
 
 .profile-page {
-    -fx-background-color: #f5f4ff;
+    -fx-background-color: transparent;
 }
 
 .label {

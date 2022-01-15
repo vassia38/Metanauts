@@ -7,11 +7,9 @@ import com.main.utils.observer.Observer;
 import com.main.repository.RepositoryException;
 import com.main.utils.observer.OperationType;
 import javafx.animation.FadeTransition;
-import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -37,10 +35,8 @@ public class MainController implements Observer {
     private User currentUser;
     private Controller serviceController;
     private User shownUser;
-    ObservableList<String> usernames = FXCollections.observableArrayList();
     ObservableList<User> friends = FXCollections.observableArrayList();
     ObservableList<Group> groups = FXCollections.observableArrayList();
-    FilteredList<String> filteredItems = new FilteredList<>(usernames);
     Node requestsPage;
     Node eventsPage;
     RequestsController requestsController;
@@ -59,12 +55,13 @@ public class MainController implements Observer {
     @FXML Button friendlistButton;
     @FXML Button requestsButton;
     @FXML Button eventsButton;
+    @FXML Button createReportButton;
 
     @FXML ImageView menu;
     @FXML ImageView homeLogo;
 
 
-    @FXML ComboBox<String> comboBoxSearch;
+    @FXML TextField searchTextField;
     @FXML Button searchButton;
 
     @FXML Button messageButton;
@@ -101,7 +98,7 @@ public class MainController implements Observer {
             if(event.getTarget() != menuBarShadow && friendliestBar.isVisible()) {
                 this.animateSideBar(friendliestBar, !friendliestBar.isVisible());
             }
-            if(comboBoxSearch.isFocused()) {
+            if(searchTextField.isFocused()) {
                 document.requestFocus();
                 event.consume();
             }
@@ -184,20 +181,6 @@ public class MainController implements Observer {
 
         groupName.setCellValueFactory(new PropertyValueFactory<>("name"));
         tableViewGroups.setItems(this.groups);
-
-        comboBoxSearch.getEditor().textProperty().addListener((obs, oldValue, newValue) -> {
-            final TextField editor = comboBoxSearch.getEditor();
-            final String selected = comboBoxSearch.getSelectionModel().getSelectedItem();
-
-            // This needs run on the GUI thread to avoid the error described
-            // here: https://bugs.openjdk.java.net/browse/JDK-8081700.
-            Platform.runLater(() -> {
-                if (selected == null || !selected.equals(editor.getText())) {
-                    filteredItems.setPredicate(item -> item.toUpperCase().startsWith(newValue.toUpperCase()));
-                }
-            });
-        });
-        comboBoxSearch.setItems(filteredItems);
     }
 
     /***
@@ -287,12 +270,6 @@ public class MainController implements Observer {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    void updateUsernames() {
-        this.usernames.clear();
-        Iterable<User> users = this.serviceController.getAllUsers();
-        this.setUsernames(users);
     }
 
     // FRIENDS OBSERVER METHODS
@@ -393,9 +370,11 @@ public class MainController implements Observer {
     }
 
     public void searchUser() {
-        System.out.println("Searching for " + this.comboBoxSearch.getEditor().getText());
+        if(this.searchTextField.getText() == null || this.searchTextField.getText().equals(""))
+            return;
+        System.out.println("Searching for " + this.searchTextField.getText());
         try {
-            User user = this.serviceController.findUserByUsername(this.comboBoxSearch.getEditor().getText());
+            User user = this.serviceController.findUserByUsername(this.searchTextField.getText());
             this.showPage(null, userPage, user);
         } catch (RepositoryException ex) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -411,10 +390,6 @@ public class MainController implements Observer {
 
     private void setCurrentUser(User user) {
         this.currentUser = user;
-    }
-
-    private void setUsernames(Iterable<User> users) {
-        users.forEach( u -> this.usernames.add(u.getUsername()));
     }
 
     public void addFriend() {
@@ -584,7 +559,6 @@ public class MainController implements Observer {
     }
     @Override
     public void updateUsers(Event event) {
-        this.updateUsernames();
     }
     @Override
     public void updateMessages(Event event) {
@@ -597,5 +571,26 @@ public class MainController implements Observer {
     @Override
     public void updateEvents(Event event) {
 
+    }
+
+    public void createReport(ActionEvent actionEvent) {
+        try {
+            Stage newstage = new Stage();
+            FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("report-view.fxml"));
+            Parent root = fxmlLoader.load();
+            Scene scene = new Scene(root, 600, 800);
+            newstage.setTitle("Metanauts - " + currentUser.getUsername() + " | Received messages");
+            newstage.setScene(scene);
+            try{
+                newstage.getIcons().add(new Image(Objects.requireNonNull(Main.class.getResourceAsStream("logo.png"))));
+            } catch(NullPointerException e){
+                System.out.println("icon could not load!");
+            }
+            ReportController ctrl = fxmlLoader.getController();
+            ctrl.afterLoad(this.serviceController, currentUser);
+            newstage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
