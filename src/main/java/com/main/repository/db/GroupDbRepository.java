@@ -1,7 +1,6 @@
 package com.main.repository.db;
 
 import com.main.model.Group;
-import com.main.model.GroupMessage;
 import com.main.repository.Repository;
 
 import java.sql.*;
@@ -39,6 +38,7 @@ public class GroupDbRepository implements Repository<Long, Group> {
                     Long idMember = resultSet.getLong("id_user");
                     idsMembers.add(idMember);
                 }
+                System.out.println("[findOneById] " + id + " " +name_group);
                 return new Group(id, name_group, idsMembers);
             }
         }catch(SQLException e){
@@ -117,6 +117,7 @@ public class GroupDbRepository implements Repository<Long, Group> {
                     psGroupMemberInsert.setLong(2, idUser);
                     psGroupMemberInsert.executeUpdate();
                 }
+                return new Group(idGroup, entity.getName(), entity.getIdsMembers());
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -153,7 +154,6 @@ public class GroupDbRepository implements Repository<Long, Group> {
 
     @Override
     public Group update(Group entity) {
-        // TODO
         return null;
     }
 }

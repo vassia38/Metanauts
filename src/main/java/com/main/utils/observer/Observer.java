@@ -10,4 +10,6 @@ public interface Observer{
     void updateUsers(Event event);
     void updateMessages(Event event);
     void updateGroups(Event event);
+    void updateGroupMessages(Event event);
+    void updateEvents(Event event);
 }

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.text.Font?>
+<BorderPane id="body" xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml" fx:controller="com.main.GroupChatController"
+            prefHeight="800.0" prefWidth="600.0">
+    <stylesheets>
+        <URL value="@style.css"/>
+    </stylesheets>
+    <top>
+        <HBox prefHeight="30.0" prefWidth="560.0" spacing="400">
+            <Button fx:id="back" onAction="#backAction" prefHeight="30.0" prefWidth="70.0" text="Back" textFill="WHITE">
+                <font>
+                    <Font size="14.0" />
+                </font></Button>
+            <Label fx:id="groupLabel" alignment="CENTER"
+                   prefHeight="30.0" prefWidth="190.0"
+                   text="Destination" textFill="WHITE">
+                <font>
+                    <Font size="14.0" />
+                </font></Label>
+        </HBox>
+    </top>
+    <center>
+        <ListView fx:id = "messagesView"  maxWidth="560.0" minWidth="400" prefHeight="300.0" prefWidth="560.0">
+        </ListView>
+    </center>
+    <bottom>
+        <HBox alignment="CENTER_RIGHT"  prefHeight="115.0" prefWidth="560.0">
+            <padding>
+                <Insets bottom="10" top="10" />
+            </padding>
+            <TextArea fx:id="textarea" prefHeight="95.0" prefWidth="460.0" promptText="...">
+            </TextArea>
+            <VBox alignment="CENTER" spacing="10">
+                <Button fx:id="send" onAction="#sendMessage" prefHeight="55" prefWidth="100.0" text="Send" textFill="WHITE">
+                    <font>
+                        <Font size="14.0" />
+                    </font></Button>
+                <Button fx:id="reset" onAction="#resetReply" prefHeight="25" prefWidth="100" text="No reply" textFill="WHITE">
+                    <font>
+                        <Font size="14.0" />
+                    </font></Button>
+            </VBox>
+        </HBox>
+    </bottom>
+</BorderPane>

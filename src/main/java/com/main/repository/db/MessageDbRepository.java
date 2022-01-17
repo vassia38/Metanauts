@@ -5,6 +5,10 @@ import com.main.model.Message;
 import com.main.model.User;
 import com.main.model.validators.Validator;
 import com.main.repository.Repository;
+import com.main.repository.paging.Page;
+import com.main.repository.paging.Pageable;
+import com.main.repository.paging.Paginator;
+import com.main.repository.paging.PagingRepository;
 
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -12,7 +16,7 @@ import java.util.*;
 
 import static java.sql.Types.INTEGER;
 
-public class MessageDbRepository implements Repository<Long, Message> {
+public class MessageDbRepository implements PagingRepository<Long, Message> {
     private final String url;
     private final String username;
     private final String password;
@@ -40,7 +44,7 @@ public class MessageDbRepository implements Repository<Long, Message> {
             ResultSet resultSet = psSelectMsg.executeQuery();
             if(resultSet.next()) {
                 Long sourceId = resultSet.getLong("source_id");
-                User source = new User(sourceId,null,null,null);
+                User source = new User(sourceId,null,null,null, null);
                 String messageText = resultSet.getString("message_text");
                 LocalDateTime date = LocalDateTime.parse(resultSet.getString("date"));
                 long repliedMessageId = resultSet.getLong("replied_message_id");
@@ -48,7 +52,7 @@ public class MessageDbRepository implements Repository<Long, Message> {
                 resultSet = psSelectDest.executeQuery();
                 while(resultSet.next()){
                     Long destinationId = resultSet.getLong("destination_id");
-                    User destination = new User(destinationId,null,null,null);
+                    User destination = new User(destinationId,null,null,null, null);
                     destinationList.add(destination);
                 }
                 Message replied = null;
@@ -86,7 +90,7 @@ public class MessageDbRepository implements Repository<Long, Message> {
             ResultSet resultSet = psSelectMsg.executeQuery();
             if(resultSet.next()) {
                 Long sourceId = resultSet.getLong("source_id");
-                User source = new User(sourceId,null,null,null);
+                User source = new User(sourceId,null,null,null, null);
                 String messageText = resultSet.getString("message_text");
                 LocalDateTime date = LocalDateTime.parse(resultSet.getString("date"));
                 long repliedMessageId = resultSet.getLong("replied_message_id");
@@ -118,7 +122,7 @@ public class MessageDbRepository implements Repository<Long, Message> {
 
     public Iterable<Message> findAllMessagesBySource(Long sourceId){
         Set<Message> messages = new HashSet<>();
-        User source = new User(sourceId, null, null, null);
+        User source = new User(sourceId, null, null, null, null);
         String sqlSelectMsg = "select * from messages where source_id=? order by id";
         String sqlSelectDest = "select * from source_destination where source_id=? order by message_id";
         try(Connection connection = DriverManager.getConnection(url,username,password);
@@ -137,7 +141,7 @@ public class MessageDbRepository implements Repository<Long, Message> {
                 List<User> destinationList = new ArrayList<>();
                 while(destinationSet.next() && id == destinationSet.getLong("message_id")){
                     Long destinationId = destinationSet.getLong("destination_id");
-                    User destination = new User(destinationId,null,null,null);
+                    User destination = new User(destinationId,null,null,null, null);
                     destinationList.add(destination);
                 }
                 Message replied = null;
@@ -150,6 +154,43 @@ public class MessageDbRepository implements Repository<Long, Message> {
                 messages.add(msg);
             }
         }catch(SQLException e){
+            e.printStackTrace();
+        }
+        return messages;
+    }
+
+    public Set<Message> findAllMessagesByDestination(Long destinationId){
+        Set<Message> messages = new TreeSet<>();
+        String sqlSelectMessage =
+                "select M.id,M.source_id,M.message_text,M.date,M.replied_message_id " +
+                        "from messages M, source_destination SD " +
+                        "where M.id = SD.message_id and SD.destination_id=? " +
+                        "order by id";
+        try(Connection connection = DriverManager.getConnection(url,username,password);
+            PreparedStatement psSelectMessage = connection.prepareStatement(sqlSelectMessage)){
+
+            psSelectMessage.setLong(1,destinationId);
+            ResultSet resultSet = psSelectMessage.executeQuery();
+            while(resultSet.next()){
+                Long messageId = resultSet.getLong("id");
+                Long sourceId = resultSet.getLong("source_id");
+                User source = new User(sourceId,null,null,null, null);
+                User destination = new User(destinationId,null,null,null, null);
+                String messageText = resultSet.getString("message_text");
+                LocalDateTime date = LocalDateTime.parse(resultSet.getString("date"));
+                long repliedMessageId = resultSet.getLong("replied_message_id");
+                Message replied = null;
+                if(repliedMessageId != 0){
+                    replied = new Message(null,null,null,null);
+                    replied.setId(repliedMessageId);
+                }
+                List<User> destinationList= new ArrayList<>();
+                destinationList.add(destination);
+                Message msg = new Message(source,destinationList,messageText,date, replied);
+                msg.setId(messageId);
+                messages.add(msg);
+            }
+        }catch (SQLException e){
             e.printStackTrace();
         }
         return messages;
@@ -173,9 +214,9 @@ public class MessageDbRepository implements Repository<Long, Message> {
             while(resultSet.next()){
                 Long messageId = resultSet.getLong("id");
                 Long sourceId = resultSet.getLong("source_id");
-                User source = new User(sourceId,null,null,null);
+                User source = new User(sourceId,null,null,null, null);
                 Long destinationId = resultSet.getLong("destination_id");
-                User destination = new User(destinationId,null,null,null);
+                User destination = new User(destinationId,null,null,null, null);
                 String messageText = resultSet.getString("message_text");
                 LocalDateTime date = LocalDateTime.parse(resultSet.getString("date"));
                 long repliedMessageId = resultSet.getLong("replied_message_id");
@@ -206,7 +247,7 @@ public class MessageDbRepository implements Repository<Long, Message> {
             while(resultSet.next()) {
                 Long messageId = resultSet.getLong("id");
                 Long sourceId = resultSet.getLong("source_id");
-                User source = new User(sourceId,null,null,null);
+                User source = new User(sourceId,null,null,null, null);
                 String messageText = resultSet.getString("message_text");
                 LocalDateTime date = LocalDateTime.parse(resultSet.getString("date"));
                 long repliedMessageId = resultSet.getLong("replied_message_id");
@@ -229,7 +270,7 @@ public class MessageDbRepository implements Repository<Long, Message> {
         String sqlInsert = "insert into group_messages (source_id, message_text," +
                 "date, replied_message_id, id_group) values (?,?,?,?,?)";
         try(Connection connection = DriverManager.getConnection(url, username, password);
-            PreparedStatement psInsert = connection.prepareStatement(sqlInsert)){
+            PreparedStatement psInsert = connection.prepareStatement(sqlInsert, Statement.RETURN_GENERATED_KEYS)){
             psInsert.setLong(1, entity.getSource().getId());
             psInsert.setString(2, entity.getMessageText());
             psInsert.setString(3, entity.getDate().toString());
@@ -239,6 +280,10 @@ public class MessageDbRepository implements Repository<Long, Message> {
                 psInsert.setLong(4, entity.getRepliedMessage().getId());
             psInsert.setLong(5, entity.getIdGroup());
             psInsert.executeUpdate();
+            ResultSet rs = psInsert.getGeneratedKeys();
+            rs.next();
+            entity.setId(rs.getLong(1));
+            return entity;
         } catch(SQLException e) {
             e.printStackTrace();
         }
@@ -272,6 +317,8 @@ public class MessageDbRepository implements Repository<Long, Message> {
                 psDest.setLong(3, rs.getLong(1));
                 psDest.executeUpdate();
             }
+            entity.setId(rs.getLong(1));
+            return entity;
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -339,4 +386,19 @@ public class MessageDbRepository implements Repository<Long, Message> {
         return findAllMessagesBySource(source);
     }
 
+
+    public Page<Message> findAll(Pageable pageable, Long destinationId) {
+        Iterable<Message> iterable = this.findAllMessagesByDestination(destinationId);
+        Set<Message> msgs = new TreeSet<>();
+        for( Message m : iterable) {
+            msgs.add(m);
+        }
+        Paginator<Message> paginator = new Paginator<Message>(pageable, msgs);
+        return paginator.paginate();
+    }
+
+    @Override
+    public Page<Message> findAll(Pageable pageable) {
+        return null;
+    }
 }

@@ -15,8 +15,8 @@ ext {
     junitVersion = '5.7.1'
 }
 
-sourceCompatibility = '17'
-targetCompatibility = '17'
+sourceCompatibility = '16'
+targetCompatibility = '16'
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
@@ -28,11 +28,12 @@ application {
 }
 
 javafx {
-    version = '17-ea+11'
+    version = '16'
     modules = ['javafx.controls', 'javafx.fxml']
 }
 
 dependencies {
+    implementation group: 'org.apache.pdfbox', name: 'pdfbox', version:'2.0.23'
     implementation('org.postgresql:postgresql:42.3.1')
     implementation('org.controlsfx:controlsfx:11.1.0')
     implementation('com.dlsc.formsfx:formsfx-core:11.3.2') {

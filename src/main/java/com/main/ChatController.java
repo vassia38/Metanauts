@@ -8,14 +8,21 @@ import com.main.utils.observer.Observer;
 import com.main.utils.observer.OperationType;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.control.skin.VirtualFlow;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
+import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ChatController implements Observer {
 
@@ -39,7 +46,7 @@ public class ChatController implements Observer {
     public void initialize() {
         this.messagesView.setCellFactory(param -> new ListViewCell(currentUser.getId()) );
         this.messagesView.setItems(messages);
-
+        textarea.setWrapText(true);
     }
 
     public void afterLoad(Controller serviceController, User currentUser, User destination) {
@@ -47,22 +54,47 @@ public class ChatController implements Observer {
         this.currentUser = currentUser;
         this.destination = destination;
         this.serviceController.addObserver(this);
-
         this.destinationLabel.setText(destination.getFirstName() + " " + destination.getLastName());
         this.updateMessages(null);
     }
 
+
+    public void addMessageObserverMethod(Message msg) {
+        this.messages.add(msg);
+    }
+    public final Map<OperationType, Method> mapMessagesOperations = new HashMap<>(){{
+        try {
+            put(OperationType.ADD, ChatController.class.getMethod("addMessageObserverMethod", Message.class));
+            put(OperationType.DELETE, null);
+            put(OperationType.UPDATE, null);
+        } catch(NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+    }};
     @Override
     public void updateMessages(Event event) {
-        this.messages.clear();
-        this.serviceController.
-                getConversation(currentUser.getUsername(), destination.getUsername()).
-                forEach(messages::add);
+        if(event == null) {
+            this.messages.clear();
+            this.serviceController.
+                    getConversation(currentUser.getUsername(), destination.getUsername()).
+                    forEach(messages::add);
+            this.scrollDown();
+            return;
+        }
+        OperationType operationType = event.getOperationType();
+        try {
+            mapMessagesOperations.get(operationType).invoke(this, event.getObject());
+            this.scrollDown();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    @Override
-    public void updateGroups(Event event) {
-        // TODO
+    @FXML
+    void backAction(ActionEvent actionEvent) {
+        Node source = (Node) actionEvent.getSource();
+        Stage stage = (Stage) source.getScene().getWindow();
+        stage.close();
     }
 
     @FXML
@@ -80,6 +112,10 @@ public class ChatController implements Observer {
     @FXML
     void resetReply() {
         this.messagesView.getSelectionModel().clearSelection();
+    }
+
+    public void scrollDown() {
+        messagesView.scrollTo(messages.size() - 1);
     }
 
     static final class ListViewCell extends ListCell<Message> {
@@ -142,6 +178,8 @@ public class ChatController implements Observer {
             var label=new Label(msg);
             label.setMinWidth(50);
             label.setMinHeight(50);
+            label.setMaxWidth(280);
+            label.setWrapText(true);
             label.setStyle("-fx-hgap: 10px;" +
                     "    -fx-padding: 20px;" +
                     "" +
@@ -159,6 +197,7 @@ public class ChatController implements Observer {
             var label=new Label(msg);
             label.setMinWidth(50);
             label.setMinHeight(50);
+            label.setMaxWidth(240);
             label.setStyle("-fx-hgap: 5px;" +
                     "    -fx-padding: 5px;" +
                     "" +
@@ -172,6 +211,22 @@ public class ChatController implements Observer {
             return label;
         }
     }
+
+    @Override
+    public void updateGroups(Event event) {
+        //nothing
+    }
+
+    @Override
+    public void updateGroupMessages(Event event) {
+        //nothing
+    }
+
+    @Override
+    public void updateEvents(Event event) {
+
+    }
+
     @Override
     public void updateFriends(Event event) {
         //nothing

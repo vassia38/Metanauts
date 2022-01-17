@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<HBox alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity"
+      minHeight="-Infinity" minWidth="-Infinity"
+      prefHeight="768.0" prefWidth="1024.0" spacing="30"
+      stylesheets="@style.css" xmlns="http://javafx.com/javafx/16"
+      xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.main.EventsController">
+   <TableView fx:id="socialEventsTable" prefHeight="340" prefWidth="290">
+      <columns>
+         <TableColumn fx:id="event_name" maxWidth="290" minWidth="280" text="Events" />
+      </columns>
+   </TableView>
+   <VBox fx:id="body">
+      <ImageView fitHeight="150.0" fitWidth="559.0" pickOnBounds="true" preserveRatio="true">
+         <Image url="@eventbg-placeholder.jpg" />
+      </ImageView>
+      <HBox alignment="CENTER" prefHeight="39.0" prefWidth="562.0">
+         <Label fx:id="eventNameLabel" alignment="CENTER" prefHeight="30.0" prefWidth="130.0" style="-fx-label-padding: 0;" text="Event Name" textFill="WHITE">
+            <font>
+               <Font size="14.0" />
+            </font></Label>
+         <Label fx:id="hostNameLabel" alignment="CENTER" prefHeight="30.0" prefWidth="130.0" style="-fx-label-padding: 0;" text="Hosted by" textFill="WHITE">
+            <font>
+               <Font size="14.0" />
+            </font>
+         </Label>
+      </HBox>
+      <HBox prefHeight="80.0" prefWidth="562.0" style="-fx-spacing: 30;">
+         <Button fx:id="goingButton" mnemonicParsing="false" prefHeight="40.0" prefWidth="90.0" text="Going" textFill="WHITE">
+            <font>
+               <Font size="14.0" />
+            </font></Button>
+         <Button fx:id="notGoingButton" mnemonicParsing="false" prefHeight="40.0" prefWidth="90.0" text="Not going" textFill="WHITE">
+            <font>
+               <Font size="14.0" />
+            </font></Button>
+         <ImageView fx:id="notificationOn" fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
+            <Image url="@notification-off.png" />
+         </ImageView>
+         <ImageView fx:id="notificationOff" fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
+            <Image url="@notification-on.png" />
+         </ImageView>
+      </HBox>
+      <HBox alignment="BOTTOM_RIGHT" prefHeight="30.0" prefWidth="562.0">
+         <Label fx:id="dateLabel" alignment="BOTTOM_RIGHT" prefHeight="30.0" prefWidth="240.0" text="DD/MM/YYYY" textFill="WHITE">
+            <font>
+               <Font size="14.0" />
+            </font>
+         </Label>
+      </HBox>
+      <HBox alignment="TOP_RIGHT" prefHeight="30.0" prefWidth="562.0">
+         <Label alignment="TOP_RIGHT" prefHeight="29.0" prefWidth="240.0" text="Location" textFill="WHITE">
+            <font>
+               <Font size="14.0" />
+            </font>
+         </Label>
+      </HBox>
+   </VBox>
+</HBox>

@@ -5,6 +5,7 @@ import com.main.model.*;
 import com.main.service.*;
 import com.main.utils.observer.Observable;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.ArrayList;
@@ -19,7 +20,7 @@ public interface Controller extends Observable {
     GroupService getGroupService();
 
     // USERS
-    void addUser(User entity);
+    void addUser(User entity, String salt);
     User deleteUser(User entity);
     User updateUser(User entity, String firstName, String lastName);
     User findUserById(Long id);
@@ -45,20 +46,39 @@ public interface Controller extends Observable {
     Iterable<Message> getConversation(String username1, String username2);
 
     // GROUPS & GROUP MESSAGES
-    void createGroup(String nameGroup, List<String> usernames);
+    void createGroup(String nameGroup, List<User> users);
     void sendGroupMessage(User source, Long idGroup, String message, LocalDateTime date, Long repliedMessageId);
     void sendGroupMessage(User source, Long idGroup, String message, LocalDateTime date);
     void addMemberToGroup(Group group, User user);
     Iterable<GroupMessage> getGroupConversation(User user, String nameGroup);
     Group findGroupByName(String name, User user);
+    Iterable<Group> getAllGroups(User user);
 
     // REQUESTS
     void addRequest(Request request);
     void answerRequest(Request request, String answer);
-    Iterable<Request> showRequests(User user);
+    Iterable<Request> getAllRequests(User user);
     Iterable<Request> showAllRequests();
     Friendship findFriendshipById(Tuple<Long,Long> id);
     Request findRequest(Request request);
     Request deleteRequest(Request request);
-    Iterable<Request> showAnsweredRequests(User user);
+    Iterable<Request> getAllAnsweredRequests(User user);
+
+    // PASSWORDS
+    String hashCodePassword(String username, String password);
+    Tuple<String,String> generatePassword(String password);
+
+    //EVENTS
+    Iterable<SocialEvent> showAllEvents();
+    Iterable<SocialEvent> showAllEventsOfUser(User user);
+    Iterable<SocialEvent> showAllEventsByName(String name);
+    SocialEvent createEvent(SocialEvent event);
+    SocialEvent delete(SocialEvent event);
+    void addParticipantToEvent(SocialEvent event, User user);
+    void removeParticipantFromEvent(SocialEvent event, User user);
+    void addNotification(SocialEvent event, User user);
+    void removeNotification(SocialEvent event, User user);
+    boolean findNotificationOfParticipant(SocialEvent event, User user);
+    // PDF REPORT
+    void saveMessageReportToPDF(String path, String fileName, LocalDate startDate, LocalDate endDate, User user);
 }

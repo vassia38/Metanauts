@@ -12,7 +12,21 @@ import com.main.utils.events.*;
 import com.main.utils.observer.Observer;
 import com.main.utils.observer.OperationType;
 import com.main.utils.observer.UpdateType;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.pdmodel.font.PDFont;
+import org.apache.pdfbox.pdmodel.font.PDType1Font;
 
+import java.io.File;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.*;
@@ -25,15 +39,17 @@ public class ControllerClass implements Controller{
     private final MessageService messageService;
     private final RequestService requestService;
     private final GroupService groupService;
+    private final SocialEventService eventService;
     Graph graph;
     public ControllerClass(UserService userService, FriendshipService friendshipService,
                            MessageService messageService, RequestService requestService,
-                           GroupService groupService){
+                           GroupService groupService, SocialEventService eventService){
         this.userService = userService;
         this.friendshipService = friendshipService;
         this.messageService = messageService;
         this.requestService = requestService;
         this.groupService = groupService;
+        this.eventService = eventService;
     }
 
     @Override
@@ -67,12 +83,17 @@ public class ControllerClass implements Controller{
      * @throws RepositoryException if user with same (id and ) username already exists
      */
     @Override
-    public void addUser(User entity) {
-        User user = userService.add(entity);
+    public void addUser(User entity, String salt) {
+        if(entity == null || entity.getUsername() == null ||
+           entity.getUsername().equals(""))
+            throw new IllegalArgumentException("Invalid user input info!\n");
+        User user = userService.findOneByUsername(entity.getUsername());
         if(user != null)
             throw new RepositoryException("User already exists!\n");
-        this.notifyObservers(UpdateType.USERS,
-                new UserEvent(entity, OperationType.ADD));
+        userService.add(entity, salt);
+        user = userService.findOneByUsername(entity.getUsername());
+        if(user != null)
+            this.notifyObservers(UpdateType.USERS, new UserEvent(user, OperationType.ADD));
     }
 
     /**
@@ -94,7 +115,7 @@ public class ControllerClass implements Controller{
             }
         }
         this.notifyObservers(UpdateType.USERS,
-                new UserEvent(entity, OperationType.DELETE));
+                new UserEvent(deleted, OperationType.DELETE));
         return deleted;
     }
 
@@ -113,6 +134,7 @@ public class ControllerClass implements Controller{
         User oldState = userService.update(entity);
         if(oldState == null)
             throw new RepositoryException("User doesn't exist!\n");
+        entity.setId(oldState.getId());
         this.notifyObservers(UpdateType.USERS,
                 new UserEvent(entity, OperationType.UPDATE));
         return oldState;
@@ -321,7 +343,9 @@ public class ControllerClass implements Controller{
         }
         Message repliedMsg = messageService.findMessageById(repliedMessageId);
         Message msg = new Message(source,destination, message, date, repliedMsg);
-        this.messageService.add(msg);
+        if(repliedMsg != null)
+            setupMessage(msg);
+        msg = this.messageService.add(msg);
         this.notifyObservers(UpdateType.MESSAGES,
                 new MessageEvent(msg, OperationType.ADD));
     }
@@ -397,8 +421,8 @@ public class ControllerClass implements Controller{
         if(this.groupService.findGroupById(idGroup) == null)
             throw new RepositoryException("Group not found!");
         GroupMessage msg = new GroupMessage(source, idGroup, message, date);
-        this.messageService.add(msg);
-        this.notifyObservers(UpdateType.MESSAGES, new GroupMessageEvent(msg, OperationType.ADD));
+        msg = this.messageService.add(msg);
+        this.notifyObservers(UpdateType.GROUPMESSAGES, new GroupMessageEvent(msg, OperationType.ADD));
     }
 
     @Override
@@ -407,25 +431,20 @@ public class ControllerClass implements Controller{
             throw new RepositoryException("Group not found!");
         GroupMessage repliedMsg = messageService.findGroupMessageById(repliedMessageId);
         GroupMessage msg = new GroupMessage(source, idGroup, message, date, repliedMsg);
-        this.messageService.add(msg);
-        this.notifyObservers(UpdateType.MESSAGES, new GroupMessageEvent(msg, OperationType.ADD));
+        setupMessage(msg);
+        msg = this.messageService.add(msg);
+        this.notifyObservers(UpdateType.GROUPMESSAGES, new GroupMessageEvent(msg, OperationType.ADD));
     }
 
     @Override
-    public void createGroup(String nameGroup, List<String> usernames) {
+    public void createGroup(String nameGroup, List<User> users) {
         if( nameGroup != null && !Objects.equals(nameGroup, "")){
             Set<Long> idsList = new HashSet<>();
-            for(String u : usernames) {
-                User user = this.userService.findOneByUsername(u);
-                if(user == null) {
-                    throw new RepositoryException("User '" + u + "' not found in repo!\n");
-                }
-                idsList.add(user.getId());
-            }
+            users.forEach( u -> idsList.add(u.getId()));
             Group entity = new Group(nameGroup, idsList.stream().toList());
-            this.groupService.add(entity);
+            Group created = this.groupService.add(entity);
             this.notifyObservers(UpdateType.GROUPS,
-                    new GroupEvent(entity, OperationType.ADD));
+                    new GroupEvent(created, OperationType.ADD));
         }
     }
 
@@ -443,6 +462,11 @@ public class ControllerClass implements Controller{
         return group;
     }
 
+    @Override
+    public Iterable<Group> getAllGroups(User user) {
+        return this.groupService.findAll(user.getId());
+    }
+
 
 
     @Override
@@ -452,8 +476,6 @@ public class ControllerClass implements Controller{
                 throw new RepositoryException("Friendship request already sent!");
         }
         requestService.add(request);
-        this.notifyObservers(UpdateType.REQUESTS,
-                new RequestEvent(request, OperationType.ADD));
     }
 
     private void validateAnswer(String answer) {
@@ -469,26 +491,27 @@ public class ControllerClass implements Controller{
         if(found == null) {
             throw new RepositoryException("Request does not exist!");
         }
-        if(found.getStatus().equals("approved")) {
+        if(found.getStatus().equals("approve")) {
             throw new RepositoryException("Request already approved!");
         }
-        if(found.getStatus().equals("rejected")) {
+        if(found.getStatus().equals("reject")) {
             throw new RepositoryException("Request already rejected!");
         }
         Request newRequest = new Request(found.getId().getLeft(), found.getId().getRight(), answer, found.getDate());
         requestService.update(newRequest);
+        System.out.println(newRequest);
         if(answer.equals("approve")) {
             Friendship friendship = new Friendship(request.getId().getLeft(), request.getId().getRight());
             this.addFriendship(friendship);
+        }
         this.notifyObservers(UpdateType.REQUESTS,
                 new RequestEvent(newRequest, OperationType.DELETE));
         this.notifyObservers(UpdateType.SOLVEDREQUESTS,
                 new RequestEvent(newRequest, OperationType.ADD));
-        }
     }
 
     @Override
-    public Iterable<Request> showRequests(User user) {
+    public Iterable<Request> getAllRequests(User user) {
         Iterable<Request> requests = requestService.getAllEntities();
         ArrayList<Request> requestsToUser = new ArrayList<>();
         for(Request request : requests) {
@@ -500,7 +523,7 @@ public class ControllerClass implements Controller{
     }
 
     @Override
-    public Iterable<Request> showAnsweredRequests(User user) {
+    public Iterable<Request> getAllAnsweredRequests(User user) {
         Iterable<Request> requests = requestService.getAllEntities();
         ArrayList<Request> requestsToUser = new ArrayList<>();
         for(Request request : requests) {
@@ -542,13 +565,81 @@ public class ControllerClass implements Controller{
         return friendshipService.findFriendshipById(id);
     }
 
+    @Override
+    public Iterable<SocialEvent> showAllEvents() {
+        return eventService.findAll();
+    }
 
+    @Override
+    public Iterable<SocialEvent> showAllEventsOfUser(User user) {
+        return eventService.findAll(user.getId());
+    }
+
+    @Override
+    public Iterable<SocialEvent> showAllEventsByName(String name) {
+        return eventService.findAll(name);
+    }
+
+    @Override
+    public SocialEvent createEvent(SocialEvent event) {
+        event = eventService.save(event);
+        SocialEventEvent ev = new SocialEventEvent(event,OperationType.ADD);
+        this.notifyObservers(UpdateType.SOCIALEVENTS, ev);
+        return event;
+    }
+
+    @Override
+    public SocialEvent delete(SocialEvent event) {
+        return eventService.delete(event.getId());
+    }
+
+    @Override
+    public void addParticipantToEvent(SocialEvent event, User user) {
+        if(eventService.findParticipantInEvent(event.getId(), user.getId()))
+            //throw new RepositoryException("User is already participating in this event");
+            return;
+        eventService.addParticipant(event.getId(), user.getId(), 1);
+        event = eventService.findOneById(event.getId());
+        this.notifyObservers(UpdateType.SOCIALEVENTS,
+                new SocialEventEvent(event, OperationType.UPDATE));
+    }
+
+    @Override
+    public void removeParticipantFromEvent(SocialEvent event, User user) {
+        if(!eventService.findParticipantInEvent(event.getId(), user.getId()))
+           // throw new RepositoryException("User is not participating in this event");
+            return;
+        eventService.removeParticipant(event.getId(), user.getId());
+        event = eventService.findOneById(event.getId());
+        this.notifyObservers(UpdateType.SOCIALEVENTS,
+                new SocialEventEvent(event, OperationType.UPDATE));
+    }
+
+    @Override
+    public void addNotification(SocialEvent event, User user) {
+        if(!eventService.findParticipantInEvent(event.getId(), user.getId()))
+            throw new RepositoryException("User is not participating in this event");
+        eventService.addNotification(event.getId(), user.getId());
+    }
+
+    @Override
+    public void removeNotification(SocialEvent event, User user) {
+        if(!eventService.findParticipantInEvent(event.getId(), user.getId()))
+            throw new RepositoryException("User is not participating in this event");
+        eventService.removeNotification(event.getId(), user.getId());
+    }
+
+    @Override
+    public boolean findNotificationOfParticipant(SocialEvent event, User user) {
+        return eventService.findNotificationOfParticipant(event.getId(), user.getId());
+    }
 
 
     private final List<Observer> observers = new ArrayList<>();
 
     @Override
     public void notifyObservers(UpdateType updateType, Event event) {
+        System.out.println("Observable notifying " + updateType + " for " +event.getOperationType());
         for (Observer observer : this.observers) {
             if(updateType == UpdateType.USERS){
                 observer.updateUsers(event);
@@ -562,8 +653,17 @@ public class ControllerClass implements Controller{
             if(updateType == UpdateType.MESSAGES){
                 observer.updateMessages(event);
             }
+            if(updateType == UpdateType.GROUPMESSAGES){
+                observer.updateGroupMessages(event);
+            }
             if(updateType == UpdateType.SOLVEDREQUESTS){
                 observer.updateSolvedRequests(event);
+            }
+            if(updateType == UpdateType.GROUPS) {
+                observer.updateGroups(event);
+            }
+            if(updateType == UpdateType.SOCIALEVENTS) {
+                observer.updateEvents(event);
             }
         }
     }
@@ -576,5 +676,141 @@ public class ControllerClass implements Controller{
     @Override
     public void removeObserver(Observer obs) {
         this.observers.remove(obs);
+    }
+
+    @Override
+    public Tuple<String,String> generatePassword(String password) {
+        try{
+            SecureRandom random = new SecureRandom();
+
+            int randomInt = random.nextInt();
+            String salt = Integer.toString(randomInt);
+            String p = password + salt;
+
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+
+
+            byte[] hash = digest.digest(p.getBytes(StandardCharsets.UTF_8));
+            BigInteger no = new BigInteger(1, hash);
+            String hashtext = no.toString(16);
+
+            return new Tuple<>(hashtext, salt);
+        } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public String hashCodePassword(String username, String password) {
+        try{
+            String salt = this.userService.getSalt(username);
+            String p = password + salt;
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(p.getBytes(StandardCharsets.UTF_8));
+            BigInteger no = new BigInteger(1, hash);
+            return no.toString(16);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public void saveMessageReportToPDF(String path, String fileName, LocalDate startDate, LocalDate endDate, User user) {
+        if ( fileName.equals("") || path.equals(""))
+            return;
+        messageService.setPageSize(10);
+        PDDocument doc = null;
+        try {
+            doc = new PDDocument();
+            PDFont pdfFont = PDType1Font.TIMES_ROMAN;
+            float fontSize = 12;
+            float leading = 1.5f * fontSize;
+            Set<Message> msgs = messageService.getNextMessages(user.getId());
+            int i = 0;
+            while(msgs.size() != 0) {
+                PDPage page = new PDPage();
+                doc.addPage(page);
+                PDPageContentStream contentStream = new PDPageContentStream(doc, page);
+                PDRectangle mediabox = page.getMediaBox();
+                float margin = 16;
+                float width = mediabox.getWidth() - 2*margin;
+                float startX = mediabox.getLowerLeftX() + margin;
+                float startY = mediabox.getUpperRightY() - margin;
+                contentStream.beginText();
+                contentStream.setFont(pdfFont, fontSize);
+                contentStream.newLineAtOffset(startX, startY);
+                System.out.println("contentStream start");
+                System.out.println("printing page " + i);
+                i++;
+                for(Message m : msgs) {
+                    setupMessage(m);
+                    System.out.println(m);
+                    LocalDate date = m.getDate().toLocalDate();
+                    if( !(date.isAfter(startDate) && date.isBefore(endDate)) )
+                        continue;
+                    List<String> strs = Arrays.stream(
+                            m.toString().replace("\t", "").split("\n"))
+                            .toList();
+                    for(String text : strs) {
+                        List<String> lines = new ArrayList<>();
+                        int lastSpace = -1;
+                        while (text.length() > 0)
+                        {
+                            int spaceIndex = text.indexOf(' ', lastSpace + 1);
+                            if (spaceIndex < 0)
+                                spaceIndex = text.length();
+                            String subString = text.substring(0, spaceIndex);
+                            float size = fontSize * pdfFont.getStringWidth(subString) / 1000;
+                            System.out.printf("'%s' - %f of %f\n", subString, size, width);
+                            if (size > width)
+                            {
+                                if (lastSpace < 0)
+                                    lastSpace = spaceIndex;
+                                subString = text.substring(0, lastSpace);
+                                lines.add(subString);
+                                text = text.substring(lastSpace).trim();
+                                System.out.printf("'%s' is line\n", subString);
+                                lastSpace = -1;
+                            }
+                            else if (spaceIndex == text.length())
+                            {
+                                lines.add(text);
+                                System.out.printf("'%s' is line\n", text);
+                                text = "";
+                            }
+                            else
+                            {
+                                lastSpace = spaceIndex;
+                            }
+                        }
+                        for (String line: lines)
+                        {
+                            System.out.println(line);
+                            contentStream.showText(line);
+                            contentStream.newLineAtOffset(0, -leading);
+                        }
+                    }
+                }
+                contentStream.endText();
+                contentStream.close();
+                System.out.println("contentStream closed");
+                msgs = messageService.getNextMessages(user.getId());
+            }
+            System.out.println("saving");
+            doc.save(new File(path, fileName));
+        } catch(IOException e) {
+            e.printStackTrace();
+        } finally {
+            messageService.setPage(-1);
+            messageService.setPageSize(1);
+            if (doc != null) {
+                try {
+                    doc.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 }

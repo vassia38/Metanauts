@@ -1,57 +1,98 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
 <?import java.net.URL?>
-
-<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.Image?>
-<VBox id="body" alignment="TOP_CENTER" spacing="20.0"
-      xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.main.MainController">
-    <stylesheets>
-        <URL value="@style.css"/>
-    </stylesheets>
-    <HBox>
-        <ImageView fx:id="homeLogo" fitWidth="30" fitHeight="30">
-            <Image url="@logo.png"/>
-        </ImageView>
-        <ComboBox fx:id="comboBoxSearch" editable="true" promptText="Search by username" minHeight="30" prefWidth="500" />
-        <Button fx:id="searchButton" minHeight="30" onAction="#searchUser">Search</Button>
-    </HBox>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
-    <HBox prefHeight="500">
-        <VBox prefHeight="500">
-            <TextField promptText="Search friend list"/>
-            <TableView fx:id="tableViewFriends" styleClass="table">
-                <columns>
-                    <TableColumn fx:id="friendUser" minWidth="100" text="Username" />
-                    <TableColumn fx:id="first_name" minWidth="100" text="First Name" />
-                    <TableColumn fx:id="last_name" minWidth="100" text="Last Name" />
-                </columns>
-            </TableView>
-        </VBox>
-        <VBox styleClass="profile-page" prefWidth="700" prefHeight="500">
-            <Label fx:id="profileTitle" prefHeight="50">My profile page</Label>
-            <HBox alignment="CENTER_RIGHT" spacing="50" prefHeight="50">
-                <Button fx:id="messageButton" onAction="#messageFriend">Message</Button>
-                <Button fx:id="addFriendButton" onAction="#addFriend">Add friend</Button>
-                <Button fx:id="removeFriendButton" onAction="#removeFriend">Remove friend</Button>
-                <Button fx:id="cancelRequestButton" onAction="#cancelRequest">Cancel Request</Button>
-            </HBox>
-            <TableView fx:id="tableViewRequests" prefHeight="200">
-                <columns>
-                    <TableColumn fx:id="fromUser" text="From"/>
-                    <TableColumn fx:id="acceptFriendship"/>
-                    <TableColumn fx:id="rejectFriendship"/>
-                </columns>
-            </TableView>
-            <TableView fx:id="historyTableViewRequests" prefHeight="200">
-                <columns>
-                    <TableColumn fx:id="historyFromUser" text="From"/>
-                    <TableColumn fx:id="status"/>
-                    <TableColumn fx:id="dateSent" prefWidth="120"/>
-                </columns>
-            </TableView>
-        </VBox>
+<VBox fx:id="document" alignment="TOP_CENTER" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.main.MainController">
+    <stylesheets>
+        <URL value="@style.css" />
+    </stylesheets>
+    <HBox id="top-bar" style="-fx-spacing: 5;">
+        <ImageView fx:id="menu" fitHeight="30" fitWidth="30">
+            <Image url="@menu-icon.png" />
+        </ImageView>
+        <ImageView fx:id="homeLogo" fitHeight="30" fitWidth="30">
+            <Image url="@logo.png" />
+        </ImageView>
+        <TextField fx:id="searchTextField" minHeight="30" prefWidth="500" promptText="Search by username" />
+        <Button fx:id="searchButton" minHeight="30" onAction="#searchUser" prefHeight="33.0" prefWidth="71.0" style="-fx-background-insets: 0;" text="Search" textFill="WHITE">
+            <font>
+                <Font name="Roboto" size="14.0" />
+            </font>
+        </Button>
     </HBox>
+    <StackPane fx:id="body" alignment="TOP_RIGHT">
+        <VBox fx:id="userPage" alignment="TOP_CENTER" spacing="20.0">
+            <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="680" prefWidth="1000" styleClass="profile-page">
+                <Label fx:id="profileTitle" prefHeight="50" textFill="WHITE">
+               <font>
+                  <Font size="18.0" />
+               </font></Label>
+                <HBox id="profileBtns" alignment="CENTER_LEFT" prefHeight="50" spacing="20" style="-fx-padding: 10;">
+                    <Button fx:id="messageButton" onAction="#messageFriend" text="Message" textFill="WHITE">Message</Button>
+                    <Button fx:id="addFriendButton" onAction="#addFriend" textFill="WHITE">Add friend</Button>
+                    <Button fx:id="removeFriendButton" onAction="#removeFriend" textFill="WHITE">Remove friend</Button>
+                    <Button fx:id="cancelRequestButton" onAction="#cancelRequest" textFill="WHITE">Cancel Request</Button>
+                    <Button fx:id="createGroupButton" onAction="#createGroup" textFill="WHITE">Create group</Button>
+                    <Button fx:id="createEventButton" onAction="#createEvent" textFill="WHITE">Create event</Button>
+                </HBox>
+                <VBox prefHeight="575.0" prefWidth="1000.0" style="-fx-padding: 20;">
+                    <Label fx:id="motdLabel" alignment="TOP_CENTER" prefHeight="323.0" prefWidth="706.0" style="-fx-font-size: 32;" textFill="WHITE">
+                    </Label>
+                    <Label fx:id="todayDateLabel" alignment="BOTTOM_RIGHT" prefHeight="221.0" prefWidth="960.0" style="-fx-font-size: 14;" textFill="WHITE">
+                    </Label>
+                </VBox>
+            </VBox>
+        </VBox>
+        <VBox fx:id="friendliestBar" alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="680.0" prefWidth="300" style="-fx-spacing: 10; -fx-padding: 5; -fx-background-color: transparent">
+            <TableView fx:id="tableViewFriends" prefHeight="340.0" prefWidth="290.0">
+                <columns>
+                    <TableColumn fx:id="name_friend" maxWidth="290" minWidth="280" text="Friends" />
+                </columns>
+            </TableView>
+            <TableView fx:id="tableViewGroups" prefHeight="340" prefWidth="290">
+                <columns>
+                    <TableColumn fx:id="groupName" maxWidth="290" minWidth="280" text="Groups" />
+                </columns>
+            </TableView>
+        </VBox>
+        <BorderPane fx:id="menuBarShadow" style="-fx-background-color: rgba(0,0,0,0.4)">
+            <left>
+            <VBox fx:id="menuBar" alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="680" prefWidth="200" style="-fx-spacing: 10; -fx-padding: 5;                 -fx-background-color: transparent">
+                <Button fx:id="homeButton" alignment="CENTER_RIGHT" contentDisplay="CENTER" mnemonicParsing="false" prefHeight="30.0" prefWidth="190.0" text="Home" textFill="WHITE">
+                    <font>
+                        <Font name="Roboto" size="14.0" />
+                    </font>
+                </Button>
+                <Button fx:id="friendlistButton" alignment="CENTER_RIGHT" contentDisplay="CENTER" mnemonicParsing="false" prefHeight="30.0" prefWidth="190.0" text="Friends and groups" textFill="WHITE">
+                    <font>
+                        <Font name="Roboto" size="14.0" />
+                    </font>
+                </Button>
+                <Button fx:id="requestsButton" alignment="CENTER_RIGHT" contentDisplay="CENTER" mnemonicParsing="false" prefHeight="30.0" prefWidth="190.0" text="Requests" textFill="WHITE">
+                    <font>
+                        <Font name="Roboto" size="14.0" />
+                    </font>
+                </Button>
+                <Button fx:id="eventsButton" alignment="CENTER_RIGHT" contentDisplay="CENTER" mnemonicParsing="false" prefHeight="30.0" prefWidth="190.0" text="Events" textFill="WHITE">
+                    <font>
+                        <Font name="Roboto" size="14.0" />
+                    </font>
+                </Button>
+                <Button fx:id="createReportButton" alignment="CENTER_RIGHT" contentDisplay="CENTER" mnemonicParsing="false" onAction="#createReport" prefHeight="30.0" prefWidth="190.0" textFill="WHITE">Create message report</Button>
+            </VBox>
+            </left>
+        </BorderPane>
+    </StackPane>
 </VBox>
